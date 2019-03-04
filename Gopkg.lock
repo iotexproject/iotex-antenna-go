@@ -2,6 +2,38 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:093bf93a65962e8191e3e8cd8fc6c363f83d43caca9739c906531ba7210a9904"
+  name = "github.com/btcsuite/btcd"
+  packages = ["btcec"]
+  pruneopts = "UT"
+  revision = "306aecffea325e97f513b3ff0cf7895a5310651d"
+
+[[projects]]
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = "UT"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
+  digest = "1:93e12a5541258740498cab5686cf2b63b442c5ae352d78be607219b5b7b8b2d4"
+  name = "github.com/ethereum/go-ethereum"
+  packages = [
+    "common",
+    "common/hexutil",
+    "common/math",
+    "crypto",
+    "crypto/secp256k1",
+    "crypto/sha3",
+    "rlp",
+  ]
+  pruneopts = "UT"
+  revision = "2bbee71fbe61def241832e800b4f0bd24d4beb89"
+  source = "github.com/iotexproject/go-ethereum"
+
+[[projects]]
   digest = "1:d54df1fb58660918d29dfd14de544579e3ae14325fba85bf82703f91e8025148"
   name = "github.com/golang/protobuf"
   packages = [
@@ -13,16 +45,84 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:2c532d740f159c012019af7ed26091adbe8fa28515c30774fa133e00220fd9b7"
+  digest = "1:b2eae779c60123ab18849751698d1704a61190f630d1f882c0b7d40420b65a3c"
   name = "github.com/iotexproject/iotex-core"
-  packages = ["protogen/iotextypes"]
+  packages = [
+    "address",
+    "address/bech32",
+    "pkg/hash",
+    "pkg/keypair",
+    "pkg/log",
+    "protogen/iotextypes",
+  ]
   pruneopts = "UT"
-  revision = "7e3641be6914e161358e4f573a3c179af11b3d84"
-  version = "v0.5.0-rc2"
+  revision = "e556b3c883f941f4f489769c6623484b0f4acbaa"
+
+[[projects]]
+  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
+
+[[projects]]
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = "UT"
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:972c2427413d41a1e06ca4897e8528e5a1622894050e2f527b38ddf0f343f759"
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  pruneopts = "UT"
+  revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
+  version = "v1.3.0"
+
+[[projects]]
+  digest = "1:3c1a69cdae3501bf75e76d0d86dc6f2b0a7421bc205c0cb7b96b19eed464a34d"
+  name = "go.uber.org/atomic"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1ea20fb1cbb1cc08cbd0d913a96dead89aa18289"
+  version = "v1.3.2"
+
+[[projects]]
+  digest = "1:60bf2a5e347af463c42ed31a493d817f8a72f102543060ed992754e689805d1a"
+  name = "go.uber.org/multierr"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3c4937480c32f4c13a875a1829af76c98ca3d40a"
+  version = "v1.1.0"
+
+[[projects]]
+  digest = "1:c52caf7bd44f92e54627a31b85baf06a68333a196b3d8d241480a774733dcf8b"
+  name = "go.uber.org/zap"
+  packages = [
+    ".",
+    "buffer",
+    "internal/bufferpool",
+    "internal/color",
+    "internal/exit",
+    "zapcore",
+  ]
+  pruneopts = "UT"
+  revision = "ff33455a0e382e8a81d14dd7c922020b6b5e7982"
+  version = "v1.9.1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/iotexproject/iotex-core/protogen/iotextypes"]
+  input-imports = [
+    "github.com/ethereum/go-ethereum/crypto",
+    "github.com/iotexproject/iotex-core/address",
+    "github.com/iotexproject/iotex-core/pkg/hash",
+    "github.com/iotexproject/iotex-core/pkg/keypair",
+    "github.com/iotexproject/iotex-core/protogen/iotextypes",
+    "github.com/stretchr/testify/assert",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
