@@ -31,4 +31,9 @@
 
 [[constraint]]
   name = "github.com/iotexproject/iotex-core"
-  version = "0.5.0-rc2"
+  revision = "e556b3c883f941f4f489769c6623484b0f4acbaa"
+
+[[constraint]]
+  name = "github.com/ethereum/go-ethereum"
+  revision = "2bbee71fbe61def241832e800b4f0bd24d4beb89"
+  source = "github.com/iotexproject/go-ethereum"
