@@ -34,10 +34,13 @@
   source = "github.com/iotexproject/go-ethereum"
 
 [[projects]]
-  digest = "1:d54df1fb58660918d29dfd14de544579e3ae14325fba85bf82703f91e8025148"
+  digest = "1:4c0989ca0bcd10799064318923b9bc2db6b4d6338dd75f3f2d86c3511aaaf5cf"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
+    "ptypes",
+    "ptypes/any",
+    "ptypes/duration",
     "ptypes/timestamp",
   ]
   pruneopts = "UT"
@@ -45,7 +48,7 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:b2eae779c60123ab18849751698d1704a61190f630d1f882c0b7d40420b65a3c"
+  digest = "1:1d2dba27e9dc2f2e48eba97c9a84f8abb91f46102a878f2299c787326a0f082d"
   name = "github.com/iotexproject/iotex-core"
   packages = [
     "address",
@@ -53,6 +56,7 @@
     "pkg/hash",
     "pkg/keypair",
     "pkg/log",
+    "protogen/iotexapi",
     "protogen/iotextypes",
   ]
   pruneopts = "UT"
@@ -113,6 +117,101 @@
   revision = "ff33455a0e382e8a81d14dd7c922020b6b5e7982"
   version = "v1.9.1"
 
+[[projects]]
+  branch = "master"
+  digest = "1:4512c74e2c934a151fa9246cdc565d29611f53295bfb05e7a6275e80ee540a0c"
+  name = "golang.org/x/net"
+  packages = [
+    "context",
+    "http/httpguts",
+    "http2",
+    "http2/hpack",
+    "idna",
+    "internal/timeseries",
+    "trace",
+  ]
+  pruneopts = "UT"
+  revision = "16b79f2e4e95ea23b2bf9903c9809ff7b013ce85"
+
+[[projects]]
+  branch = "master"
+  digest = "1:7705456281a2327caef2d26e5881361effba03476bd9d09c60f3e4958d6c981c"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  pruneopts = "UT"
+  revision = "30e92a19ae4a77dde818b8c3d41d51e4850cba12"
+
+[[projects]]
+  digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
+  name = "golang.org/x/text"
+  packages = [
+    "collate",
+    "collate/build",
+    "internal/colltab",
+    "internal/gen",
+    "internal/tag",
+    "internal/triegen",
+    "internal/ucd",
+    "language",
+    "secure/bidirule",
+    "transform",
+    "unicode/bidi",
+    "unicode/cldr",
+    "unicode/norm",
+    "unicode/rangetable",
+  ]
+  pruneopts = "UT"
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:077c1c599507b3b3e9156d17d36e1e61928ee9b53a5b420f10f28ebd4a0b275c"
+  name = "google.golang.org/genproto"
+  packages = ["googleapis/rpc/status"]
+  pruneopts = "UT"
+  revision = "c21a8b77f9f040598af1c8c5c0870568f1959df3"
+
+[[projects]]
+  digest = "1:cbc746de4662c66fd24a037501bd65aa0f8ad0bfca0c92576e0abb88864e3741"
+  name = "google.golang.org/grpc"
+  packages = [
+    ".",
+    "balancer",
+    "balancer/base",
+    "balancer/roundrobin",
+    "binarylog/grpc_binarylog_v1",
+    "codes",
+    "connectivity",
+    "credentials",
+    "credentials/internal",
+    "encoding",
+    "encoding/proto",
+    "grpclog",
+    "internal",
+    "internal/backoff",
+    "internal/binarylog",
+    "internal/channelz",
+    "internal/envconfig",
+    "internal/grpcrand",
+    "internal/grpcsync",
+    "internal/syscall",
+    "internal/transport",
+    "keepalive",
+    "metadata",
+    "naming",
+    "peer",
+    "resolver",
+    "resolver/dns",
+    "resolver/passthrough",
+    "stats",
+    "status",
+    "tap",
+  ]
+  pruneopts = "UT"
+  revision = "2fdaae294f38ed9a121193c51ec99fecd3b13eb7"
+  version = "v1.19.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -121,8 +220,10 @@
     "github.com/iotexproject/iotex-core/address",
     "github.com/iotexproject/iotex-core/pkg/hash",
     "github.com/iotexproject/iotex-core/pkg/keypair",
+    "github.com/iotexproject/iotex-core/protogen/iotexapi",
     "github.com/iotexproject/iotex-core/protogen/iotextypes",
     "github.com/stretchr/testify/assert",
+    "google.golang.org/grpc",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
