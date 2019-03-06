@@ -3,8 +3,9 @@ package rpcmethod
 import (
 	"context"
 
-	"github.com/iotexproject/iotex-core/protogen/iotexapi"
 	"google.golang.org/grpc"
+
+	"github.com/iotexproject/iotex-core/protogen/iotexapi"
 )
 
 // RPCMethod provides simple interface tp invoke rpc method
@@ -29,19 +30,19 @@ func NewRPCMethod(endpoint string) (*RPCMethod, error) {
 	}, nil
 }
 
-// Close close the underlaying connection, after Close, no method should be
+// Close closes the underlaying connection, after Close, no method should be
 // invoked anymore
 func (r *RPCMethod) Close() {
 	r.conn.Close()
 }
 
-// GetAccount get the address detail of an address
+// GetAccount gets the address detail of an address
 func (r *RPCMethod) GetAccount(in *iotexapi.GetAccountRequest) (*iotexapi.GetAccountResponse, error) {
 	ctx := context.Background()
 	return r.cli.GetAccount(ctx, in)
 }
 
-// GetActions get action(s) by:
+// GetActions gets action(s) by:
 // 1. start index and action count
 // 2. action hash
 // 3. address with start index and action count
@@ -52,7 +53,7 @@ func (r *RPCMethod) GetActions(in *iotexapi.GetActionsRequest) (*iotexapi.GetAct
 	return r.cli.GetActions(ctx, in)
 }
 
-// GetBlockMetas get block metadata(s) by:
+// GetBlockMetas gets block metadata(s) by:
 // 1. start index and block count
 // 2. block hash
 func (r *RPCMethod) GetBlockMetas(in *iotexapi.GetBlockMetasRequest) (*iotexapi.GetBlockMetasResponse, error) {
@@ -60,19 +61,19 @@ func (r *RPCMethod) GetBlockMetas(in *iotexapi.GetBlockMetasRequest) (*iotexapi.
 	return r.cli.GetBlockMetas(ctx, in)
 }
 
-// GetChainMeta get chain metadata
+// GetChainMeta gets chain metadata
 func (r *RPCMethod) GetChainMeta(in *iotexapi.GetChainMetaRequest) (*iotexapi.GetChainMetaResponse, error) {
 	ctx := context.Background()
 	return r.cli.GetChainMeta(ctx, in)
 }
 
-// SendAction send atcion to svr
+// SendAction sends atcion to svr
 func (r *RPCMethod) SendAction(in *iotexapi.SendActionRequest) (*iotexapi.SendActionResponse, error) {
 	ctx := context.Background()
 	return r.cli.SendAction(ctx, in)
 }
 
-// GetReceiptByAction get receipt by action hash
+// GetReceiptByAction gets receipt by action hash
 func (r *RPCMethod) GetReceiptByAction(in *iotexapi.GetReceiptByActionRequest) (*iotexapi.GetReceiptByActionResponse, error) {
 	ctx := context.Background()
 	return r.cli.GetReceiptByAction(ctx, in)
@@ -84,7 +85,7 @@ func (r *RPCMethod) ReadContract(in *iotexapi.ReadContractRequest) (*iotexapi.Re
 	return r.cli.ReadContract(ctx, in)
 }
 
-// SuggestGasPrice suggests gas pric
+// SuggestGasPrice suggests gas price
 func (r *RPCMethod) SuggestGasPrice(in *iotexapi.SuggestGasPriceRequest) (*iotexapi.SuggestGasPriceResponse, error) {
 	ctx := context.Background()
 	return r.cli.SuggestGasPrice(ctx, in)
