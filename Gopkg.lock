@@ -48,16 +48,22 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:1d2dba27e9dc2f2e48eba97c9a84f8abb91f46102a878f2299c787326a0f082d"
+  digest = "1:f7e9fabd667e2a9c66651dc9b4dee6cfc693ef8be7b7bd98401bbde3c890a179"
   name = "github.com/iotexproject/iotex-core"
   packages = [
+    "action",
+    "action/protocol/account/accountpb",
     "address",
     "address/bech32",
+    "pkg/enc",
     "pkg/hash",
     "pkg/keypair",
     "pkg/log",
+    "pkg/util/byteutil",
+    "pkg/version",
     "protogen/iotexapi",
     "protogen/iotextypes",
+    "state",
   ]
   pruneopts = "UT"
   revision = "e556b3c883f941f4f489769c6623484b0f4acbaa"
@@ -217,6 +223,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/ethereum/go-ethereum/crypto",
+    "github.com/iotexproject/iotex-core/action",
     "github.com/iotexproject/iotex-core/address",
     "github.com/iotexproject/iotex-core/pkg/hash",
     "github.com/iotexproject/iotex-core/pkg/keypair",

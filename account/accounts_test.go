@@ -17,6 +17,6 @@ func TestAccounts_Create(t *testing.T) {
 
 func TestAccounts_PrivateKeyToAccount(t *testing.T) {
 	acts := Accounts{}
-	act, _ := acts.PrivateKeyToAccount(expAct.PrivateKey)
-	assert.Equal(t, expAct, act)
+	act, _ := acts.PrivateKeyToAccount(testAcct.PrivateKey)
+	assert.Equal(t, testAcct, act)
 }
