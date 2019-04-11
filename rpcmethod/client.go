@@ -1,3 +1,9 @@
+// Copyright (c) 2019 IoTeX
+// This is an alpha (internal) release and is not suitable for production. This source code is provided 'as is' and no
+// warranties are given as to title or non-infringement, merchantability or fitness for purpose and, to the extent
+// permitted by law, all liability for your use of the code is disclaimed. This source code is governed by Apache
+// License 2.0 that can be found in the LICENSE file.
+
 package rpcmethod
 
 import (
@@ -67,6 +73,12 @@ func (r *RPCMethod) GetChainMeta(in *iotexapi.GetChainMetaRequest) (*iotexapi.Ge
 	return r.cli.GetChainMeta(ctx, in)
 }
 
+// GetServerMeta gets server metadata
+func (r *RPCMethod) GetServerMeta(in *iotexapi.GetServerMetaRequest) (*iotexapi.GetServerMetaResponse, error) {
+	ctx := context.Background()
+	return r.cli.GetServerMeta(ctx, in)
+}
+
 // SendAction sends atcion to svr
 func (r *RPCMethod) SendAction(in *iotexapi.SendActionRequest) (*iotexapi.SendActionResponse, error) {
 	ctx := context.Background()
@@ -101,4 +113,10 @@ func (r *RPCMethod) EstimateGasForAction(in *iotexapi.EstimateGasForActionReques
 func (r *RPCMethod) ReadState(in *iotexapi.ReadStateRequest) (*iotexapi.ReadStateResponse, error) {
 	ctx := context.Background()
 	return r.cli.ReadState(ctx, in)
+}
+
+// GetEpochMeta get epoch meta
+func (r *RPCMethod) GetEpochMeta(in *iotexapi.GetEpochMetaRequest) (*iotexapi.GetEpochMetaResponse, error) {
+	ctx := context.Background()
+	return r.cli.GetEpochMeta(ctx, in)
 }
