@@ -8,13 +8,11 @@ package rpcmethod
 
 import (
 	"encoding/hex"
-	"fmt"
 	"math/big"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/iotexproject/iotex-core/pkg/hash"
 	"github.com/iotexproject/iotex-core/protogen/iotexapi"
 	"github.com/iotexproject/iotex-core/protogen/iotextypes"
 	ta "github.com/iotexproject/iotex-core/test/testaddress"
@@ -237,22 +235,6 @@ func TestServer_ReadState(t *testing.T) {
 	expected, ok := new(big.Int).SetString("3712000000000000000000", 10)
 	require.True(ok)
 	require.Equal(1, val.Cmp(expected))
-}
-
-func TestServer_GetReceiptByAction(t *testing.T) {
-	require := require.New(t)
-	svr, err := NewRPCMethod(host)
-	require.NoError(err)
-
-	request := &iotexapi.GetReceiptByActionRequest{ActionHash: actionHash}
-	res, err := svr.GetReceiptByAction(request)
-	require.Error(err)
-	fmt.Println(res)
-	require.Nil(res)
-	receiptPb := res.ReceiptInfo.Receipt
-	require.Equal(1, receiptPb.Status)
-	require.Equal(11, receiptPb.BlkHeight)
-	require.NotEqual(hash.ZeroHash256, res.ReceiptInfo.BlkHash)
 }
 
 func TestServer_SuggestGasPrice(t *testing.T) {
