@@ -34,7 +34,7 @@ jobs:
           command: |
             export GOPATH=~/go
             set -e 
-            for d in $(go list ./...); do
+            for d in $(go list ./...|grep -v vendor); do
               go test -short -v -coverprofile=profile.out -covermode=count "$d"
               if [ -f profile.out ]; then
                 cat profile.out >> coverage.txt
