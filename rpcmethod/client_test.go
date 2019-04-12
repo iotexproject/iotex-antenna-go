@@ -21,7 +21,8 @@ import (
 
 const (
 	//host = "127.0.0.1:14014"
-	host        = "api.testnet.iotex.one:80"
+	host        = "api.iotex.one:80"
+	privateKey  = "bace9b2435db45b119e1570b4ea9c57993b2311e0c408d743d87cd22838ae892"
 	account     = "io13n3382cjhaawmqfk4vmvvgllnryw4tf56qdtks"
 	actionHash  = "74bf4f3e943c2285899426302669c5bc2d479f0f3799160b41ac435bfa04fa47"
 	blk1000Hash = "cce0233204fba5f1f259a3aeebd1b2aa12773039ff1f11dbc142025da624c3c9"
