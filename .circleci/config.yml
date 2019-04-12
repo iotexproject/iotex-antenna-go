@@ -1,0 +1,49 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2
+jobs:
+  build_test_docker:
+    docker:
+      - image: circleci/golang:1.11.6
+      
+    working_directory: ~/go/src/github.com/iotexproject/iotex-antenna-go
+    #environment:
+    #  - GOPATH: "${HOME}/go"
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+          paths:
+              - ~/go/src/github.com/iotexproject/iotex-antenna-go/vendor
+      - run:
+          name: "get vendor"
+          command: |
+            export GOPATH=~/go
+            if [ ! -d ~/go/src/github.com/iotexproject/iotex-antenna-go/vendor ]; then
+                dep ensure
+            fi
+      - save_cache:
+          key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+          paths:
+              - ~/go/src/github.com/iotexproject/iotex-antenna-go/vendor
+      - run: 
+          name: go test
+          command: |
+            export GOPATH=~/go
+            set -e 
+            for d in $(go list ./...|grep -v vendor); do
+              go test -short -v -coverprofile=profile.out -covermode=count "$d"
+              if [ -f profile.out ]; then
+                cat profile.out >> coverage.txt
+                rm profile.out
+              fi
+            done
+          
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - build_test_docker
