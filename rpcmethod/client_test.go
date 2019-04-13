@@ -7,6 +7,7 @@
 package rpcmethod
 
 import (
+	"fmt"
 	"math/big"
 	"os"
 	"strconv"
@@ -15,6 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/iotexproject/iotex-core/pkg/hash"
+	"github.com/iotexproject/iotex-core/pkg/keypair"
 	"github.com/iotexproject/iotex-core/protogen/iotexapi"
 	"github.com/iotexproject/iotex-core/protogen/iotextypes"
 	ta "github.com/iotexproject/iotex-core/test/testaddress"
@@ -102,26 +104,27 @@ func TestServer_GetActions(t *testing.T) {
 	require.Equal(5, len(res.ActionInfo))
 }
 
-//func TestServer_SendAction(t *testing.T) {
-//	require := require.New(t)
-//	rpc, err := NewRPCMethod(host)
-//	require.NoError(err)
-//	accountPrivateKey := os.Getenv("accountPrivateKey")
-//	accountPendingNonce := os.Getenv("accountPendingNonce")
-//	accountPendingNonceInt, err := strconv.ParseUint(accountPendingNonce, 10, 64)
-//	priKey, err := keypair.HexStringToPrivateKey(accountPrivateKey)
-//	require.NoError(err)
-//
-//	testTransfer, err := testutil.SignedTransfer("io15jcpv957y5rn3zkyvd22cerfxcw4wc86hghyhn",
-//		priKey, accountPendingNonceInt, big.NewInt(1000000000000000000), []byte{}, 2000000,
-//		big.NewInt(1000000000000))
-//	require.NoError(err)
-//	testTransferPb := testTransfer.Proto()
-//	request := &iotexapi.SendActionRequest{Action: testTransferPb}
-//	res, err := rpc.SendAction(request)
-//	require.NoError(err)
-//	fmt.Println("res:", res)
-//}
+func TestServer_SendAction(t *testing.T) {
+	t.Skip("Skip,make sure env is right")
+	require := require.New(t)
+	rpc, err := NewRPCMethod(host)
+	require.NoError(err)
+	accountPrivateKey := os.Getenv("accountPrivateKey")
+	accountPendingNonce := os.Getenv("accountPendingNonce")
+	accountPendingNonceInt, err := strconv.ParseUint(accountPendingNonce, 10, 64)
+	priKey, err := keypair.HexStringToPrivateKey(accountPrivateKey)
+	require.NoError(err)
+
+	testTransfer, err := testutil.SignedTransfer("io15jcpv957y5rn3zkyvd22cerfxcw4wc86hghyhn",
+		priKey, accountPendingNonceInt, big.NewInt(1000000000000000000), []byte{}, 2000000,
+		big.NewInt(1000000000000))
+	require.NoError(err)
+	testTransferPb := testTransfer.Proto()
+	request := &iotexapi.SendActionRequest{Action: testTransferPb}
+	res, err := rpc.SendAction(request)
+	require.NoError(err)
+	fmt.Println("res:", res)
+}
 
 func TestServer_GetAction(t *testing.T) {
 	require := require.New(t)
