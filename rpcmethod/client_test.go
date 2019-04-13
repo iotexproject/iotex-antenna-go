@@ -7,52 +7,43 @@
 package rpcmethod
 
 import (
-	"fmt"
 	"math/big"
 	"os"
 	"strconv"
 	"testing"
 
+	"github.com/iotexproject/iotex-core/testutil"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/iotexproject/iotex-core/pkg/hash"
-	"github.com/iotexproject/iotex-core/pkg/keypair"
-	"github.com/iotexproject/iotex-core/protogen/iotexapi"
 	"github.com/iotexproject/iotex-core/protogen/iotextypes"
 	ta "github.com/iotexproject/iotex-core/test/testaddress"
-	"github.com/iotexproject/iotex-core/testutil"
 )
 
 const (
-	//export accountPrivateKey="9cdf22c5caa8a4d99eb674da27756b438c05c6b1e8995f4a0586745e2071b115"
-	//export accountAddress="io14gnqxf9dpkn05g337rl7eyt2nxasphf5m6n0rd"
-	//export accountBalance="99994712164399999990848350"
-	//export accountNonce="337529"
-	//export accountPendingNonce="337530"
-	//export accountNumActions="506609"
-	//export actionHash="b9a938e1f249d3c7ab8152e377132989535e25ea9ee376323179d1943dc15b4e"
-	//export actionActionInfoLen="1"
-	//export actionActionNonce="1"
-	//export getActionsByAddressActionHash="10efdacf68be2fa0afdc2a46786b3caf0a59fe2386485a9f075acf2a41c93d78"
-	//export blk60801Hash="a331841e6b29becdeeb65cb0948d896076b514e5f8d69d560b4424282a7882d7"
-	//export blk60801HashNumActions="1960"
-	//export blk60801HashTransferAmount="2389000000000000000000"
-	//export getServerMetaPackageCommitID="e24aadf90f98d800b9f117354ddd5b3dbe58dde9"
-	//export accountAddressUnclaimedBalance="0"
-	//export getReceiptByActionBlkHeight="517"
+	//export accountPrivateKey              = "9cdf22c5caa8a4d99eb674da27756b438c05c6b1e8995f4a0586745e2071b115"
+	//export accountAddress                 = "io14gnqxf9dpkn05g337rl7eyt2nxasphf5m6n0rd"
+	//export accountBalance                 = "99994712164399999990848350"
+	//export accountNonce                   = "337529"
+	//export accountPendingNonce            = "337530"
+	//export accountNumActions              = "506609"
+	//export actionHash                     = "b9a938e1f249d3c7ab8152e377132989535e25ea9ee376323179d1943dc15b4e"
+	//export actionActionInfoLen            = "1"
+	//export actionActionNonce              = "1"
+	//export getActionsByAddressActionHash  = "10efdacf68be2fa0afdc2a46786b3caf0a59fe2386485a9f075acf2a41c93d78"
+	//export blk60801Hash                   = "a331841e6b29becdeeb65cb0948d896076b514e5f8d69d560b4424282a7882d7"
+	//export blk60801HashNumActions         = "1960"
+	//export blk60801HashTransferAmount     = "2389000000000000000000"
+	//export getServerMetaPackageCommitID   = "e24aadf90f98d800b9f117354ddd5b3dbe58dde9"
+	//export accountAddressUnclaimedBalance = "0"
+	//export getReceiptByActionBlkHeight    = "517"
 	//
-	//export epochDataHeight="1"
-	//export epochGravityChainStartHeight="7502300"
-	//export readContractActionHash="63c74277bcbfcef195f57713131b05cb54c47461f7e64b8f32fb58f9b8445265"
+	//export epochDataHeight              = "1"
+	//export epochGravityChainStartHeight = "7502300"
+	//export readContractActionHash       = "28a4b4979cb9922e18c60a1c4238cbea3775f757fb947456342b90eca7e52e08"
+	//export senderPriKey = "8c379a71721322d16912a88b1602c5596ca9e99a5f70777561c3029efa71a435"
 	host = "api.iotex.one:80"
-)
-
-var (
-	testTransfer, _ = testutil.SignedTransfer(ta.Addrinfo["alfa"].String(),
-		ta.Keyinfo["alfa"].PriKey, 3, big.NewInt(10), []byte{}, testutil.TestGasLimit,
-		big.NewInt(testutil.TestGasPriceInt64))
-
-	testTransferPb = testTransfer.Proto()
 )
 
 func TestServer_GetAccount(t *testing.T) {
@@ -71,8 +62,7 @@ func TestServer_GetAccount(t *testing.T) {
 	accountNumActions := os.Getenv("accountNumActions")
 	accountNumActionsInt, err := strconv.ParseUint(accountNumActions, 10, 64)
 	require.NoError(err)
-	request := &iotexapi.GetAccountRequest{Address: accountAddress}
-	res, err := svr.GetAccount(request)
+	res, err := svr.GetAccount(accountAddress)
 	require.NoError(err)
 	accountMeta := res.AccountMeta
 	require.Equal(accountAddress, accountMeta.Address)
@@ -82,51 +72,30 @@ func TestServer_GetAccount(t *testing.T) {
 	require.Equal(true, accountNumActionsInt < accountMeta.NumActions)
 
 	// failure
-	_, err = svr.GetAccount(&iotexapi.GetAccountRequest{})
+	_, err = svr.GetAccount("")
 	require.Error(err)
 }
 
-func TestServer_GetActions(t *testing.T) {
+func TestServer_GetActionsByIndex(t *testing.T) {
 	require := require.New(t)
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
-
-	request := &iotexapi.GetActionsRequest{
-		Lookup: &iotexapi.GetActionsRequest_ByIndex{
-			ByIndex: &iotexapi.GetActionsByIndexRequest{
-				Start: 0,
-				Count: 5,
-			},
-		},
-	}
-	res, err := svr.GetActions(request)
+	res, err := svr.GetActionsByIndex(0, 5)
 	require.NoError(err)
 	require.Equal(5, len(res.ActionInfo))
 }
 
-func TestServer_SendAction(t *testing.T) {
-	t.Skip("Skip,make sure env is right")
+func TestServer_SendTransfer(t *testing.T) {
 	require := require.New(t)
 	rpc, err := NewRPCMethod(host)
 	require.NoError(err)
-	accountPrivateKey := os.Getenv("accountPrivateKey")
-	accountPendingNonce := os.Getenv("accountPendingNonce")
-	accountPendingNonceInt, err := strconv.ParseUint(accountPendingNonce, 10, 64)
-	priKey, err := keypair.HexStringToPrivateKey(accountPrivateKey)
+	recipientAddr := os.Getenv("accountAddress")
+	senderPriKey := os.Getenv("senderPriKey")
+	_, err = rpc.SendTransfer(recipientAddr, senderPriKey, 10, big.NewInt(1000000), nil, 1000000, big.NewInt(10000000000))
 	require.NoError(err)
-
-	testTransfer, err := testutil.SignedTransfer("io15jcpv957y5rn3zkyvd22cerfxcw4wc86hghyhn",
-		priKey, accountPendingNonceInt, big.NewInt(1000000000000000000), []byte{}, 2000000,
-		big.NewInt(1000000000000))
-	require.NoError(err)
-	testTransferPb := testTransfer.Proto()
-	request := &iotexapi.SendActionRequest{Action: testTransferPb}
-	res, err := rpc.SendAction(request)
-	require.NoError(err)
-	fmt.Println("res:", res)
 }
 
-func TestServer_GetAction(t *testing.T) {
+func TestServer_GetActionByHash(t *testing.T) {
 	require := require.New(t)
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
@@ -137,15 +106,7 @@ func TestServer_GetAction(t *testing.T) {
 	actionActionNonce := os.Getenv("actionActionNonce")
 	actionActionNonceInt, err := strconv.ParseUint(actionActionNonce, 10, 64)
 	require.NoError(err)
-	request := &iotexapi.GetActionsRequest{
-		Lookup: &iotexapi.GetActionsRequest_ByHash{
-			ByHash: &iotexapi.GetActionByHashRequest{
-				ActionHash:   actionHash,
-				CheckPending: true,
-			},
-		},
-	}
-	res, err := svr.GetActions(request)
+	res, err := svr.GetActionsByHash(actionHash, true)
 	require.NoError(err)
 	require.Equal(int(actionActionInfoLenInt), len(res.ActionInfo))
 	act := res.ActionInfo[0]
@@ -158,16 +119,7 @@ func TestServer_GetActionsByAddress(t *testing.T) {
 	require.NoError(err)
 	accountAddress := os.Getenv("accountAddress")
 	getActionsByAddressActionHash := os.Getenv("getActionsByAddressActionHash")
-	request := &iotexapi.GetActionsRequest{
-		Lookup: &iotexapi.GetActionsRequest_ByAddr{
-			ByAddr: &iotexapi.GetActionsByAddressRequest{
-				Address: accountAddress,
-				Start:   1,
-				Count:   1,
-			},
-		},
-	}
-	res, err := svr.GetActions(request)
+	res, err := svr.GetActionsByAddress(accountAddress, 1, 1)
 	require.NoError(err)
 	require.Equal(getActionsByAddressActionHash, res.ActionInfo[0].ActHash)
 	require.Equal(1, len(res.ActionInfo))
@@ -178,16 +130,7 @@ func TestServer_GetUnconfirmedActionsByAddress(t *testing.T) {
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
 	accountAddress := os.Getenv("accountAddress")
-	request := &iotexapi.GetActionsRequest{
-		Lookup: &iotexapi.GetActionsRequest_UnconfirmedByAddr{
-			UnconfirmedByAddr: &iotexapi.GetUnconfirmedActionsByAddressRequest{
-				Address: accountAddress,
-				Start:   1,
-				Count:   10,
-			},
-		},
-	}
-	res, err := svr.GetActions(request)
+	res, err := svr.GetUnconfirmedActionsByAddress(accountAddress, 1, 10)
 	require.NoError(err)
 	require.Equal(0, len(res.ActionInfo))
 }
@@ -197,16 +140,7 @@ func TestServer_GetActionsByBlock(t *testing.T) {
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
 	blk60801Hash := os.Getenv("blk60801Hash")
-	request := &iotexapi.GetActionsRequest{
-		Lookup: &iotexapi.GetActionsRequest_ByBlk{
-			ByBlk: &iotexapi.GetActionsByBlockRequest{
-				BlkHash: blk60801Hash,
-				Start:   1,
-				Count:   10,
-			},
-		},
-	}
-	res, err := svr.GetActions(request)
+	res, err := svr.GetActionsByBlock(blk60801Hash, 1, 10)
 	require.NoError(err)
 	require.Equal(10, len(res.ActionInfo))
 }
@@ -215,16 +149,7 @@ func TestServer_GetBlockMetas(t *testing.T) {
 	require := require.New(t)
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
-
-	request := &iotexapi.GetBlockMetasRequest{
-		Lookup: &iotexapi.GetBlockMetasRequest_ByIndex{
-			ByIndex: &iotexapi.GetBlockMetasByIndexRequest{
-				Start: 10,
-				Count: 10,
-			},
-		},
-	}
-	res, err := svr.GetBlockMetas(request)
+	res, err := svr.GetBlockMetasByIndexAndCount(10, 10)
 	require.NoError(err)
 	require.Equal(10, len(res.GetBlkMetas()))
 	var prevBlkPb *iotextypes.BlockMeta
@@ -234,7 +159,6 @@ func TestServer_GetBlockMetas(t *testing.T) {
 		}
 		prevBlkPb = blkPb
 	}
-
 }
 
 func TestServer_GetBlockMeta(t *testing.T) {
@@ -246,14 +170,7 @@ func TestServer_GetBlockMeta(t *testing.T) {
 	blk60801HashNumActionsInt, err := strconv.ParseInt(blk60801HashNumActions, 10, 64)
 	blk60801HashTransferAmount := os.Getenv("blk60801HashTransferAmount")
 
-	request := &iotexapi.GetBlockMetasRequest{
-		Lookup: &iotexapi.GetBlockMetasRequest_ByHash{
-			ByHash: &iotexapi.GetBlockMetaByHashRequest{
-				BlkHash: blk60801Hash,
-			},
-		},
-	}
-	res, err := svr.GetBlockMetas(request)
+	res, err := svr.GetBlockMetasByBlockHash(blk60801Hash)
 	require.NoError(err)
 	require.Equal(1, len(res.BlkMetas))
 	blkPb := res.BlkMetas[0]
@@ -266,7 +183,7 @@ func TestServer_GetChainMeta(t *testing.T) {
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
 
-	res, err := svr.GetChainMeta(&iotexapi.GetChainMetaRequest{})
+	res, err := svr.GetChainMeta()
 	require.NoError(err)
 	chainMetaPb := res.ChainMeta
 	require.Equal(true, chainMetaPb.Height > 1)
@@ -281,7 +198,7 @@ func TestServer_GetServerMeta(t *testing.T) {
 	require := require.New(t)
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
-	res, err := svr.GetServerMeta(&iotexapi.GetServerMetaRequest{})
+	res, err := svr.GetServerMeta()
 	require.NoError(err)
 	getServerMetaPackageCommitID := os.Getenv("getServerMetaPackageCommitID")
 	require.Equal(getServerMetaPackageCommitID, res.GetServerMeta().PackageCommitID)
@@ -293,11 +210,7 @@ func TestServer_ReadState(t *testing.T) {
 	require.NoError(err)
 	accountAddress := os.Getenv("accountAddress")
 	accountAddressUnclaimedBalance := os.Getenv("accountAddressUnclaimedBalance")
-	out, err := svr.ReadState(&iotexapi.ReadStateRequest{
-		ProtocolID: []byte("rewarding"),
-		MethodName: []byte("UnclaimedBalance"),
-		Arguments:  [][]byte{[]byte(accountAddress)},
-	})
+	out, err := svr.ReadState("rewarding", "UnclaimedBalance", [][]byte{[]byte(accountAddress)})
 	require.NoError(err)
 	require.NotNil(out)
 	val, ok := big.NewInt(0).SetString(string(out.Data), 10)
@@ -314,8 +227,7 @@ func TestServer_GetReceiptByAction(t *testing.T) {
 	actionHash := os.Getenv("actionHash")
 	getReceiptByActionBlkHeight := os.Getenv("getReceiptByActionBlkHeight")
 	getReceiptByActionBlkHeightInt, err := strconv.ParseUint(getReceiptByActionBlkHeight, 10, 64)
-	request := &iotexapi.GetReceiptByActionRequest{ActionHash: actionHash}
-	res, err := svr.GetReceiptByAction(request)
+	res, err := svr.GetReceiptByAction(actionHash)
 	require.NoError(err)
 	require.NotNil(res)
 	receiptPb := res.ReceiptInfo.Receipt
@@ -329,19 +241,7 @@ func TestServer_ReadContract(t *testing.T) {
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
 	readContractActionHash := os.Getenv("readContractActionHash")
-	request := &iotexapi.GetActionsRequest{
-		Lookup: &iotexapi.GetActionsRequest_ByHash{
-			ByHash: &iotexapi.GetActionByHashRequest{
-				ActionHash:   readContractActionHash,
-				CheckPending: true,
-			},
-		},
-	}
-	res, err := svr.GetActions(request)
-	require.NoError(err)
-	request2 := &iotexapi.ReadContractRequest{Action: res.ActionInfo[0].Action}
-
-	res2, err := svr.ReadContract(request2)
+	res2, err := svr.ReadContract(readContractActionHash, true)
 	require.NoError(err)
 	require.Equal("", res2.Data)
 }
@@ -350,7 +250,7 @@ func TestServer_SuggestGasPrice(t *testing.T) {
 	require := require.New(t)
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
-	res, err := svr.SuggestGasPrice(&iotexapi.SuggestGasPriceRequest{})
+	res, err := svr.SuggestGasPrice()
 	require.NoError(err)
 	require.Equal(uint64(1), res.GasPrice)
 }
@@ -359,9 +259,7 @@ func TestServer_EstimateGasForAction(t *testing.T) {
 	require := require.New(t)
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
-
-	request := &iotexapi.EstimateGasForActionRequest{Action: testTransferPb}
-	res, err := svr.EstimateGasForAction(request)
+	res, err := svr.EstimateGasForAction(ta.Addrinfo["alfa"].String(), ta.Keyinfo["alfa"].PriKey.HexString(), 3, big.NewInt(10000000), 1000000, big.NewInt(testutil.TestGasPriceInt64), nil)
 	require.NoError(err)
 	require.Equal(uint64(10000), res.Gas)
 }
@@ -375,7 +273,7 @@ func TestServer_GetEpochMeta(t *testing.T) {
 	epochGravityChainStartHeight := os.Getenv("epochGravityChainStartHeight")
 	epochGravityChainStartHeightInt, err := strconv.ParseUint(epochGravityChainStartHeight, 10, 64)
 
-	res, err := svr.GetEpochMeta(&iotexapi.GetEpochMetaRequest{EpochNumber: 1})
+	res, err := svr.GetEpochMeta(1)
 	require.NoError(err)
 	require.Equal(uint64(1), res.EpochData.Num)
 	require.Equal(epochDataHeightInt, res.EpochData.Height)
