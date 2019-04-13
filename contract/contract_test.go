@@ -7,7 +7,6 @@
 package contract
 
 import (
-	"fmt"
 	"math/big"
 	"testing"
 
@@ -32,10 +31,8 @@ func TestServer_Deploy(t *testing.T) {
 	require.NoError(err)
 	receipt, err := sct.CheckCallResult(hash)
 	require.NoError(err)
-	fmt.Println("receipt contract:", receipt.ContractAddress)
 	sct.SetContractAddress(receipt.ContractAddress)
-	fmt.Println("contract:", sct.ContractAddress())
 	ret, err := sct.CallMethod("febb0f7e")
 	require.NoError(err)
-	fmt.Println(ret)
+	require.Equal("0000000000000000000000000000000000000000000000000000000000000064", ret)
 }
