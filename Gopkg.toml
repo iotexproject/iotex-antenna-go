@@ -31,7 +31,7 @@
 
 [[constraint]]
   name = "github.com/iotexproject/iotex-core"
-  revision = "e556b3c883f941f4f489769c6623484b0f4acbaa"
+  revision = "v0.5.0-rc8"
 
 [[constraint]]
   name = "github.com/ethereum/go-ethereum"
