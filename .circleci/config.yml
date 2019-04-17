@@ -10,7 +10,6 @@ jobs:
     working_directory: ~/go/src/github.com/iotexproject/iotex-antenna-go
     #environment:
     #  - GOPATH: "${HOME}/go"
-
     steps:
       - checkout
 
@@ -25,6 +24,11 @@ jobs:
             if [ ! -d ~/go/src/github.com/iotexproject/iotex-antenna-go/vendor ]; then
                 dep ensure
             fi
+      - run:
+          name: "set env"
+          command: |
+            chmod +x ./rpcmethod/exportevn.sh
+            ./rpcmethod/exportevn.sh
       - save_cache:
           key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
           paths:
