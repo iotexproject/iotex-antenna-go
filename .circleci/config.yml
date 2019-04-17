@@ -10,7 +10,7 @@ jobs:
     working_directory: ~/go/src/github.com/iotexproject/iotex-antenna-go
     #environment:
     #  - GOPATH: "${HOME}/go"
-    -
+
     steps:
       - checkout
 
