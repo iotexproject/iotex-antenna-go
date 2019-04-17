@@ -7,8 +7,6 @@
 package account
 
 import (
-	"github.com/ethereum/go-ethereum/crypto"
-
 	"github.com/iotexproject/iotex-core/pkg/keypair"
 )
 
@@ -17,11 +15,11 @@ type Accounts struct {
 }
 
 func (acts *Accounts) Create() (Account, error) {
-	private, err := crypto.GenerateKey()
+	private, err := keypair.GenerateKey()
 	if err != nil {
 		return Account{}, err
 	}
-	return privateToAccount(private)
+	return privateToAccount(private.EcdsaPrivateKey())
 }
 
 func (acts *Accounts) PrivateKeyToAccount(privateKey string) (Account, error) {

@@ -9,8 +9,6 @@ package account
 import (
 	"crypto/ecdsa"
 
-	"github.com/ethereum/go-ethereum/crypto"
-
 	"github.com/iotexproject/iotex-core/address"
 	"github.com/iotexproject/iotex-core/pkg/hash"
 	"github.com/iotexproject/iotex-core/pkg/keypair"
@@ -28,7 +26,7 @@ func (act Account) Sign(data []byte) ([]byte, error) {
 		return nil, err
 	}
 	h := hash.Hash256b(data)
-	return crypto.Sign(h[:], priv.EcdsaPrivateKey())
+	return priv.Sign(h[:])
 }
 
 func privateToAccount(private *ecdsa.PrivateKey) (acc Account, err error) {
