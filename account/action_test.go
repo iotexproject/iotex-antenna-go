@@ -7,13 +7,15 @@
 package account
 
 import (
-	"testing"
-	"github.com/iotexproject/iotex-core/action"
-	"math/big"
-	"github.com/stretchr/testify/assert"
-	"github.com/iotexproject/iotex-core/pkg/keypair"
 	"encoding/hex"
+	"math/big"
+	"testing"
+
 	"github.com/golang/protobuf/proto"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/iotexproject/iotex-core/action"
+	"github.com/iotexproject/iotex-core/pkg/keypair"
 )
 
 func TestAction_Envelope(t *testing.T) {
@@ -30,7 +32,7 @@ func TestAction_Envelope(t *testing.T) {
 		SetGasLimit(gasPrice.Uint64()).
 		Build()
 
-	privKey, err := keypair.DecodePrivateKey(testAcct.PrivateKey)
+	privKey, err := keypair.HexStringToPrivateKey(testAcct.PrivateKey)
 	assert.NoError(t, err)
 
 	sealed, err := action.Sign(elp, privKey)
