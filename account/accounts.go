@@ -8,7 +8,6 @@ package account
 
 import (
 	"github.com/iotexproject/iotex-core/pkg/keypair"
-	"github.com/ethereum/go-ethereum/crypto"
 )
 
 type Accounts struct {
@@ -16,20 +15,19 @@ type Accounts struct {
 }
 
 func (acts *Accounts) Create() (Account, error) {
-	private, err := crypto.GenerateKey()
+	private, err := keypair.GenerateKey()
 	if err != nil {
 		return Account{}, err
 	}
-	return privateToAccount(private)
+	return privateToAccount(private.EcdsaPrivateKey())
 }
 
 func (acts *Accounts) PrivateKeyToAccount(privateKey string) (Account, error) {
-	private, err := keypair.DecodePrivateKey(privateKey)
+	private, err := keypair.HexStringToPrivateKey(privateKey)
 	if err != nil {
 		return Account{}, nil
 	}
-
-	return privateToAccount(private)
+	return privateToAccount(private.EcdsaPrivateKey())
 }
 
 func (acts *Accounts) Sign(data []byte, privateKey string) ([]byte, error) {
@@ -37,6 +35,5 @@ func (acts *Accounts) Sign(data []byte, privateKey string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return act.Sign(data)
 }

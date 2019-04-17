@@ -8,38 +8,39 @@ package account
 
 import (
 	"crypto/ecdsa"
-	"fmt"
 
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/iotexproject/iotex-core/pkg/keypair"
 	"github.com/iotexproject/iotex-core/address"
 	"github.com/iotexproject/iotex-core/pkg/hash"
+	"github.com/iotexproject/iotex-core/pkg/keypair"
 )
 
 type Account struct {
-	Address string
-	PublicKey string
+	Address    string
 	PrivateKey string
+	PublicKey  string
 }
 
 func (act Account) Sign(data []byte) ([]byte, error) {
-	priv, err := keypair.DecodePrivateKey(act.PrivateKey)
+	priv, err := keypair.HexStringToPrivateKey(act.PrivateKey)
 	if err != nil {
 		return nil, err
 	}
 	h := hash.Hash256b(data)
-	fmt.Printf("h: %+x\n", h)
-	return crypto.Sign(h[:], priv)
+	return priv.Sign(h[:])
 }
 
-func privateToAccount(private *ecdsa.PrivateKey) (Account, error) {
-	pkHash := keypair.HashPubKey(&private.PublicKey)
-	addr, _ := address.FromBytes(pkHash[:])
-	priKeyBytes := keypair.PrivateKeyToBytes(private)
-	pubKeyBytes := keypair.PublicKeyToBytes(&private.PublicKey)
+func privateToAccount(private *ecdsa.PrivateKey) (acc Account, err error) {
+	pri, err := keypair.BytesToPrivateKey(private.D.Bytes())
+	if err != nil {
+		return
+	}
+	addr, err := address.FromBytes(pri.PublicKey().Hash())
+	if err != nil {
+		return
+	}
 	return Account{
-		Address: addr.String(),
-		PublicKey: fmt.Sprintf("%x", pubKeyBytes),
-		PrivateKey: fmt.Sprintf("%x", priKeyBytes),
+		Address:    addr.String(),
+		PrivateKey: pri.HexString(),
+		PublicKey:  pri.PublicKey().HexString(),
 	}, nil
 }

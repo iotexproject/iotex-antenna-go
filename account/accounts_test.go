@@ -24,5 +24,7 @@ func TestAccounts_Create(t *testing.T) {
 func TestAccounts_PrivateKeyToAccount(t *testing.T) {
 	acts := Accounts{}
 	act, _ := acts.PrivateKeyToAccount(testAcct.PrivateKey)
-	assert.Equal(t, testAcct, act)
+	assert.Equal(t, testAcct.Address, act.Address)
+	assert.Equal(t, testAcct.PrivateKey, act.PrivateKey)
+	assert.Equal(t, testAcct.PublicKey, act.PublicKey)
 }

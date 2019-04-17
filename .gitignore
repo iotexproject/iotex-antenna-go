@@ -34,3 +34,6 @@ bin/*
 coverage.html
 lint.log
 .editorconfig
+coverage.txt
+
+vendor/
