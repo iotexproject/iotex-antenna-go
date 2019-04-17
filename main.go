@@ -9,10 +9,23 @@ package main
 import (
 	"fmt"
 
-    "github.com/iotexproject/iotex-core/protogen/iotextypes"
+	"github.com/iotexproject/iotex-antenna-go/antenna"
+	"github.com/iotexproject/iotex-core/protogen/iotextypes"
 )
 
 func main() {
-    var blk iotextypes.Block
+	var blk iotextypes.Block
 	fmt.Printf("Hello Antenna %s\n", blk.Header.ProducerPubkey)
+
+	svr, err := antenna.NewRPCMethod("api.iotex.one:80")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	res, err := svr.SuggestGasPrice(&antenna.SuggestGasPriceRequest{})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(res)
 }
