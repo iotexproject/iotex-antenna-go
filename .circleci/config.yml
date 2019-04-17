@@ -26,6 +26,11 @@ jobs:
                 dep ensure
             fi
       - run:
+          name: "build libsecp256k1"
+          command: |
+            chmod +x buildlibsecp256k1.sh
+            ./buildlibsecp256k1.sh
+      - run:
           name: "set env"
           command: |
             source ./rpcmethod/exportevn.sh
