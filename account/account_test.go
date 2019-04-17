@@ -7,13 +7,13 @@
 package account
 
 import (
-	"testing"
 	"encoding/hex"
 	"fmt"
+	"testing"
 
-	"github.com/iotexproject/iotex-core/pkg/hash"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/iotexproject/iotex-core/pkg/hash"
 )
 
 var testAcct = Account{
