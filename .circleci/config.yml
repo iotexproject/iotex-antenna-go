@@ -28,8 +28,7 @@ jobs:
       - run:
           name: "set env"
           command: |
-            chmod +x ./rpcmethod/exportevn.sh
-            ./rpcmethod/exportevn.sh
+            source ./rpcmethod/exportevn.sh
       - save_cache:
           key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
           paths:
