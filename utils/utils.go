@@ -36,60 +36,29 @@ func convert(num, unit, operator string) string {
 	if !ok {
 		return ""
 	}
+	unitInt := int64(1)
 	switch unit {
 	case "Rau":
-		if operator == "div" {
-			return numInt.Div(numInt, big.NewInt(Iotx/Rau)).Text(10)
-		} else {
-			return numInt.Mul(numInt, big.NewInt(Rau)).Text(10)
-		}
+		unitInt = Rau
 	case "KRau":
-		if operator == "div" {
-			return numInt.Div(numInt, big.NewInt(Iotx/KRau)).Text(10)
-		} else {
-			return numInt.Mul(numInt, big.NewInt(KRau)).Text(10)
-		}
+		unitInt = KRau
 	case "MRau":
-		if operator == "div" {
-			return numInt.Div(numInt, big.NewInt(Iotx/MRau)).Text(10)
-		} else {
-			return numInt.Mul(numInt, big.NewInt(MRau)).Text(10)
-		}
+		unitInt = MRau
 	case "GRau":
-		if operator == "div" {
-			return numInt.Div(numInt, big.NewInt(Iotx/GRau)).Text(10)
-		} else {
-			return numInt.Mul(numInt, big.NewInt(GRau)).Text(10)
-		}
+		unitInt = GRau
 	case "Qev":
-		if operator == "div" {
-			return numInt.Div(numInt, big.NewInt(Iotx/Qev)).Text(10)
-		} else {
-			return numInt.Mul(numInt, big.NewInt(Qev)).Text(10)
-		}
+		unitInt = Qev
 	case "Jin":
-		if operator == "div" {
-			return numInt.Div(numInt, big.NewInt(Iotx/Jin)).Text(10)
-		} else {
-			return numInt.Mul(numInt, big.NewInt(Jin)).Text(10)
-		}
+		unitInt = Jin
 	default:
-		if operator == "div" {
-			return numInt.Div(numInt, big.NewInt(Iotx/Iotx)).Text(10)
-		} else {
-			return numInt.Mul(numInt, big.NewInt(Iotx)).Text(10)
-		}
+		unitInt = Iotx
+	}
+	return bigOperator(numInt, unitInt, operator)
+}
+func bigOperator(numInt *big.Int, unit int64, operator string) string {
+	if operator == "div" {
+		return numInt.Div(numInt, big.NewInt(Iotx/unit)).Text(10)
+	} else {
+		return numInt.Mul(numInt, big.NewInt(unit)).Text(10)
 	}
 }
-
-//// FromRau is a function to convert Rau to Iotx.
-//func FromRau(rau *big.Int) int64 {
-//	rau = rau.Div(rau, big.NewInt(1e18))
-//	return rau.Int64()
-//}
-//
-//// ToRau is a function to convert various units to Rau.
-//func ToRau(iotx int64) *big.Int {
-//	itx := big.NewInt(iotx)
-//	return itx.Mul(itx, big.NewInt(1e18))
-//}
