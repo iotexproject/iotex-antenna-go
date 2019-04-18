@@ -21,7 +21,25 @@ func (acts *Accounts) Create() (Account, error) {
 	}
 	return privateToAccount(private.EcdsaPrivateKey())
 }
-
+func (acts *Accounts) GetAccount(addr string) (string, bool) {
+	for _, acc := range acts.acts {
+		if acc.Address == addr {
+			return acc.PrivateKey, true
+		}
+	}
+	return "", false
+}
+func (acts *Accounts) AddAccount(privateKey string) error {
+	acc, err := acts.PrivateKeyToAccount(privateKey)
+	if err != nil {
+		return err
+	}
+	_, exist := acts.GetAccount(acc.Address)
+	if !exist {
+		acts.acts = append(acts.acts, acc)
+	}
+	return nil
+}
 func (acts *Accounts) PrivateKeyToAccount(privateKey string) (Account, error) {
 	private, err := keypair.HexStringToPrivateKey(privateKey)
 	if err != nil {
