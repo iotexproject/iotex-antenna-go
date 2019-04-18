@@ -27,7 +27,6 @@
 
 [prune]
   go-tests = true
-  unused-packages = true
 
 [[constraint]]
   name = "github.com/iotexproject/iotex-core"
