@@ -39,15 +39,20 @@ func TestServer_GetAccount(t *testing.T) {
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
 	accountAddress := os.Getenv("accountAddress")
-
 	accountBalance := os.Getenv("accountBalance")
 	accountNonce := os.Getenv("accountNonce")
+	accountPendingNonce := os.Getenv("accountPendingNonce")
+	accountNumActions := os.Getenv("accountNumActions")
+	if accountAddress == "" || accountBalance == "" || accountNonce == "" || accountPendingNonce == "" || accountNumActions == "" {
+		t.Skip("skipping test; some params not set")
+	}
+
 	accountNonceInt, err := strconv.ParseUint(accountNonce, 10, 64)
 	require.NoError(err)
-	accountPendingNonce := os.Getenv("accountPendingNonce")
+
 	accountPendingNonceInt, err := strconv.ParseUint(accountPendingNonce, 10, 64)
 	require.NoError(err)
-	accountNumActions := os.Getenv("accountNumActions")
+
 	accountNumActionsInt, err := strconv.ParseUint(accountNumActions, 10, 64)
 	require.NoError(err)
 	request := &iotexapi.GetAccountRequest{Address: accountAddress}
@@ -89,6 +94,10 @@ func TestServer_SendAction(t *testing.T) {
 	require.NoError(err)
 	accountPrivateKey := os.Getenv("accountPrivateKey")
 	accountPendingNonce := os.Getenv("accountPendingNonce")
+	if accountPrivateKey == "" || accountPendingNonce == "" {
+		t.Skip("skipping test; some params not set")
+	}
+
 	accountPendingNonceInt, err := strconv.ParseUint(accountPendingNonce, 10, 64)
 	priKey, err := keypair.HexStringToPrivateKey(accountPrivateKey)
 	require.NoError(err)
@@ -109,9 +118,13 @@ func TestServer_GetAction(t *testing.T) {
 	require.NoError(err)
 	actionHash := os.Getenv("actionHash")
 	actionActionInfoLen := os.Getenv("actionActionInfoLen")
+	actionActionNonce := os.Getenv("actionActionNonce")
+	if actionHash == "" || actionActionInfoLen == "" || actionActionNonce == "" {
+		t.Skip("skipping test; some params not set")
+	}
+
 	actionActionInfoLenInt, err := strconv.ParseInt(actionActionInfoLen, 10, 64)
 	require.NoError(err)
-	actionActionNonce := os.Getenv("actionActionNonce")
 	actionActionNonceInt, err := strconv.ParseUint(actionActionNonce, 10, 64)
 	require.NoError(err)
 	request := &iotexapi.GetActionsRequest{
@@ -135,6 +148,9 @@ func TestServer_GetActionsByAddress(t *testing.T) {
 	require.NoError(err)
 	accountAddress := os.Getenv("accountAddress")
 	getActionsByAddressActionHash := os.Getenv("getActionsByAddressActionHash")
+	if accountAddress == "" || getActionsByAddressActionHash == "" {
+		t.Skip("skipping test; some params not set")
+	}
 	request := &iotexapi.GetActionsRequest{
 		Lookup: &iotexapi.GetActionsRequest_ByAddr{
 			ByAddr: &iotexapi.GetActionsByAddressRequest{
@@ -155,6 +171,10 @@ func TestServer_GetUnconfirmedActionsByAddress(t *testing.T) {
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
 	accountAddress := os.Getenv("accountAddress")
+	if accountAddress == "" {
+		t.Skip("skipping test; some params not set")
+	}
+
 	request := &iotexapi.GetActionsRequest{
 		Lookup: &iotexapi.GetActionsRequest_UnconfirmedByAddr{
 			UnconfirmedByAddr: &iotexapi.GetUnconfirmedActionsByAddressRequest{
@@ -174,6 +194,10 @@ func TestServer_GetActionsByBlock(t *testing.T) {
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
 	blk60801Hash := os.Getenv("blk60801Hash")
+	if blk60801Hash == "" {
+		t.Skip("skipping test; some params not set")
+	}
+
 	request := &iotexapi.GetActionsRequest{
 		Lookup: &iotexapi.GetActionsRequest_ByBlk{
 			ByBlk: &iotexapi.GetActionsByBlockRequest{
@@ -220,9 +244,12 @@ func TestServer_GetBlockMeta(t *testing.T) {
 	require.NoError(err)
 	blk60801Hash := os.Getenv("blk60801Hash")
 	blk60801HashNumActions := os.Getenv("blk60801HashNumActions")
-	blk60801HashNumActionsInt, err := strconv.ParseInt(blk60801HashNumActions, 10, 64)
 	blk60801HashTransferAmount := os.Getenv("blk60801HashTransferAmount")
+	if blk60801Hash == "" || blk60801HashNumActions == "" || blk60801HashTransferAmount == "" {
+		t.Skip("skipping test; some params not set")
+	}
 
+	blk60801HashNumActionsInt, err := strconv.ParseInt(blk60801HashNumActions, 10, 64)
 	request := &iotexapi.GetBlockMetasRequest{
 		Lookup: &iotexapi.GetBlockMetasRequest_ByHash{
 			ByHash: &iotexapi.GetBlockMetaByHashRequest{
@@ -261,6 +288,9 @@ func TestServer_GetServerMeta(t *testing.T) {
 	res, err := svr.GetServerMeta(&iotexapi.GetServerMetaRequest{})
 	require.NoError(err)
 	getServerMetaPackageCommitID := os.Getenv("getServerMetaPackageCommitID")
+	if getServerMetaPackageCommitID == "" {
+		t.Skip("skipping test; some params not set")
+	}
 	require.Equal(getServerMetaPackageCommitID, res.GetServerMeta().PackageCommitID)
 }
 
@@ -270,6 +300,10 @@ func TestServer_ReadState(t *testing.T) {
 	require.NoError(err)
 	accountAddress := os.Getenv("accountAddress")
 	accountAddressUnclaimedBalance := os.Getenv("accountAddressUnclaimedBalance")
+	if accountAddress == "" || accountAddressUnclaimedBalance == "" {
+		t.Skip("skipping test; some params not set")
+	}
+
 	out, err := svr.ReadState(&iotexapi.ReadStateRequest{
 		ProtocolID: []byte("rewarding"),
 		MethodName: []byte("UnclaimedBalance"),
@@ -290,6 +324,10 @@ func TestServer_GetReceiptByAction(t *testing.T) {
 	require.NoError(err)
 	actionHash := os.Getenv("actionHash")
 	getReceiptByActionBlkHeight := os.Getenv("getReceiptByActionBlkHeight")
+	if actionHash == "" || getReceiptByActionBlkHeight == "" {
+		t.Skip("skipping test; some params not set")
+	}
+
 	getReceiptByActionBlkHeightInt, err := strconv.ParseUint(getReceiptByActionBlkHeight, 10, 64)
 	request := &iotexapi.GetReceiptByActionRequest{ActionHash: actionHash}
 	res, err := svr.GetReceiptByAction(request)
@@ -306,6 +344,10 @@ func TestServer_ReadContract(t *testing.T) {
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
 	readContractActionHash := os.Getenv("readContractActionHash")
+	if readContractActionHash == "" {
+		t.Skip("skipping test; some params not set")
+	}
+
 	request := &iotexapi.GetActionsRequest{
 		Lookup: &iotexapi.GetActionsRequest_ByHash{
 			ByHash: &iotexapi.GetActionByHashRequest{
@@ -347,8 +389,12 @@ func TestServer_GetEpochMeta(t *testing.T) {
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
 	epochDataHeight := os.Getenv("epochDataHeight")
-	epochDataHeightInt, err := strconv.ParseUint(epochDataHeight, 10, 64)
 	epochGravityChainStartHeight := os.Getenv("epochGravityChainStartHeight")
+	if epochDataHeight == "" || epochGravityChainStartHeight == "" {
+		t.Skip("skipping test; some params not set")
+	}
+
+	epochDataHeightInt, err := strconv.ParseUint(epochDataHeight, 10, 64)
 	epochGravityChainStartHeightInt, err := strconv.ParseUint(epochGravityChainStartHeight, 10, 64)
 
 	res, err := svr.GetEpochMeta(&iotexapi.GetEpochMetaRequest{EpochNumber: 1})
