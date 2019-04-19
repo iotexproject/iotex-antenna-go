@@ -4,22 +4,17 @@
 // permitted by law, all liability for your use of the code is disclaimed. This source code is governed by Apache
 // License 2.0 that can be found in the LICENSE file.
 
-package iotx
+package contract
 
-type TransferRequest struct {
-	From     string
-	To       string
-	Value    string
-	Payload  string
-	GasLimit string
-	GasPrice string
-}
-type ContractRequest struct {
-	From   string
-	Amount string
-	// contract bytecode
-	Data     string
-	Abi      string
-	GasLimit string
-	GasPrice string
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
+
+func TestGetFuncHash(t *testing.T) {
+	require := require.New(t)
+	fun := "withdraw(uint256)"
+	ret := GetFuncHash(fun)
+	require.Equal("2e1a7d4d", ret)
 }

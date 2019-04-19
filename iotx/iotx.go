@@ -9,11 +9,15 @@ package iotx
 import (
 	"errors"
 	"fmt"
+
 	"math/big"
 	"strconv"
 
 	"github.com/iotexproject/iotex-antenna-go/account"
+	"github.com/iotexproject/iotex-antenna-go/contract"
 	"github.com/iotexproject/iotex-antenna-go/rpcmethod"
+	"github.com/iotexproject/iotex-core/action"
+	"github.com/iotexproject/iotex-core/pkg/hash"
 	"github.com/iotexproject/iotex-core/pkg/keypair"
 	"github.com/iotexproject/iotex-core/testutil"
 )
@@ -47,7 +51,7 @@ func (this *Iotx) SendTransfer(request *TransferRequest) error {
 	if err != nil {
 		return err
 	}
-	nonce := res.AccountMeta.Nonce
+	nonce := res.AccountMeta.PendingNonce
 	amount, ok := new(big.Int).SetString(request.Value, 10)
 	if !ok {
 		return errors.New(fmt.Sprintf("amount:%s error", request.Value))
@@ -66,7 +70,54 @@ func (this *Iotx) SendTransfer(request *TransferRequest) error {
 	_, err = this.SendAction(finalAction)
 	return err
 }
-func (this *Iotx) DeployContract(request *ContractRequest) error {
-	// TODO
-	return nil
+func (this *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (hash hash.Hash256, err error) {
+	senderPriKey, ok := this.Accounts.GetAccount(req.From)
+	if !ok {
+		err = errors.New("account does not exist")
+		return
+	}
+	conOptions := contract.CustomOptions{}
+	conOptions.From = req.From
+	conOptions.Data = req.Data
+	conOptions.Abi = req.Abi
+	limit, err := strconv.ParseUint(req.GasLimit, 10, 64)
+	if err != nil {
+		return
+	}
+	price, ok := new(big.Int).SetString(req.GasPrice, 10)
+	if !ok {
+		err = errors.New("gas price convert err")
+		return
+	}
+	conOptions.GasLimit = limit
+	conOptions.GasPrice = price
+	contract := contract.NewContract(conOptions)
+	exec, err := contract.Deploy(args...)
+	if err != nil {
+		return
+	}
+	// get account nonce
+	accountReq := &rpcmethod.GetAccountRequest{Address: req.From}
+	res, err := this.GetAccount(accountReq)
+	if err != nil {
+		return
+	}
+	nonce := res.AccountMeta.PendingNonce
+	fmt.Println("deploy:", nonce)
+	priKey, err := keypair.HexStringToPrivateKey(senderPriKey)
+	if err != nil {
+		return
+	}
+	bd := &action.EnvelopeBuilder{}
+	elp := bd.SetNonce(nonce).
+		SetGasPrice(exec.GasPrice()).
+		SetGasLimit(exec.GasLimit()).
+		SetAction(exec).Build()
+	selp, err := action.Sign(elp, priKey)
+	if err != nil {
+		return
+	}
+	request := &rpcmethod.SendActionRequest{Action: selp.Proto()}
+	_, err = this.SendAction(request)
+	return selp.Hash(), nil
 }
