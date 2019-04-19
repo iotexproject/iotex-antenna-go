@@ -8,28 +8,8 @@ jobs:
       - image: circleci/golang:1.11.6
       
     working_directory: ~/go/src/github.com/iotexproject/iotex-antenna-go
-    environment:
-      - GOPATH: "${HOME}/go"
-      - accountPrivateKey: "9cdf22c5caa8a4d99eb674da27756b438c05c6b1e8995f4a0586745e2071b115"
-      - accountAddress: "io14gnqxf9dpkn05g337rl7eyt2nxasphf5m6n0rd"
-      - accountBalance: "99994712164399999990848350"
-      - accountNonce: "1516"
-      - accountPendingNonce: "1517"
-      - accountNumActions: "1"
-      - actionHash: "b9a938e1f249d3c7ab8152e377132989535e25ea9ee376323179d1943dc15b4e"
-      - actionActionInfoLen: "1"
-      - actionActionNonce: "1"
-      - getActionsByAddressActionHash: "10efdacf68be2fa0afdc2a46786b3caf0a59fe2386485a9f075acf2a41c93d78"
-      - blk60801Hash: "560f14e829a4e5ba3f462eda6d919d489dc50a3a1eac6eaa660f2793eefe20b7"
-      - blk60801HashNumActions: "1"
-      - blk60801HashTransferAmount: "0"
-      - getServerMetaPackageCommitID: "58f30cbe2825a42729968ea98fee633a82a7f9f3"
-      - accountAddressUnclaimedBalance: "0"
-      - getReceiptByActionBlkHeight: "0"
-      - epochDataHeight: "1"
-      - epochGravityChainStartHeight: "7581300"
-      - readContractActionHash: "2d8667c6378da99a616c1c435ba34b618e51cb1e9e873f98321b4924c1c06af8"
-      - expectedReadContractActionHash: ""
+#    environment:
+#      - GOPATH: "${HOME}/go"
     steps:
       - checkout
 
