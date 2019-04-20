@@ -9,7 +9,6 @@ package iotx
 import (
 	"errors"
 	"fmt"
-
 	"math/big"
 	"strconv"
 
@@ -76,7 +75,7 @@ func (this *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (has
 		err = errors.New("account does not exist")
 		return
 	}
-	conOptions := contract.CustomOptions{}
+	conOptions := &contract.ContractOptions{}
 	conOptions.From = req.From
 	conOptions.Data = req.Data
 	conOptions.Abi = req.Abi
@@ -91,7 +90,10 @@ func (this *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (has
 	}
 	conOptions.GasLimit = limit
 	conOptions.GasPrice = price
-	contract := contract.NewContract(conOptions)
+	contract, err := contract.NewContract(conOptions)
+	if err != nil {
+		return
+	}
 	exec, err := contract.Deploy(args...)
 	if err != nil {
 		return
@@ -103,7 +105,6 @@ func (this *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (has
 		return
 	}
 	nonce := res.AccountMeta.PendingNonce
-	fmt.Println("deploy:", nonce)
 	priKey, err := keypair.HexStringToPrivateKey(senderPriKey)
 	if err != nil {
 		return

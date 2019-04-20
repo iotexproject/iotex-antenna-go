@@ -8,6 +8,7 @@ package contract
 
 import (
 	"encoding/hex"
+	"errors"
 	"math/big"
 	"strings"
 
@@ -17,7 +18,12 @@ import (
 	"github.com/iotexproject/iotex-core/action"
 )
 
-type CustomOptions struct {
+type Contract interface {
+	ABI() string
+	Address() string
+	Deploy(args ...interface{}) (*action.Execution, error)
+}
+type ContractOptions struct {
 	Address  string
 	Abi      string
 	Data     string
@@ -25,29 +31,36 @@ type CustomOptions struct {
 	GasPrice *big.Int
 	GasLimit uint64
 }
-
 type contractOptions struct {
-	CustomOptions
+	*ContractOptions
 }
-type Contract struct {
-	options contractOptions
+type contract struct {
+	options *contractOptions
 }
 
-func NewContract(options CustomOptions) *Contract {
-	return &Contract{contractOptions{options}}
+func NewContract(options *ContractOptions) (Contract, error) {
+	err := validate(options)
+	if err != nil {
+		return nil, err
+	}
+	return &contract{&contractOptions{options}}, nil
 }
-func (c *Contract) ABI() string {
+
+func (c *contract) ABI() string {
 	return c.options.Abi
 }
-func (c *Contract) Address() string {
+
+func (c *contract) Address() string {
 	return c.options.Address
 }
-func (c *Contract) Deploy(args ...interface{}) (*action.Execution, error) {
+
+// Deploy args is used for this contract's constructor
+func (c *contract) Deploy(args ...interface{}) (*action.Execution, error) {
 	data, err := hex.DecodeString(c.options.Data)
 	if err != nil {
 		return nil, err
 	}
-	arg, err := c.EncodeArguments("", args...)
+	arg, err := c.encodeArguments("", args...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +70,7 @@ func (c *Contract) Deploy(args ...interface{}) (*action.Execution, error) {
 	return execution, err
 }
 
-func (c *Contract) EncodeArguments(method string, args ...interface{}) ([]byte, error) {
+func (c *contract) encodeArguments(method string, args ...interface{}) ([]byte, error) {
 	reader := strings.NewReader(c.options.Abi)
 	abiParam, err := abi.JSON(reader)
 	if err != nil {
@@ -68,4 +81,11 @@ func (c *Contract) EncodeArguments(method string, args ...interface{}) ([]byte, 
 
 func GetFuncHash(fun string) string {
 	return hex.EncodeToString(crypto.Keccak256([]byte(fun))[:4])
+}
+
+func validate(options *ContractOptions) error {
+	if options.Abi == "" || options.Data == "" || options.From == "" {
+		return errors.New("some params is empty")
+	}
+	return nil
 }
