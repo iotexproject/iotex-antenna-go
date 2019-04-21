@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccounts_Create(t *testing.T) {
-	acts := Accounts{}
+	acts := NewAccounts()
 	act, err := acts.Create()
 	assert.NoError(t, err)
 	assert.NotEmpty(t, act.PrivateKey)
@@ -22,7 +22,7 @@ func TestAccounts_Create(t *testing.T) {
 }
 
 func TestAccounts_PrivateKeyToAccount(t *testing.T) {
-	acts := Accounts{}
+	acts := NewAccounts()
 	act, _ := acts.PrivateKeyToAccount(testAcct.PrivateKey)
 	assert.Equal(t, testAcct.Address, act.Address)
 	assert.Equal(t, testAcct.PrivateKey, act.PrivateKey)
