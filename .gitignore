@@ -37,3 +37,4 @@ lint.log
 coverage.txt
 
 vendor/
+.vscode

@@ -25,9 +25,9 @@ func TestTransfer(t *testing.T) {
 	require.NoError(err)
 	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
 	require.NoError(err)
-	require.EqualValues(acc.Address, "io14gnqxf9dpkn05g337rl7eyt2nxasphf5m6n0rd")
+	require.EqualValues(acc.Address, accountAddress)
 
-	req := &TransferRequest{From: accountAddress, To: to, Value: "1000000000000000000", Payload: "", GasLimit: "1000000", GasPrice: "1000000000000"}
+	req := &TransferRequest{From: accountAddress, To: to, Value: "1000000000000000000", Payload: "", GasLimit: "1000000", GasPrice: "1"}
 	hash, err := iotx.SendTransfer(req)
 	require.NoError(err)
 	require.NotEmpty(hash)

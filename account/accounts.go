@@ -15,6 +15,14 @@ type Accounts struct {
 	accounts map[string]Account
 }
 
+// NewAccounts ...
+func NewAccounts() *Accounts {
+	accounts := make(map[string]Account)
+	return &Accounts{
+		accounts: accounts,
+	}
+}
+
 // Create new account
 func (acts *Accounts) Create() (*Account, error) {
 	private, err := keypair.GenerateKey()

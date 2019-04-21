@@ -6,6 +6,7 @@
 
 package iotx
 
+// TransferRequest ...
 type TransferRequest struct {
 	From     string
 	To       string
@@ -14,6 +15,8 @@ type TransferRequest struct {
 	GasLimit string
 	GasPrice string
 }
+
+// ContractRequest ...
 type ContractRequest struct {
 	From   string
 	Amount string
