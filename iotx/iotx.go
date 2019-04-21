@@ -7,15 +7,18 @@
 package iotx
 
 import (
-	"errors"
+	"encoding/hex"
 	"fmt"
 	"math/big"
 	"strconv"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/iotexproject/iotex-antenna-go/account"
 	"github.com/iotexproject/iotex-antenna-go/rpcmethod"
-	"github.com/iotexproject/iotex-core/pkg/keypair"
-	"github.com/iotexproject/iotex-core/testutil"
+	"github.com/iotexproject/iotex-core/action"
+	"github.com/iotexproject/iotex-core/pkg/hash"
+	"github.com/iotexproject/iotex-core/pkg/util/byteutil"
+	"github.com/iotexproject/iotex-core/protogen/iotexapi"
 )
 
 // Iotx
@@ -24,7 +27,8 @@ type Iotx struct {
 	Accounts account.Accounts
 }
 
-func NewIotx(host string) (*Iotx, error) {
+// New new Iotx
+func New(host string) (*Iotx, error) {
 	rpc, err := rpcmethod.NewRPCMethod(host)
 	if err != nil {
 		return nil, err
@@ -32,41 +36,59 @@ func NewIotx(host string) (*Iotx, error) {
 	iotx := &Iotx{rpc, account.Accounts{}}
 	return iotx, nil
 }
-func (this *Iotx) SendTransfer(request *TransferRequest) error {
-	accountPrivateKey, exist := this.Accounts.GetAccount(request.From)
+
+// SendTransfer ...
+func (i *Iotx) SendTransfer(request *TransferRequest) (string, error) {
+	sender, exist := i.Accounts.GetAccount(request.From)
 	if !exist {
-		return errors.New(fmt.Sprintf("account:%s not exist", request.From))
+		return "", fmt.Errorf("account:%s not exist", request.From)
 	}
-	priKey, err := keypair.HexStringToPrivateKey(accountPrivateKey)
-	if err != nil {
-		return err
-	}
+
 	// get account nonce
 	accountReq := &rpcmethod.GetAccountRequest{Address: request.From}
-	res, err := this.GetAccount(accountReq)
+	res, err := i.GetAccount(accountReq)
 	if err != nil {
-		return err
+		return "", err
 	}
 	nonce := res.AccountMeta.Nonce
 	amount, ok := new(big.Int).SetString(request.Value, 10)
 	if !ok {
-		return errors.New(fmt.Sprintf("amount:%s error", request.Value))
+		return "", fmt.Errorf("amount:%s error", request.Value)
 	}
 	gasLimit, err := strconv.ParseUint(request.GasLimit, 10, 64)
 	gasPrice, ok := new(big.Int).SetString(request.GasPrice, 10)
 	if !ok {
-		return errors.New(fmt.Sprintf("gasPrice:%s error", request.GasPrice))
+		return "", fmt.Errorf("gasPrice:%s error", request.GasPrice)
 	}
-	Transfer, err := testutil.SignedTransfer(request.To,
-		priKey, nonce, amount, []byte(request.Payload), gasLimit,
-		gasPrice)
 
-	TransferPb := Transfer.Proto()
-	finalAction := &rpcmethod.SendActionRequest{Action: TransferPb}
-	_, err = this.SendAction(finalAction)
-	return err
+	tx, err := action.NewTransfer(nonce, amount,
+		request.To, []byte(request.Payload), gasLimit, gasPrice)
+	if err != nil {
+		return "", err
+	}
+	bd := &action.EnvelopeBuilder{}
+	elp := bd.SetNonce(nonce).
+		SetGasPrice(gasPrice).
+		SetGasLimit(gasLimit).
+		SetAction(tx).Build()
+
+	return i.sendAction(sender, elp)
 }
-func (this *Iotx) DeployContract(request *ContractRequest) error {
+
+// DeployContract deploy contract
+func (i *Iotx) DeployContract(request *ContractRequest) error {
 	// TODO
 	return nil
+}
+
+func (i *Iotx) sendAction(acc *account.Account, elp action.Envelope) (string, error) {
+	sealed, err := action.Sign(elp, *acc.Private())
+	if err != nil {
+		return "", err
+	}
+	selp := sealed.Proto()
+	request := &iotexapi.SendActionRequest{Action: selp}
+	_, err = i.SendAction(request)
+	shash := hash.Hash256b(byteutil.Must(proto.Marshal(selp)))
+	return hex.EncodeToString(shash[:]), nil
 }

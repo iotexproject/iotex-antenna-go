@@ -14,13 +14,16 @@ import (
 	"github.com/iotexproject/iotex-core/pkg/keypair"
 )
 
+// Account type
 type Account struct {
+	private    *keypair.PrivateKey
 	Address    string
 	PrivateKey string
 	PublicKey  string
 }
 
-func (act Account) Sign(data []byte) ([]byte, error) {
+// Sign by acount private key
+func (act *Account) Sign(data []byte) ([]byte, error) {
 	priv, err := keypair.HexStringToPrivateKey(act.PrivateKey)
 	if err != nil {
 		return nil, err
@@ -29,8 +32,22 @@ func (act Account) Sign(data []byte) ([]byte, error) {
 	return priv.Sign(h[:])
 }
 
-func privateToAccount(private *ecdsa.PrivateKey) (acc Account, err error) {
-	pri, err := keypair.BytesToPrivateKey(private.D.Bytes())
+// Private return keypair private key
+func (act *Account) Private() *keypair.PrivateKey {
+	return act.private
+}
+
+// FromPrivateKey create Account from private key string
+func FromPrivateKey(privateKey string) (*Account, error) {
+	private, err := keypair.HexStringToPrivateKey(privateKey)
+	if err != nil {
+		return nil, err
+	}
+	return privateToAccount(private.EcdsaPrivateKey())
+}
+
+func privateToAccount(privateKey *ecdsa.PrivateKey) (acc *Account, err error) {
+	pri, err := keypair.BytesToPrivateKey(privateKey.D.Bytes())
 	if err != nil {
 		return
 	}
@@ -38,7 +55,8 @@ func privateToAccount(private *ecdsa.PrivateKey) (acc Account, err error) {
 	if err != nil {
 		return
 	}
-	return Account{
+	return &Account{
+		private:    &pri,
 		Address:    addr.String(),
 		PrivateKey: pri.HexString(),
 		PublicKey:  pri.PublicKey().HexString(),

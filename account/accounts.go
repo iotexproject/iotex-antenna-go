@@ -10,46 +10,46 @@ import (
 	"github.com/iotexproject/iotex-core/pkg/keypair"
 )
 
+// Accounts type
 type Accounts struct {
-	acts []Account
+	accounts map[string]Account
 }
 
-func (acts *Accounts) Create() (Account, error) {
+// Create new account
+func (acts *Accounts) Create() (*Account, error) {
 	private, err := keypair.GenerateKey()
 	if err != nil {
-		return Account{}, err
+		return nil, err
 	}
-	return privateToAccount(private.EcdsaPrivateKey())
-}
-func (acts *Accounts) GetAccount(addr string) (string, bool) {
-	for _, acc := range acts.acts {
-		if acc.Address == addr {
-			return acc.PrivateKey, true
-		}
-	}
-	return "", false
-}
-func (acts *Accounts) AddAccount(privateKey string) error {
-	acc, err := acts.PrivateKeyToAccount(privateKey)
+	acc, err := privateToAccount(private.EcdsaPrivateKey())
 	if err != nil {
-		return err
+		return nil, err
 	}
-	_, exist := acts.GetAccount(acc.Address)
-	if !exist {
-		acts.acts = append(acts.acts, acc)
-	}
-	return nil
-}
-func (acts *Accounts) PrivateKeyToAccount(privateKey string) (Account, error) {
-	private, err := keypair.HexStringToPrivateKey(privateKey)
-	if err != nil {
-		return Account{}, nil
-	}
-	return privateToAccount(private.EcdsaPrivateKey())
+	acts.accounts[acc.Address] = *acc
+	return acc, nil
 }
 
+// GetAccount by address
+func (acts *Accounts) GetAccount(addr string) (*Account, bool) {
+	if acc, ok := acts.accounts[addr]; ok {
+		return &acc, true
+	}
+	return nil, false
+}
+
+// PrivateKeyToAccount new Account by privateKey
+func (acts *Accounts) PrivateKeyToAccount(privateKey string) (*Account, error) {
+	acc, err := FromPrivateKey(privateKey)
+	if err != nil {
+		return nil, err
+	}
+	acts.accounts[acc.Address] = *acc
+	return acc, nil
+}
+
+// Sign by accounts
 func (acts *Accounts) Sign(data []byte, privateKey string) ([]byte, error) {
-	act, err := acts.PrivateKeyToAccount(privateKey)
+	act, err := FromPrivateKey(privateKey)
 	if err != nil {
 		return nil, err
 	}

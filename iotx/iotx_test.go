@@ -21,12 +21,14 @@ const (
 
 func TestTransfer(t *testing.T) {
 	require := require.New(t)
-	iotx, err := NewIotx(host)
+	iotx, err := New(host)
 	require.NoError(err)
-	err = iotx.Accounts.AddAccount(accountPrivateKey)
+	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
 	require.NoError(err)
+	require.EqualValues(acc.Address, "io14gnqxf9dpkn05g337rl7eyt2nxasphf5m6n0rd")
 
 	req := &TransferRequest{From: accountAddress, To: to, Value: "1000000000000000000", Payload: "", GasLimit: "1000000", GasPrice: "1000000000000"}
-	err = iotx.SendTransfer(req)
+	hash, err := iotx.SendTransfer(req)
 	require.NoError(err)
+	require.NotEmpty(hash)
 }
