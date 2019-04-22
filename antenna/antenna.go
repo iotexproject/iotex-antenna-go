@@ -11,12 +11,12 @@ import (
 	"github.com/iotexproject/iotex-antenna-go/utils"
 )
 
-// Antenna ...
+// Antenna service main entrance
 type Antenna struct {
 	Iotx *iotx.Iotx
 }
 
-// NewAntenna ...
+// NewAntenna returns Antenna instance
 func NewAntenna(host string) (*Antenna, error) {
 	iotx, err := iotx.New(host)
 	if err != nil {
@@ -27,12 +27,12 @@ func NewAntenna(host string) (*Antenna, error) {
 	return antenna, nil
 }
 
-// FromRau ...
+// FromRau converts Rau string into diffrent unit string
 func FromRau(rau, unit string) string {
 	return utils.FromRau(rau, unit)
 }
 
-// ToRau ...
+// ToRau  converts different unit string into Rau string
 func ToRau(num, unit string) string {
 	return utils.ToRau(num, unit)
 }

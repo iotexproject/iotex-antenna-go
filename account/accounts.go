@@ -15,7 +15,7 @@ type Accounts struct {
 	accounts map[string]Account
 }
 
-// NewAccounts ...
+// NewAccounts return Accounts instance
 func NewAccounts() *Accounts {
 	accounts := make(map[string]Account)
 	return &Accounts{
