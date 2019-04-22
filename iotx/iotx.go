@@ -8,12 +8,14 @@ package iotx
 
 import (
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"math/big"
 	"strconv"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/iotexproject/iotex-antenna-go/account"
+	"github.com/iotexproject/iotex-antenna-go/contract"
 	"github.com/iotexproject/iotex-antenna-go/rpcmethod"
 	"github.com/iotexproject/iotex-antenna-go/utils"
 	"github.com/iotexproject/iotex-core/action"
@@ -79,8 +81,8 @@ func (i *Iotx) normalizeGas(acc *account.Account, elp action.Envelope, gasLimit,
 
 // SendTransfer ...
 func (i *Iotx) SendTransfer(req *TransferRequest) (string, error) {
-	sender, exist := i.Accounts.GetAccount(req.From)
-	if !exist {
+	sender, ok := i.Accounts.GetAccount(req.From)
+	if !ok {
 		return "", fmt.Errorf("account:%s not exist", req.From)
 	}
 
@@ -123,10 +125,58 @@ func (i *Iotx) SendTransfer(req *TransferRequest) (string, error) {
 	return i.sendAction(sender, elp)
 }
 
-// DeployContract deploy contract
-func (i *Iotx) DeployContract(request *ContractRequest) error {
-	// TODO
-	return nil
+// DeployContract ...
+func (i *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (string, error) {
+	sender, ok := i.Accounts.GetAccount(req.From)
+	if !ok {
+		return "", fmt.Errorf("account:%s not exist", req.From)
+	}
+
+	conOptions := &contract.ContractOptions{}
+	conOptions.From = req.From
+	conOptions.Data = req.Data
+	conOptions.Abi = req.Abi
+	limit, err := strconv.ParseUint(req.GasLimit, 10, 64)
+	if err != nil {
+		return "", err
+	}
+	price, ok := new(big.Int).SetString(req.GasPrice, 10)
+	if !ok {
+		return "", errors.New("gas price convert err")
+	}
+	conOptions.GasLimit = limit
+	conOptions.GasPrice = price
+	contract, err := contract.NewContract(conOptions)
+	if err != nil {
+		return "", err
+	}
+	exec, err := contract.Deploy(args...)
+	if err != nil {
+		return "", err
+	}
+	// get account nonce
+	accountReq := &rpcmethod.GetAccountRequest{Address: req.From}
+	res, err := i.GetAccount(accountReq)
+	if err != nil {
+		return "", err
+	}
+	nonce := res.AccountMeta.PendingNonce
+	bd := &action.EnvelopeBuilder{}
+	elp := bd.SetNonce(nonce).
+		SetGasPrice(exec.GasPrice()).
+		SetGasLimit(exec.GasLimit()).
+		SetAction(exec).Build()
+	selp, err := action.Sign(elp, *sender.Private())
+	if err != nil {
+		return "", err
+	}
+	request := &rpcmethod.SendActionRequest{Action: selp.Proto()}
+	_, err = i.SendAction(request)
+	if err != nil {
+		return "", err
+	}
+	shash := hash.Hash256b(byteutil.Must(proto.Marshal(selp.Proto())))
+	return hex.EncodeToString(shash[:]), nil
 }
 
 func (i *Iotx) sendAction(acc *account.Account, elp action.Envelope) (string, error) {

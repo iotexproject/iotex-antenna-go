@@ -6,12 +6,13 @@ require (
 	github.com/btcsuite/btcd v0.0.0-20190213025234-306aecffea32
 	github.com/davecgh/go-spew v1.1.1
 	github.com/deckarep/golang-set v1.7.1
-	github.com/ethereum/go-ethereum v1.8.27 // indirect
+	github.com/ethereum/go-ethereum v1.8.27
 	github.com/facebookgo/clock v0.0.0-20150410010913-600d898af40a
 	github.com/go-stack/stack v1.8.0
 	github.com/golang/protobuf v1.3.1
 	github.com/golang/snappy v0.0.1
 	github.com/google/uuid v1.1.1
+	github.com/iotexproject/iotex-address v0.1.0
 	github.com/iotexproject/iotex-core v0.5.0-rc8
 	github.com/pborman/uuid v0.0.0-20180906182336-adf5a7427709
 	github.com/pkg/errors v0.8.1

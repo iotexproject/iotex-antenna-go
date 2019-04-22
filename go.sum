@@ -38,6 +38,8 @@ github.com/golang/snappy v0.0.1/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEW
 github.com/google/uuid v1.1.1 h1:Gkbcsh/GbpXz7lPftLA3P6TYMwjCLYm83jiFQZF/3gY=
 github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
+github.com/iotexproject/iotex-address v0.1.0 h1:mzhWO/p2SW9dnEAKw0i/Hy+xDhKD5AfMuOh7rtKQGqg=
+github.com/iotexproject/iotex-address v0.1.0/go.mod h1:XX+4C9lYCSG0dt5kzinWbUs0Kq/5OL7Hnu2Stt+4q2E=
 github.com/iotexproject/iotex-core v0.5.0-rc8 h1:wBz0Vrw+UH29xjFLgaOvFzfQD9qLz1nDzbK1ztJF+O8=
 github.com/iotexproject/iotex-core v0.5.0-rc8/go.mod h1:8nEaqyRRzZK6IAH8H/bB/hUCz2jpTsQ0DBuhSm+nBEk=
 github.com/jessevdk/go-flags v0.0.0-20141203071132-1679536dcc89/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
