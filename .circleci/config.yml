@@ -7,7 +7,7 @@ jobs:
     docker:
       - image: circleci/golang:1.11.6
       
-    working_directory: ~/go/src/github.com/iotexproject/iotex-antenna-go
+    working_directory: /go/src/github.com/iotexproject/iotex-antenna-go
 #    environment:
 #      - GOPATH: "${HOME}/go"
     steps:
@@ -16,12 +16,12 @@ jobs:
       - restore_cache:
           key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
           paths:
-              - ~/go/src/github.com/iotexproject/iotex-antenna-go/vendor
+              - /go/src/github.com/iotexproject/iotex-antenna-go/vendor
       - run:
           name: "get vendor"
           command: |
-            export GOPATH=~/go
-            if [ ! -d ~/go/src/github.com/iotexproject/iotex-antenna-go/vendor ]; then
+            export GOPATH=/go
+            if [ ! -d /go/src/github.com/iotexproject/iotex-antenna-go/vendor ]; then
                 dep ensure
             fi
       - run:
@@ -32,11 +32,14 @@ jobs:
       - save_cache:
           key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
           paths:
-              - ~/go/src/github.com/iotexproject/iotex-antenna-go/vendor
+              - /go/src/github.com/iotexproject/iotex-antenna-go/vendor
+      - run: go get golang.org/x/lint/golint
+      - run: golint -set_exit_status $(go list ./... | grep -v /vendor/)
+      - run: go vet $(go list ./... | grep -v /vendor/)
       - run: 
           name: go test
           command: |
-            export GOPATH=~/go
+            export GOPATH=/go
             set -e 
             for d in $(go list ./...|grep -v vendor); do
               go test -short -v -coverprofile=profile.out -covermode=count "$d"

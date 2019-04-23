@@ -126,7 +126,7 @@ func (i *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (string
 		return "", ErrAccountNotExist
 	}
 
-	conOptions := &contract.ContractOptions{}
+	conOptions := &contract.Options{}
 	conOptions.From = req.From
 	conOptions.Data = req.Data
 	conOptions.Abi = req.Abi
