@@ -18,12 +18,15 @@ import (
 	"github.com/iotexproject/iotex-core/action"
 )
 
+// Contract is contract interface
 type Contract interface {
 	ABI() string
 	Address() string
 	Deploy(args ...interface{}) (*action.Execution, error)
 }
-type ContractOptions struct {
+
+// Options for contract
+type Options struct {
 	Address  string
 	Abi      string
 	Data     string
@@ -32,13 +35,14 @@ type ContractOptions struct {
 	GasLimit uint64
 }
 type contractOptions struct {
-	*ContractOptions
+	*Options
 }
 type contract struct {
 	options *contractOptions
 }
 
-func NewContract(options *ContractOptions) (Contract, error) {
+// NewContract return new contract
+func NewContract(options *Options) (Contract, error) {
 	err := validate(options)
 	if err != nil {
 		return nil, err
@@ -79,11 +83,12 @@ func (c *contract) encodeArguments(method string, args ...interface{}) ([]byte, 
 	return abiParam.Pack(method, args...)
 }
 
+// GetFuncHash return func's hash
 func GetFuncHash(fun string) string {
 	return hex.EncodeToString(crypto.Keccak256([]byte(fun))[:4])
 }
 
-func validate(options *ContractOptions) error {
+func validate(options *Options) error {
 	if options.Abi == "" || options.Data == "" || options.From == "" {
 		return errors.New("some params is empty")
 	}
