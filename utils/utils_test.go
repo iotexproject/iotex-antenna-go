@@ -17,7 +17,7 @@ func TestFromRau(t *testing.T) {
 	convert := FromRau("1000", "Jin")
 	require.Equal("1", convert)
 
-	convert = FromRau("1000000000000000000", "Rau")
+	convert = FromRau("1000000000000000000", "Iotx")
 	require.Equal("1", convert)
 }
 func TestToRau(t *testing.T) {

@@ -10,116 +10,116 @@ import (
 	"github.com/iotexproject/iotex-core/protogen/iotexapi"
 )
 
-// GetAccountRequest is alias
+// GetAccountRequest is a type of iotexapi types
 type GetAccountRequest = iotexapi.GetAccountRequest
 
-// GetActionsRequest is alias
+// GetActionsRequest is a type of iotexapi types
 type GetActionsRequest = iotexapi.GetActionsRequest
 
-// GetActionsRequestByHash is alias
+// GetActionsRequestByHash is a type of iotexapi types
 type GetActionsRequestByHash = iotexapi.GetActionsRequest_ByHash
 
-// GetActionByHashRequest is alias
+// GetActionByHashRequest is a type of iotexapi types
 type GetActionByHashRequest = iotexapi.GetActionByHashRequest
 
-// GetActionsRequestByIndex is alias
+// GetActionsRequestByIndex is a type of iotexapi types
 type GetActionsRequestByIndex = iotexapi.GetActionsRequest_ByIndex
 
-// GetActionsByIndexRequest is alias
+// GetActionsByIndexRequest is a type of iotexapi types
 type GetActionsByIndexRequest = iotexapi.GetActionsByIndexRequest
 
-// SendActionRequest is alias
+// SendActionRequest is a type of iotexapi types
 type SendActionRequest = iotexapi.SendActionRequest
 
-// GetActionsRequestByAddr is alias
+// GetActionsRequestByAddr is a type of iotexapi types
 type GetActionsRequestByAddr = iotexapi.GetActionsRequest_ByAddr
 
-// GetActionsByAddressRequest is alias
+// GetActionsByAddressRequest is a type of iotexapi types
 type GetActionsByAddressRequest = iotexapi.GetActionsByAddressRequest
 
-// GetActionsRequestUnconfirmedByAddr is alias
+// GetActionsRequestUnconfirmedByAddr is a type of iotexapi types
 type GetActionsRequestUnconfirmedByAddr = iotexapi.GetActionsRequest_UnconfirmedByAddr
 
-// GetUnconfirmedActionsByAddressRequest is alias
+// GetUnconfirmedActionsByAddressRequest is a type of iotexapi types
 type GetUnconfirmedActionsByAddressRequest = iotexapi.GetUnconfirmedActionsByAddressRequest
 
-// GetActionsRequestByBlk is alias
+// GetActionsRequestByBlk is a type of iotexapi types
 type GetActionsRequestByBlk = iotexapi.GetActionsRequest_ByBlk
 
-// GetActionsByBlockRequest is alias
+// GetActionsByBlockRequest is a type of iotexapi types
 type GetActionsByBlockRequest = iotexapi.GetActionsByBlockRequest
 
-// GetBlockMetasRequest is alias
+// GetBlockMetasRequest is a type of iotexapi types
 type GetBlockMetasRequest = iotexapi.GetBlockMetasRequest
 
-// GetBlockMetasRequestByIndex is alias
+// GetBlockMetasRequestByIndex is a type of iotexapi types
 type GetBlockMetasRequestByIndex = iotexapi.GetBlockMetasRequest_ByIndex
 
-// GetBlockMetasByIndexRequest is alias
+// GetBlockMetasByIndexRequest is a type of iotexapi types
 type GetBlockMetasByIndexRequest = iotexapi.GetBlockMetasByIndexRequest
 
-// GetBlockMetasRequestByHash is alias
+// GetBlockMetasRequestByHash is a type of iotexapi types
 type GetBlockMetasRequestByHash = iotexapi.GetBlockMetasRequest_ByHash
 
-// GetBlockMetaByHashRequest is alias
+// GetBlockMetaByHashRequest is a type of iotexapi types
 type GetBlockMetaByHashRequest = iotexapi.GetBlockMetaByHashRequest
 
-// GetChainMetaRequest is alias
+// GetChainMetaRequest is a type of iotexapi types
 type GetChainMetaRequest = iotexapi.GetChainMetaRequest
 
-// GetServerMetaRequest is alias
+// GetServerMetaRequest is a type of iotexapi types
 type GetServerMetaRequest = iotexapi.GetServerMetaRequest
 
-// ReadStateRequest is alias
+// ReadStateRequest is a type of iotexapi types
 type ReadStateRequest = iotexapi.ReadStateRequest
 
-// GetReceiptByActionRequest is alias
+// GetReceiptByActionRequest is a type of iotexapi types
 type GetReceiptByActionRequest = iotexapi.GetReceiptByActionRequest
 
-// ReadContractRequest is alias
+// ReadContractRequest is a type of iotexapi types
 type ReadContractRequest = iotexapi.ReadContractRequest
 
-// SuggestGasPriceRequest is alias
+// SuggestGasPriceRequest is a type of iotexapi types
 type SuggestGasPriceRequest = iotexapi.SuggestGasPriceRequest
 
-// EstimateGasForActionRequest is alias
+// EstimateGasForActionRequest is a type of iotexapi types
 type EstimateGasForActionRequest = iotexapi.EstimateGasForActionRequest
 
-// GetEpochMetaRequest is alias
+// GetEpochMetaRequest is a type of iotexapi types
 type GetEpochMetaRequest = iotexapi.GetEpochMetaRequest
 
-// GetAccountResponse is alias
+// GetAccountResponse is a type of iotexapi types
 type GetAccountResponse = iotexapi.GetAccountResponse
 
-// GetActionsResponse is alias
+// GetActionsResponse is a type of iotexapi types
 type GetActionsResponse = iotexapi.GetActionsResponse
 
-// GetBlockMetasResponse is alias
+// GetBlockMetasResponse is a type of iotexapi types
 type GetBlockMetasResponse = iotexapi.GetBlockMetasResponse
 
-// GetChainMetaResponse is alias
+// GetChainMetaResponse is a type of iotexapi types
 type GetChainMetaResponse = iotexapi.GetChainMetaResponse
 
-// GetServerMetaResponse is alias
+// GetServerMetaResponse is a type of iotexapi types
 type GetServerMetaResponse = iotexapi.GetServerMetaResponse
 
-// SendActionResponse is alias
+// SendActionResponse is a type of iotexapi types
 type SendActionResponse = iotexapi.SendActionResponse
 
-// GetReceiptByActionResponse is alias
+// GetReceiptByActionResponse is a type of iotexapi types
 type GetReceiptByActionResponse = iotexapi.GetReceiptByActionResponse
 
-// ReadContractResponse is alias
+// ReadContractResponse is a type of iotexapi types
 type ReadContractResponse = iotexapi.ReadContractResponse
 
-// SuggestGasPriceResponse is alias
+// SuggestGasPriceResponse is a type of iotexapi types
 type SuggestGasPriceResponse = iotexapi.SuggestGasPriceResponse
 
-// EstimateGasForActionResponse is alias
+// EstimateGasForActionResponse is a type of iotexapi types
 type EstimateGasForActionResponse = iotexapi.EstimateGasForActionResponse
 
-// GetEpochMetaResponse is alias
+// GetEpochMetaResponse is a type of iotexapi types
 type GetEpochMetaResponse = iotexapi.GetEpochMetaResponse
 
-// ReadStateResponse is alias
+// ReadStateResponse is a type of iotexapi types
 type ReadStateResponse = iotexapi.ReadStateResponse

@@ -25,12 +25,12 @@ const (
 	Iotx = Jin * 1000
 )
 
-// FromRau convert rau to iotx
+// FromRau converts Rau string into diffrent unit string
 func FromRau(rau, unit string) string {
 	return convert(rau, unit, "div")
 }
 
-// ToRau convert iotex to rau
+// ToRau converts different unit string into Rau string
 func ToRau(num, unit string) string {
 	return convert(num, unit, "mul")
 }
@@ -60,7 +60,7 @@ func convert(num, unit, operator string) string {
 }
 func bigOperator(numInt *big.Int, unit int64, operator string) string {
 	if operator == "div" {
-		return numInt.Div(numInt, big.NewInt(Iotx/unit)).Text(10)
+		return numInt.Div(numInt, big.NewInt(unit)).Text(10)
 	}
 	return numInt.Mul(numInt, big.NewInt(unit)).Text(10)
 }
