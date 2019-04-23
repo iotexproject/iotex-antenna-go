@@ -14,17 +14,19 @@ import (
 )
 
 type (
-	// action
-	Action struct {
+	// IotexAction iotextypes Action
+	IotexAction struct {
 		*iotextypes.Action
 	}
-	ActionCore struct {
+
+	// IotexActionCore iotextypes ActionCore
+	IotexActionCore struct {
 		*iotextypes.ActionCore
 	}
 )
 
 // Hash returns the ActionCore's hash
-func (ac *ActionCore) Hash() ([]byte, error) {
+func (ac *IotexActionCore) Hash() ([]byte, error) {
 	msg, err := proto.Marshal(ac.ActionCore)
 	if err != nil {
 		return nil, err
@@ -34,7 +36,7 @@ func (ac *ActionCore) Hash() ([]byte, error) {
 }
 
 // Sign signs the ActionCore
-func (ac *ActionCore) Sign(sk keypair.PrivateKey) (*Action, error) {
+func (ac *IotexActionCore) Sign(sk keypair.PrivateKey) (*IotexAction, error) {
 	h, err := ac.Hash()
 	if err != nil {
 		return nil, err
@@ -43,7 +45,7 @@ func (ac *ActionCore) Sign(sk keypair.PrivateKey) (*Action, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Action{
+	return &IotexAction{
 		Action: &iotextypes.Action{
 			Core:         ac.ActionCore,
 			SenderPubKey: sk.PublicKey().Bytes(),
@@ -53,7 +55,7 @@ func (ac *ActionCore) Sign(sk keypair.PrivateKey) (*Action, error) {
 }
 
 // Hash returns the Action's hash
-func (a *Action) Hash() ([]byte, error) {
+func (a *IotexAction) Hash() ([]byte, error) {
 	msg, err := proto.Marshal(a.Action)
 	if err != nil {
 		return nil, err

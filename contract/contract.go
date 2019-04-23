@@ -47,7 +47,7 @@ func New(address, abi, data string) (*Contract, error) {
 }
 
 // DeployAction returns deploy contract Execution ActionCore
-func (c *Contract) DeployAction(nonce uint64, gasLimit uint64, gasPrice *big.Int, args ...interface{}) (*action.ActionCore, error) {
+func (c *Contract) DeployAction(nonce uint64, gasLimit uint64, gasPrice *big.Int, args ...interface{}) (*action.IotexActionCore, error) {
 	data := c.Data
 	if len(c.Data) == 0 {
 		return nil, errors.New("contract bytecode can not empty for deploy")
@@ -63,7 +63,7 @@ func (c *Contract) DeployAction(nonce uint64, gasLimit uint64, gasPrice *big.Int
 }
 
 // ExecuteAction returns invoke contract Execution ActionCore
-func (c *Contract) ExecuteAction(nonce uint64, gasLimit uint64, gasPrice *big.Int, amount *big.Int, method string, args ...interface{}) (*action.ActionCore, error) {
+func (c *Contract) ExecuteAction(nonce uint64, gasLimit uint64, gasPrice *big.Int, amount *big.Int, method string, args ...interface{}) (*action.IotexActionCore, error) {
 	data, err := c.EncodeArguments(method, args...)
 	if err != nil {
 		return nil, err

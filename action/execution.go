@@ -16,11 +16,11 @@ import (
 // NewExecution return new Execution ActionCore
 func NewExecution(
 	nonce uint64, gasLimit uint64, gasPrice *big.Int, amount *big.Int, contract string, data []byte,
-) (*ActionCore, error) {
+) (*IotexActionCore, error) {
 	if amount.Sign() == -1 || gasPrice.Sign() == -1 {
 		return nil, errors.New("invalid input for NewExecution()")
 	}
-	return &ActionCore{
+	return &IotexActionCore{
 		ActionCore: &iotextypes.ActionCore{
 			Version:  1,
 			Nonce:    nonce,

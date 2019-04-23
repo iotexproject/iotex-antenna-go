@@ -16,11 +16,11 @@ import (
 // NewTransfer return new Transfer ActionCore
 func NewTransfer(
 	nonce uint64, gasLimit uint64, gasPrice *big.Int, amount *big.Int, recipient string, payload string,
-) (*ActionCore, error) {
+) (*IotexActionCore, error) {
 	if amount.Sign() == -1 || gasPrice.Sign() == -1 || recipient == "" {
 		return nil, errors.New("invalid input for NewTransfer()")
 	}
-	return &ActionCore{
+	return &IotexActionCore{
 		ActionCore: &iotextypes.ActionCore{
 			Version:  1,
 			Nonce:    nonce,

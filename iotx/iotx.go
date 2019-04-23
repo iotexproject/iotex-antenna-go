@@ -46,7 +46,7 @@ func New(host string) (*Iotx, error) {
 	return iotx, nil
 }
 
-func (i *Iotx) normalizeGas(acc *account.Account, ac *action.ActionCore, gasLimit, gasPrice string) (uint64, *big.Int, error) {
+func (i *Iotx) normalizeGas(acc *account.Account, ac *action.IotexActionCore, gasLimit, gasPrice string) (uint64, *big.Int, error) {
 	var limit uint64
 	var price *big.Int
 	if gasLimit == "" {
@@ -156,7 +156,7 @@ func (i *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (string
 	return i.sendAction(sender, act)
 }
 
-func (i *Iotx) sendAction(acc *account.Account, ta *action.ActionCore) (string, error) {
+func (i *Iotx) sendAction(acc *account.Account, ta *action.IotexActionCore) (string, error) {
 	sealed, err := ta.Sign(*acc.Private())
 	if err != nil {
 		return "", err
