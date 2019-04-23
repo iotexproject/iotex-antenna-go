@@ -63,3 +63,50 @@ func TestDeployContract(t *testing.T) {
 	require.NoError(err)
 	require.NotNil(hash)
 }
+
+func TestReadContract(t *testing.T) {
+	require := require.New(t)
+	iotx, err := New(host)
+	require.NoError(err)
+	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
+	require.NoError(err)
+	require.EqualValues(acc.Address, accountAddress)
+
+	req := &ContractRequest{
+		From:     accountAddress,
+		Address:  "io17sn486alutrnzlrdz9vv44g7qyc38hygf7s6h0",
+		Abi:      `[{"constant":false,"inputs":[{"name":"x","type":"uint256"}],"name":"set","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"get","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_x","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]`,
+		Method:   "get",
+		GasLimit: "1000000",
+		GasPrice: "1",
+	}
+
+	result, err := iotx.ReadContractByMethod(req)
+
+	require.NoError(err)
+	require.NotNil(result)
+}
+
+func TestExecuteContract(t *testing.T) {
+	require := require.New(t)
+	iotx, err := New(host)
+	require.NoError(err)
+	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
+	require.NoError(err)
+	require.NotNil(acc)
+
+	req := &ContractRequest{
+		From:     accountAddress,
+		Address:  "io17sn486alutrnzlrdz9vv44g7qyc38hygf7s6h0",
+		Abi:      `[{"constant":false,"inputs":[{"name":"x","type":"uint256"}],"name":"set","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"get","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_x","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]`,
+		Method:   "set",
+		Amount:   "0",
+		GasLimit: "1000000",
+		GasPrice: "1",
+	}
+
+	result, err := iotx.ExecuteContract(req, big.NewInt(8))
+
+	require.NoError(err)
+	require.NotNil(result)
+}

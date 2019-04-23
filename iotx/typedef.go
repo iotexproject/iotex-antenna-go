@@ -18,8 +18,12 @@ type TransferRequest struct {
 
 // ContractRequest defines contract request parameters
 type ContractRequest struct {
-	From   string
-	Amount string
+	// contract address
+	Address string
+	From    string
+	Amount  string
+	// for execute method
+	Method string
 	// contract bytecode
 	Data     string
 	Abi      string

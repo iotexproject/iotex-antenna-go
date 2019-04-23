@@ -7,6 +7,7 @@
 package iotx
 
 import (
+	"errors"
 	"fmt"
 	"math/big"
 	"strconv"
@@ -24,9 +25,9 @@ import (
 // Error strings
 var (
 	// ErrAccountNotExist indicates error for not exist account
-	ErrAccountNotExist = fmt.Errorf("no config matchs")
+	ErrAccountNotExist = fmt.Errorf("account not exist")
 	// ErrAmount indicates error for error amount convert
-	ErrAmount = fmt.Errorf("no endpoint has been set")
+	ErrAmount = fmt.Errorf("error amount")
 )
 
 // Iotx service RPCMethod and Accounts
@@ -134,7 +135,7 @@ func (i *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (string
 	}
 	nonce := res.AccountMeta.PendingNonce
 
-	ctr, err := contract.New(req.Abi, req.Data)
+	ctr, err := contract.New("", req.Abi, req.Data)
 	if err != nil {
 		return "", err
 	}
@@ -166,4 +167,104 @@ func (i *Iotx) sendAction(acc *account.Account, ta *action.ActionCore) (string, 
 		return "", err
 	}
 	return response.ActionHash, nil
+}
+
+// ExecuteContract returns execute contract method action hash
+func (i *Iotx) ExecuteContract(req *ContractRequest, args ...interface{}) (string, error) {
+	if req.Address == "" || req.Method == "" {
+		return "", errors.New("contract address and method can not empty")
+	}
+
+	amount, ok := big.NewInt(0).SetString(req.Amount, 10)
+	if !ok {
+		return "", ErrAmount
+	}
+
+	sender, ok := i.Accounts.GetAccount(req.From)
+	if !ok {
+		return "", ErrAccountNotExist
+	}
+
+	// get account nonce
+	accountReq := &rpc.GetAccountRequest{Address: req.From}
+	res, err := i.GetAccount(accountReq)
+	if err != nil {
+		return "", err
+	}
+	nonce := res.AccountMeta.PendingNonce
+
+	ctr, err := contract.New(req.Address, req.Abi, req.Data)
+	if err != nil {
+		return "", err
+	}
+
+	act, err := ctr.ExecuteAction(nonce, 0, big.NewInt(0), amount, req.Method, args...)
+	if err != nil {
+		return "", err
+	}
+	gasLimit, gasPrice, err := i.normalizeGas(sender, act, req.GasLimit, req.GasPrice)
+	if err != nil {
+		return "", err
+	}
+
+	act, err = ctr.ExecuteAction(nonce, gasLimit, gasPrice, amount, req.Method, args...)
+	if err != nil {
+		return "", err
+	}
+	return i.sendAction(sender, act)
+}
+
+// ReadContractByHash returns execute contract method result by action hash
+func (i *Iotx) ReadContractByHash(hash string) (string, error) {
+	return "nil", nil
+}
+
+// ReadContractByMethod returns execute contract view method result
+func (i *Iotx) ReadContractByMethod(req *ContractRequest, args ...interface{}) (string, error) {
+	if req.Address == "" || req.Method == "" {
+		return "", errors.New("contract address and method can not empty")
+	}
+
+	sender, ok := i.Accounts.GetAccount(req.From)
+	if !ok {
+		return "", ErrAccountNotExist
+	}
+
+	// get account nonce
+	accountReq := &rpc.GetAccountRequest{Address: req.From}
+	res, err := i.GetAccount(accountReq)
+	if err != nil {
+		return "", err
+	}
+	nonce := res.AccountMeta.PendingNonce
+
+	ctr, err := contract.New(req.Address, req.Abi, req.Data)
+	if err != nil {
+		return "", err
+	}
+
+	act, err := ctr.ExecuteAction(nonce, 0, big.NewInt(0), big.NewInt(0), req.Method, args...)
+	if err != nil {
+		return "", err
+	}
+	gasLimit, gasPrice, err := i.normalizeGas(sender, act, req.GasLimit, req.GasPrice)
+	if err != nil {
+		return "", err
+	}
+
+	act, err = ctr.ExecuteAction(nonce, gasLimit, gasPrice, big.NewInt(0), req.Method, args...)
+	if err != nil {
+		return "", err
+	}
+	sealed, err := act.Sign(*sender.Private())
+	if err != nil {
+		return "", err
+	}
+	request := &iotexapi.ReadContractRequest{Action: sealed.Action}
+	response, err := i.ReadContract(request)
+	if err != nil {
+		return "", err
+	}
+
+	return response.Data, nil
 }
