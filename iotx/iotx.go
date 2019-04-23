@@ -13,11 +13,11 @@ import (
 	"strconv"
 
 	"github.com/iotexproject/iotex-antenna-go/contract"
+	"github.com/iotexproject/iotex-antenna-go/rpcmethod"
 
 	"github.com/iotexproject/iotex-antenna-go/action"
 
 	"github.com/iotexproject/iotex-antenna-go/account"
-	"github.com/iotexproject/iotex-antenna-go/rpc"
 	"github.com/iotexproject/iotex-antenna-go/utils"
 	"github.com/iotexproject/iotex-core/protogen/iotexapi"
 )
@@ -32,13 +32,13 @@ var (
 
 // Iotx service RPCMethod and Accounts
 type Iotx struct {
-	*rpc.RPCMethod
+	*rpcmethod.RPCMethod
 	Accounts *account.Accounts
 }
 
 // New return Iotx instance
 func New(host string) (*Iotx, error) {
-	rpc, err := rpc.NewRPCMethod(host)
+	rpc, err := rpcmethod.NewRPCMethod(host)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (i *Iotx) SendTransfer(req *TransferRequest) (string, error) {
 	}
 
 	// get account nonce
-	accountReq := &rpc.GetAccountRequest{Address: req.From}
+	accountReq := &rpcmethod.GetAccountRequest{Address: req.From}
 	res, err := i.GetAccount(accountReq)
 	if err != nil {
 		return "", err
@@ -128,7 +128,7 @@ func (i *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (string
 	}
 
 	// get account nonce
-	accountReq := &rpc.GetAccountRequest{Address: req.From}
+	accountReq := &rpcmethod.GetAccountRequest{Address: req.From}
 	res, err := i.GetAccount(accountReq)
 	if err != nil {
 		return "", err
@@ -186,7 +186,7 @@ func (i *Iotx) ExecuteContract(req *ContractRequest, args ...interface{}) (strin
 	}
 
 	// get account nonce
-	accountReq := &rpc.GetAccountRequest{Address: req.From}
+	accountReq := &rpcmethod.GetAccountRequest{Address: req.From}
 	res, err := i.GetAccount(accountReq)
 	if err != nil {
 		return "", err
@@ -247,7 +247,7 @@ func (i *Iotx) ReadContractByMethod(req *ContractRequest, args ...interface{}) (
 	}
 
 	// get account nonce
-	accountReq := &rpc.GetAccountRequest{Address: req.From}
+	accountReq := &rpcmethod.GetAccountRequest{Address: req.From}
 	res, err := i.GetAccount(accountReq)
 	if err != nil {
 		return "", err

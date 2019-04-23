@@ -14,10 +14,10 @@ import (
 
 func TestFromRau(t *testing.T) {
 	require := require.New(t)
-	convert := FromRau("1000", "Jin")
+	convert := FromRau("1000", "KRau")
 	require.Equal("1", convert)
 
-	convert = FromRau("1000000000000000000", "Rau")
+	convert = FromRau("1000000000000000000", "Iotx")
 	require.Equal("1", convert)
 }
 func TestToRau(t *testing.T) {
