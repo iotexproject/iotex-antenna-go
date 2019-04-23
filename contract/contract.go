@@ -9,29 +9,41 @@ package contract
 import (
 	"encoding/hex"
 	"errors"
-	"math/big"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/iotexproject/iotex-antenna-go/action"
 )
 
-// Contract defines contract
-type Contract struct {
-	// contract address
-	Address string
+// Contract defines contract interface
+type Contract interface {
+	// Address returns contract address
+	Address() string
 
-	// contract abi for invoke contract
-	ABI string
+	// ABI returns contract abi
+	ABI() string
 
-	// contract bytecode for deploy
-	Data []byte
+	// DeployData returns deploy contract Execution packed data
+	DeployData(args ...interface{}) ([]byte, error)
+
+	// ExecuteData returns invoke contract Execution packed data
+	ExecuteData(method string, args ...interface{}) ([]byte, error)
 }
 
-// New construct Contract instrance
-func New(address, abi, data string) (*Contract, error) {
+type contract struct {
+	// contract address
+	address string
+
+	// contract abi for invoke contract
+	abi string
+
+	// contract bytecode for deploy
+	data []byte
+}
+
+// NewContract returns construct Contract instance
+func NewContract(address, abi, data string) (Contract, error) {
 	if len(abi) == 0 {
 		return nil, errors.New("must set contract abi")
 	}
@@ -39,17 +51,27 @@ func New(address, abi, data string) (*Contract, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Contract{
-		Address: address,
-		ABI:     abi,
-		Data:    dataBytes,
+	return &contract{
+		address: address,
+		abi:     abi,
+		data:    dataBytes,
 	}, nil
 }
 
+// Address returns contract address
+func (c *contract) Address() string {
+	return c.address
+}
+
+// ABI returns contract abi
+func (c *contract) ABI() string {
+	return c.abi
+}
+
 // DeployAction returns deploy contract Execution ActionCore
-func (c *Contract) DeployAction(nonce uint64, gasLimit uint64, gasPrice *big.Int, args ...interface{}) (*action.IotexActionCore, error) {
-	data := c.Data
-	if len(c.Data) == 0 {
+func (c *contract) DeployData(args ...interface{}) ([]byte, error) {
+	data := c.data
+	if len(c.data) == 0 {
 		return nil, errors.New("contract bytecode can not empty for deploy")
 	}
 	if len(args) > 0 {
@@ -59,21 +81,17 @@ func (c *Contract) DeployAction(nonce uint64, gasLimit uint64, gasPrice *big.Int
 		}
 		data = append(data, ab...)
 	}
-	return action.NewExecution(nonce, gasLimit, gasPrice, big.NewInt(0), "", data)
+	return data, nil
 }
 
-// ExecuteAction returns invoke contract Execution ActionCore
-func (c *Contract) ExecuteAction(nonce uint64, gasLimit uint64, gasPrice *big.Int, amount *big.Int, method string, args ...interface{}) (*action.IotexActionCore, error) {
-	data, err := c.EncodeArguments(method, args...)
-	if err != nil {
-		return nil, err
-	}
-	return action.NewExecution(nonce, gasLimit, gasPrice, amount, c.Address, data)
+// ExecuteData returns invoke contract Execution ActionCore
+func (c *contract) ExecuteData(method string, args ...interface{}) ([]byte, error) {
+	return c.EncodeArguments(method, args...)
 }
 
 // EncodeArguments encode method arguments to bytes.
-func (c *Contract) EncodeArguments(method string, args ...interface{}) ([]byte, error) {
-	reader := strings.NewReader(c.ABI)
+func (c *contract) EncodeArguments(method string, args ...interface{}) ([]byte, error) {
+	reader := strings.NewReader(c.abi)
 	abiParam, err := abi.JSON(reader)
 	if err != nil {
 		return nil, err

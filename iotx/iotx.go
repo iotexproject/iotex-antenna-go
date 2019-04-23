@@ -135,12 +135,16 @@ func (i *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (string
 	}
 	nonce := res.AccountMeta.PendingNonce
 
-	ctr, err := contract.New("", req.Abi, req.Data)
+	ctr, err := contract.NewContract("", req.Abi, req.Data)
 	if err != nil {
 		return "", err
 	}
 
-	act, err := ctr.DeployAction(nonce, 0, big.NewInt(0), args...)
+	actData, err := ctr.DeployData(args...)
+	if err != nil {
+		return "", err
+	}
+	act, err := action.NewExecution(nonce, 0, big.NewInt(0), big.NewInt(0), "", actData)
 	if err != nil {
 		return "", err
 	}
@@ -149,7 +153,7 @@ func (i *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (string
 		return "", err
 	}
 
-	act, err = ctr.DeployAction(nonce, gasLimit, gasPrice, args...)
+	act, err = action.NewExecution(nonce, gasLimit, gasPrice, big.NewInt(0), "", actData)
 	if err != nil {
 		return "", err
 	}
@@ -193,12 +197,16 @@ func (i *Iotx) ExecuteContract(req *ContractRequest, args ...interface{}) (strin
 	}
 	nonce := res.AccountMeta.PendingNonce
 
-	ctr, err := contract.New(req.Address, req.Abi, req.Data)
+	ctr, err := contract.NewContract(req.Address, req.Abi, req.Data)
 	if err != nil {
 		return "", err
 	}
 
-	act, err := ctr.ExecuteAction(nonce, 0, big.NewInt(0), amount, req.Method, args...)
+	actData, err := ctr.ExecuteData(req.Method, args...)
+	if err != nil {
+		return "", err
+	}
+	act, err := action.NewExecution(nonce, 0, big.NewInt(0), amount, req.Address, actData)
 	if err != nil {
 		return "", err
 	}
@@ -207,7 +215,7 @@ func (i *Iotx) ExecuteContract(req *ContractRequest, args ...interface{}) (strin
 		return "", err
 	}
 
-	act, err = ctr.ExecuteAction(nonce, gasLimit, gasPrice, amount, req.Method, args...)
+	act, err = action.NewExecution(nonce, gasLimit, gasPrice, amount, req.Address, actData)
 	if err != nil {
 		return "", err
 	}
@@ -254,12 +262,16 @@ func (i *Iotx) ReadContractByMethod(req *ContractRequest, args ...interface{}) (
 	}
 	nonce := res.AccountMeta.PendingNonce
 
-	ctr, err := contract.New(req.Address, req.Abi, req.Data)
+	ctr, err := contract.NewContract(req.Address, req.Abi, req.Data)
 	if err != nil {
 		return "", err
 	}
 
-	act, err := ctr.ExecuteAction(nonce, 0, big.NewInt(0), big.NewInt(0), req.Method, args...)
+	actData, err := ctr.ExecuteData(req.Method, args...)
+	if err != nil {
+		return "", err
+	}
+	act, err := action.NewExecution(nonce, 0, big.NewInt(0), big.NewInt(0), req.Address, actData)
 	if err != nil {
 		return "", err
 	}
@@ -268,7 +280,7 @@ func (i *Iotx) ReadContractByMethod(req *ContractRequest, args ...interface{}) (
 		return "", err
 	}
 
-	act, err = ctr.ExecuteAction(nonce, gasLimit, gasPrice, big.NewInt(0), req.Method, args...)
+	act, err = action.NewExecution(nonce, gasLimit, gasPrice, big.NewInt(0), req.Address, actData)
 	if err != nil {
 		return "", err
 	}
