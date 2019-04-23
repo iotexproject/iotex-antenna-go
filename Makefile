@@ -10,6 +10,8 @@ BINARY_UNIX=$(BINARY_NAME)_unix
 all: test build
 build:
 	$(GOBUILD) -o $(BINARY_NAME) -v
+fmt:
+	$(GOCMD) fmt ./...
 test:
 	$(GOTEST) -v ./...
 clean:

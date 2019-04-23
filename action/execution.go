@@ -1,0 +1,38 @@
+// Copyright (c) 2019 IoTeX
+// This is an alpha (internal) release and is not suitable for production. This source code is provided 'as is' and no
+// warranties are given as to title or non-infringement, merchantability or fitness for purpose and, to the extent
+// permitted by law, all liability for your use of the code is disclaimed. This source code is governed by Apache
+// License 2.0 that can be found in the LICENSE file.
+
+package action
+
+import (
+	"math/big"
+
+	"github.com/iotexproject/iotex-core/protogen/iotextypes"
+	"github.com/pkg/errors"
+)
+
+// NewExecution return new Execution ActionCore
+func NewExecution(
+	nonce uint64, gasLimit uint64, gasPrice *big.Int, amount *big.Int, contract string, data []byte,
+) (*ActionCore, error) {
+	if amount.Sign() == -1 || gasPrice.Sign() == -1 {
+		return nil, errors.New("invalid input for NewExecution()")
+	}
+	return &ActionCore{
+		ActionCore: &iotextypes.ActionCore{
+			Version:  1,
+			Nonce:    nonce,
+			GasLimit: gasLimit,
+			GasPrice: gasPrice.String(),
+			Action: &iotextypes.ActionCore_Execution{
+				Execution: &iotextypes.Execution{
+					Amount:   amount.String(),
+					Contract: contract,
+					Data:     data,
+				},
+			},
+		},
+	}, nil
+}

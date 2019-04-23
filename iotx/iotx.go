@@ -14,7 +14,7 @@ import (
 
 	"github.com/iotexproject/iotex-antenna-go/account"
 	"github.com/iotexproject/iotex-antenna-go/contract"
-	"github.com/iotexproject/iotex-antenna-go/rpcmethod"
+	"github.com/iotexproject/iotex-antenna-go/rpc"
 	"github.com/iotexproject/iotex-antenna-go/utils"
 	"github.com/iotexproject/iotex-core/action"
 	"github.com/iotexproject/iotex-core/protogen/iotexapi"
@@ -30,13 +30,13 @@ var (
 
 // Iotx service RPCMethod and Accounts
 type Iotx struct {
-	*rpcmethod.RPCMethod
+	*rpc.RPCMethod
 	Accounts *account.Accounts
 }
 
 // New return Iotx instance
 func New(host string) (*Iotx, error) {
-	rpc, err := rpcmethod.NewRPCMethod(host)
+	rpc, err := rpc.NewRPCMethod(host)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (i *Iotx) SendTransfer(req *TransferRequest) (string, error) {
 	}
 
 	// get account nonce
-	accountReq := &rpcmethod.GetAccountRequest{Address: req.From}
+	accountReq := &rpc.GetAccountRequest{Address: req.From}
 	res, err := i.GetAccount(accountReq)
 	if err != nil {
 		return "", err
@@ -149,7 +149,7 @@ func (i *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (string
 		return "", err
 	}
 	// get account nonce
-	accountReq := &rpcmethod.GetAccountRequest{Address: req.From}
+	accountReq := &rpc.GetAccountRequest{Address: req.From}
 	res, err := i.GetAccount(accountReq)
 	if err != nil {
 		return "", err
@@ -164,7 +164,7 @@ func (i *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (string
 	if err != nil {
 		return "", err
 	}
-	request := &rpcmethod.SendActionRequest{Action: selp.Proto()}
+	request := &rpc.SendActionRequest{Action: selp.Proto()}
 	response, err := i.SendAction(request)
 	if err != nil {
 		return "", err
