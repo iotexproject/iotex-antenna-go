@@ -134,7 +134,7 @@ func (i *Iotx) DeployContract(req *ContractRequest) (string, error) {
 	}
 	nonce := res.AccountMeta.PendingNonce
 
-	act, err := contract.DeployAction(nonce, 0, big.NewInt(0), []byte(req.Data))
+	act, err := contract.DeployAction(nonce, 0, big.NewInt(0), req.Data)
 	if err != nil {
 		return "", err
 	}
@@ -143,7 +143,7 @@ func (i *Iotx) DeployContract(req *ContractRequest) (string, error) {
 		return "", err
 	}
 
-	act, err = contract.DeployAction(nonce, gasLimit, gasPrice, []byte(req.Data))
+	act, err = contract.DeployAction(nonce, gasLimit, gasPrice, req.Data)
 	if err != nil {
 		return "", err
 	}

@@ -21,8 +21,12 @@ type Contract struct {
 }
 
 // DeployAction returns deploy contract Execution ActionCore
-func DeployAction(nonce uint64, gasLimit uint64, gasPrice *big.Int, data []byte) (*action.ActionCore, error) {
-	return action.NewExecution(nonce, gasLimit, gasPrice, big.NewInt(0), "", data)
+func DeployAction(nonce uint64, gasLimit uint64, gasPrice *big.Int, data string) (*action.ActionCore, error) {
+	dataBytes, err := hex.DecodeString(data)
+	if err != nil {
+		return nil, err
+	}
+	return action.NewExecution(nonce, gasLimit, gasPrice, big.NewInt(0), "", dataBytes)
 }
 
 /*
@@ -80,7 +84,7 @@ func validate(options *ContractOptions) error {
 
 */
 
-// GetFuncHash returns contract method hash
+// GetFuncHash returns contract method
 func GetFuncHash(fun string) string {
 	return hex.EncodeToString(crypto.Keccak256([]byte(fun))[:4])
 }
