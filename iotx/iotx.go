@@ -120,7 +120,7 @@ func (i *Iotx) SendTransfer(req *TransferRequest) (string, error) {
 }
 
 // DeployContract invoke execution action for deploy contract
-func (i *Iotx) DeployContract(req *ContractRequest) (string, error) {
+func (i *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (string, error) {
 	sender, ok := i.Accounts.GetAccount(req.From)
 	if !ok {
 		return "", ErrAccountNotExist
@@ -134,7 +134,12 @@ func (i *Iotx) DeployContract(req *ContractRequest) (string, error) {
 	}
 	nonce := res.AccountMeta.PendingNonce
 
-	act, err := contract.DeployAction(nonce, 0, big.NewInt(0), req.Data)
+	ctr, err := contract.New(req.Abi, req.Data)
+	if err != nil {
+		return "", err
+	}
+
+	act, err := ctr.DeployAction(nonce, 0, big.NewInt(0), args...)
 	if err != nil {
 		return "", err
 	}
@@ -143,7 +148,7 @@ func (i *Iotx) DeployContract(req *ContractRequest) (string, error) {
 		return "", err
 	}
 
-	act, err = contract.DeployAction(nonce, gasLimit, gasPrice, req.Data)
+	act, err = ctr.DeployAction(nonce, gasLimit, gasPrice, args...)
 	if err != nil {
 		return "", err
 	}
