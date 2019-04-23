@@ -16,16 +16,16 @@ import (
 func TestTransfer(t *testing.T) {
 	require := require.New(t)
 
-	tsf, err := NewTransfer(1, 100, big.NewInt(-1), big.NewInt(10), "test", nil)
+	tsf, err := NewTransfer(1, 100, big.NewInt(-1), big.NewInt(10), "test", "")
 	require.Error(err)
 	require.Nil(tsf)
-	tsf, err = NewTransfer(1, 100, big.NewInt(1), big.NewInt(-10), "test", nil)
+	tsf, err = NewTransfer(1, 100, big.NewInt(1), big.NewInt(-10), "test", "")
 	require.Error(err)
 	require.Nil(tsf)
-	tsf, err = NewTransfer(1, 100, big.NewInt(1), big.NewInt(10), "", nil)
+	tsf, err = NewTransfer(1, 100, big.NewInt(1), big.NewInt(10), "", "")
 	require.Error(err)
 	require.Nil(tsf)
-	tsf, err = NewTransfer(1, 100, big.NewInt(1), big.NewInt(10), "test", nil)
+	tsf, err = NewTransfer(1, 100, big.NewInt(1), big.NewInt(10), "test", "")
 	require.NoError(err)
 	require.NotNil(tsf)
 }
