@@ -110,3 +110,13 @@ func TestExecuteContract(t *testing.T) {
 	require.NoError(err)
 	require.NotNil(result)
 }
+
+func TestReadContractByHash(t *testing.T) {
+	require := require.New(t)
+	iotx, err := New(host)
+	require.NoError(err)
+
+	result, err := iotx.ReadContractByHash("6605c15d717b48613a80be1fe38ec60cc7cc38453fa390284d98a79083752dca")
+	require.NoError(err)
+	require.NotNil(result)
+}

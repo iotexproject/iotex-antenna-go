@@ -216,7 +216,23 @@ func (i *Iotx) ExecuteContract(req *ContractRequest, args ...interface{}) (strin
 
 // ReadContractByHash returns execute contract method result by action hash
 func (i *Iotx) ReadContractByHash(hash string) (string, error) {
-	return "nil", nil
+	actionResponse, err := i.GetActions(&iotexapi.GetActionsRequest{Lookup: &iotexapi.GetActionsRequest_ByHash{
+		ByHash: &iotexapi.GetActionByHashRequest{
+			ActionHash:   hash,
+			CheckPending: true,
+		},
+	}})
+	if err != nil {
+		return "", err
+	}
+
+	request := &iotexapi.ReadContractRequest{Action: actionResponse.ActionInfo[0].Action}
+	response, err := i.ReadContract(request)
+	if err != nil {
+		return "", err
+	}
+
+	return response.Data, nil
 }
 
 // ReadContractByMethod returns execute contract view method result
