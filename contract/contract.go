@@ -8,36 +8,24 @@ package contract
 
 import (
 	"encoding/hex"
-	"errors"
 	"math/big"
-	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/crypto"
-
-	"github.com/iotexproject/iotex-core/action"
+	"github.com/iotexproject/iotex-antenna-go/action"
 )
 
-type Contract interface {
-	ABI() string
-	Address() string
-	Deploy(args ...interface{}) (*action.Execution, error)
-}
-type ContractOptions struct {
-	Address  string
-	Abi      string
-	Data     string
-	From     string
-	GasPrice *big.Int
-	GasLimit uint64
-}
-type contractOptions struct {
-	*ContractOptions
-}
-type contract struct {
-	options *contractOptions
+// Contract defines contract
+type Contract struct {
+	// contract abi for invoke contract
+	ABI string
 }
 
+// DeployAction returns deploy contract Execution ActionCore
+func DeployAction(nonce uint64, gasLimit uint64, gasPrice *big.Int, data []byte) (*action.ActionCore, error) {
+	return action.NewExecution(nonce, gasLimit, gasPrice, big.NewInt(0), "", data)
+}
+
+/*
 func NewContract(options *ContractOptions) (Contract, error) {
 	err := validate(options)
 	if err != nil {
@@ -71,7 +59,7 @@ func (c *contract) Deploy(args ...interface{}) (*action.Execution, error) {
 }
 
 func (c *contract) encodeArguments(method string, args ...interface{}) ([]byte, error) {
-	reader := strings.NewReader(c.options.Abi)
+	reader := strings.NewReader(c.ContractOptions.Abi)
 	abiParam, err := abi.JSON(reader)
 	if err != nil {
 		return nil, err
@@ -88,4 +76,11 @@ func validate(options *ContractOptions) error {
 		return errors.New("some params is empty")
 	}
 	return nil
+}
+
+*/
+
+// GetFuncHash returns contract method hash
+func GetFuncHash(fun string) string {
+	return hex.EncodeToString(crypto.Keccak256([]byte(fun))[:4])
 }

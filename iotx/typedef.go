@@ -6,12 +6,6 @@
 
 package iotx
 
-import (
-	"math/big"
-
-	"github.com/iotexproject/iotex-core/action"
-)
-
 // TransferRequest defines transfer request parameters
 type TransferRequest struct {
 	From     string
@@ -31,24 +25,4 @@ type ContractRequest struct {
 	Abi      string
 	GasLimit string
 	GasPrice string
-}
-
-// NewTransferEnvelop return action envelop
-func NewTransferEnvelop(
-	nonce uint64,
-	amount *big.Int,
-	recipient string,
-	payload string,
-	gasLimit uint64,
-	gasPrice *big.Int) (action.Envelope, error) {
-	tx, err := action.NewTransfer(nonce, amount,
-		recipient, []byte(payload), gasLimit, gasPrice)
-	if err != nil {
-		return action.Envelope{}, err
-	}
-	bd := &action.EnvelopeBuilder{}
-	return bd.SetNonce(nonce).
-		SetGasPrice(gasPrice).
-		SetGasLimit(gasLimit).
-		SetAction(tx).Build(), nil
 }
