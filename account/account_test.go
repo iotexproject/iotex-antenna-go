@@ -8,7 +8,6 @@ package account
 
 import (
 	"encoding/hex"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,11 +15,11 @@ import (
 	"github.com/iotexproject/iotex-core/pkg/hash"
 )
 
-var testAcct = Account{
-	Address:    "io187wzp08vnhjjpkydnr97qlh8kh0dpkkytfam8j",
-	PrivateKey: "0806c458b262edd333a191e92f561aff338211ee3e18ab315a074a2d82aa343f",
-	PublicKey:  "044e18306ae9ef4ec9d07bf6e705442d4d1a75e6cdf750330ca2d880f2cc54607c9c33deb9eae9c06e06e04fe9ce3d43962cc67d5aa34fbeb71270d4bad3d648d9",
-}
+var (
+	Address =    "io187wzp08vnhjjpkydnr97qlh8kh0dpkkytfam8j"
+	PrivateKey = "0806c458b262edd333a191e92f561aff338211ee3e18ab315a074a2d82aa343f"
+	PublicKey =  "044e18306ae9ef4ec9d07bf6e705442d4d1a75e6cdf750330ca2d880f2cc54607c9c33deb9eae9c06e06e04fe9ce3d43962cc67d5aa34fbeb71270d4bad3d648d9"
+)
 
 const text = "IoTeX is the auto-scalable and privacy-centric blockchain."
 
@@ -34,11 +33,20 @@ func TestHash256b(t *testing.T) {
 	assert.Equal(t, "aada23f93a5ed1829ebf1c0693988dc3d2d879f703c7d3f54dcc1b473b27d015", hex.EncodeToString(h[:]))
 }
 
-func TestAccount_Sign(t *testing.T) {
-	b, err := testAcct.Sign([]byte(text))
-	assert.NoError(t, err)
-	assert.Equal(t,
+func TestAccount(t *testing.T) {
+	assert := assert.New(t)
+
+	act, err := NewAccountFromPrivateKey(PrivateKey)
+	assert.NoError(err)
+	assert.Equal(Address, act.Address())
+	assert.Equal(PublicKey, act.PrivateKey().PublicKey().HexString())
+
+	b, err := act.Sign([]byte(text))
+	assert.NoError(err)
+	assert.Equal(
 		"482da72c8faa48ee1ac2cf9a5f9ecd42ee3258be5ddd8d6b496c7171dc7bfe8e75e5d16e7129c88d99a21a912e5c082fa1baab6ba87d2688ebd7d27bb1ab090701",
-		fmt.Sprintf("%x", b),
+		hex.EncodeToString(b),
 	)
+	// verify the signature
+	assert.True(act.Verify([]byte(text), b))
 }

@@ -8,9 +8,8 @@ package action
 
 import (
 	"github.com/golang/protobuf/proto"
-	"github.com/iotexproject/iotex-core/pkg/hash"
-	"github.com/iotexproject/iotex-core/pkg/keypair"
 	"github.com/iotexproject/iotex-core/protogen/iotextypes"
+	"github.com/iotexproject/iotex-antenna-go/account"
 )
 
 type (
@@ -25,41 +24,21 @@ type (
 	}
 )
 
-// Hash returns the ActionCore's hash
-func (ac *IotexActionCore) Hash() ([]byte, error) {
+// Sign signs the ActionCore
+func (ac *IotexActionCore) Sign(act account.Account) (*IotexAction, error) {
 	msg, err := proto.Marshal(ac.ActionCore)
 	if err != nil {
 		return nil, err
 	}
-	h := hash.Hash256b(msg)
-	return h[:], nil
-}
-
-// Sign signs the ActionCore
-func (ac *IotexActionCore) Sign(sk keypair.PrivateKey) (*IotexAction, error) {
-	h, err := ac.Hash()
-	if err != nil {
-		return nil, err
-	}
-	sig, err := sk.Sign(h[:])
+	sig, err := act.Sign(msg)
 	if err != nil {
 		return nil, err
 	}
 	return &IotexAction{
 		Action: &iotextypes.Action{
 			Core:         ac.ActionCore,
-			SenderPubKey: sk.PublicKey().Bytes(),
+			SenderPubKey: act.PublicKey().Bytes(),
 			Signature:    sig,
 		},
 	}, nil
-}
-
-// Hash returns the Action's hash
-func (a *IotexAction) Hash() ([]byte, error) {
-	msg, err := proto.Marshal(a.Action)
-	if err != nil {
-		return nil, err
-	}
-	h := hash.Hash256b(msg)
-	return h[:], nil
 }

@@ -15,14 +15,15 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/iotexproject/iotex-core/action"
-	"github.com/iotexproject/iotex-core/pkg/keypair"
 )
 
 func TestAction_Envelope(t *testing.T) {
 	gasLimit := uint64(888)
 	gasPrice := big.NewInt(999)
+	testAcct, err := NewAccountFromPrivateKey(PrivateKey)
+	assert.NoError(t, err)
 	tx, err := action.NewTransfer(123, big.NewInt(456),
-		testAcct.Address, []byte("hello world!"), gasLimit, gasPrice)
+		testAcct.Address(), []byte("hello world!"), gasLimit, gasPrice)
 	assert.NoError(t, err)
 
 	builder := &action.EnvelopeBuilder{}
@@ -32,10 +33,7 @@ func TestAction_Envelope(t *testing.T) {
 		SetGasLimit(gasPrice.Uint64()).
 		Build()
 
-	privKey, err := keypair.HexStringToPrivateKey(testAcct.PrivateKey)
-	assert.NoError(t, err)
-
-	sealed, err := action.Sign(elp, privKey)
+	sealed, err := action.Sign(elp, testAcct.PrivateKey())
 	actionPb := sealed.Proto()
 	assert.Equal(
 		t,
@@ -47,10 +45,12 @@ func TestAction_Envelope(t *testing.T) {
 func TestAction_SerializationDeserialization(t *testing.T) {
 	gasLimit := uint64(888)
 	gasPrice := big.NewInt(999)
+	testAcct, err := NewAccountFromPrivateKey(PrivateKey)
+	assert.NoError(t, err)
 	action, err := action.NewTransfer(
 		123,
 		big.NewInt(456),
-		testAcct.Address,
+		testAcct.Address(),
 		[]byte("hello world!"),
 		gasLimit,
 		gasPrice,

@@ -7,58 +7,94 @@
 package account
 
 import (
-	"crypto/ecdsa"
-
 	"github.com/iotexproject/iotex-address/address"
 	"github.com/iotexproject/iotex-core/pkg/hash"
 	"github.com/iotexproject/iotex-core/pkg/keypair"
 )
 
-// Account type
-type Account struct {
-	private    *keypair.PrivateKey
-	Address    string
-	PrivateKey string
-	PublicKey  string
-}
+type (
+	// Account is a user account
+	Account interface {
+		// Address returns the IoTeX address
+		Address() string
+		// PrivateKey returns the embedded private key interface
+		PrivateKey() keypair.PrivateKey
+		// PublicKey returns the embedded public key interface
+		PublicKey() keypair.PublicKey
+		// Sign signs the message using the private key
+		Sign([]byte) ([]byte, error)
+		// Verify verifies the message using the public key
+		Verify([]byte, []byte) bool
+		// Zero zeroes the private key data
+		Zero()
+	}
 
-// Sign by acount private key
-func (act *Account) Sign(data []byte) ([]byte, error) {
-	priv, err := keypair.HexStringToPrivateKey(act.PrivateKey)
+	account struct {
+	    private keypair.PrivateKey
+	    address string
+	}
+)
+
+// NewAccount generates a new account
+func NewAccount() (Account, error) {
+	pk, err := keypair.GenerateKey()
 	if err != nil {
 		return nil, err
 	}
-	h := hash.Hash256b(data)
-	return priv.Sign(h[:])
+	addr, err := address.FromBytes(pk.PublicKey().Hash())
+	if err != nil {
+		return nil, err
+	}
+	return &account{
+		pk,
+		addr.String(),
+	}, nil
 }
 
-// Private return keypair private key
-func (act *Account) Private() *keypair.PrivateKey {
+// NewAccountFromPrivateKey generates an account from private key string
+func NewAccountFromPrivateKey(privateKey string) (Account, error) {
+	pk, err := keypair.HexStringToPrivateKey(privateKey)
+	if err != nil {
+		return nil, err
+	}
+	addr, err := address.FromBytes(pk.PublicKey().Hash())
+	if err != nil {
+		return nil, err
+	}
+	return &account{
+		pk,
+		addr.String(),
+	}, nil
+}
+
+// Address returns the IoTeX address
+func (act *account) Address() string {
+	return act.address
+}
+
+// PrivateKey return the embedded private key
+func (act *account) PrivateKey() keypair.PrivateKey {
 	return act.private
 }
 
-// FromPrivateKey create Account from private key string
-func FromPrivateKey(privateKey string) (*Account, error) {
-	private, err := keypair.HexStringToPrivateKey(privateKey)
-	if err != nil {
-		return nil, err
-	}
-	return privateToAccount(private.EcdsaPrivateKey())
+// PublicKey returns the embedded public key interface
+func (act *account) PublicKey() keypair.PublicKey {
+	return act.private.PublicKey()
 }
 
-func privateToAccount(privateKey *ecdsa.PrivateKey) (acc *Account, err error) {
-	pri, err := keypair.BytesToPrivateKey(privateKey.D.Bytes())
-	if err != nil {
-		return
-	}
-	addr, err := address.FromBytes(pri.PublicKey().Hash())
-	if err != nil {
-		return
-	}
-	return &Account{
-		private:    &pri,
-		Address:    addr.String(),
-		PrivateKey: pri.HexString(),
-		PublicKey:  pri.PublicKey().HexString(),
-	}, nil
+// Sign signs the message using the private key
+func (act *account) Sign(data []byte) ([]byte, error) {
+	h := hash.Hash256b(data)
+	return act.private.Sign(h[:])
+}
+
+// Verify verifies the message using the public key
+func (act *account) Verify(data []byte, sig []byte) bool {
+	h := hash.Hash256b(data)
+	return act.PublicKey().Verify(h[:], sig)
+}
+
+// Zero zeroes the private key data
+func (act *account) Zero() {
+	act.private.Zero()
 }
