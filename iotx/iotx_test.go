@@ -7,12 +7,10 @@
 package iotx
 
 import (
+	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
-
-	"github.com/iotexproject/iotex-address/address"
 )
 
 const (
@@ -30,7 +28,15 @@ func TestTransfer(t *testing.T) {
 	require.NoError(err)
 	require.EqualValues(acc.Address, accountAddress)
 
-	req := &TransferRequest{From: accountAddress, To: to, Value: "1000000000000000000", Payload: "", GasLimit: "1000000", GasPrice: "1"}
+	req := &TransferRequest{
+		From:     accountAddress,
+		To:       to,
+		Value:    "1000000000000000000",
+		Payload:  "",
+		GasLimit: "1000000",
+		GasPrice: "1",
+	}
+
 	hash, err := iotx.SendTransfer(req)
 	require.NoError(err)
 	require.NotEmpty(hash)
@@ -44,13 +50,73 @@ func TestDeployContract(t *testing.T) {
 	require.NoError(err)
 	require.EqualValues(acc.Address, accountAddress)
 
-	req := &ContractRequest{From: accountAddress, Data: "6080604052600436106100565763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416630423a132811461005b578063252bd4d314610085578063bfe43b4c146100c3575b600080fd5b34801561006757600080fd5b50610073600435610191565b60408051918252519081900360200190f35b34801561009157600080fd5b5061009a610194565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b3480156100cf57600080fd5b506040805160206004803580820135601f810184900484028501840190955284845261011c9436949293602493928401919081908401838280828437509497506101919650505050505050565b6040805160208082528351818301528351919283929083019185019080838360005b8381101561015657818101518382015260200161013e565b50505050905090810190601f1680156101835780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b90565b60005473ffffffffffffffffffffffffffffffffffffffff16905600a165627a7a723058203fec9e60ea1eeb408d1fb0dcb9dc38c32b513302f817b39548a3d2c36b0772430029", Abi: `[{"constant":true,"inputs":[{"name":"x","type":"uint256"}],"name":"bar","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"getaddress","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"y","type":"string"}],"name":"barstring","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"a","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]"`, GasLimit: "1000000", GasPrice: "9000000000000000"}
-	addr, err := address.FromString(to)
-	require.NoError(err)
-	var evmContractAddrHash common.Address
-	copy(evmContractAddrHash[:], addr.Bytes())
+	req := &ContractRequest{
+		From:     accountAddress,
+		Abi:      `[{"constant":false,"inputs":[{"name":"x","type":"uint256"}],"name":"set","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"get","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_x","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]`,
+		Data:     "608060405234801561001057600080fd5b506040516020806100f2833981016040525160005560bf806100336000396000f30060806040526004361060485763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166360fe47b18114604d5780636d4ce63c146064575b600080fd5b348015605857600080fd5b5060626004356088565b005b348015606f57600080fd5b506076608d565b60408051918252519081900360200190f35b600055565b600054905600a165627a7a723058208d4f6c9737f34d9b28ef070baa8127c0876757fbf6f3945a7ea8d4387ca156590029",
+		GasLimit: "1000000",
+		GasPrice: "1",
+	}
 
-	hash, err := iotx.DeployContract(req, evmContractAddrHash)
+	hash, err := iotx.DeployContract(req, big.NewInt(10))
+
 	require.NoError(err)
 	require.NotNil(hash)
+}
+
+func TestReadContract(t *testing.T) {
+	require := require.New(t)
+	iotx, err := New(host)
+	require.NoError(err)
+	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
+	require.NoError(err)
+	require.EqualValues(acc.Address, accountAddress)
+
+	req := &ContractRequest{
+		From:     accountAddress,
+		Address:  "io17sn486alutrnzlrdz9vv44g7qyc38hygf7s6h0",
+		Abi:      `[{"constant":false,"inputs":[{"name":"x","type":"uint256"}],"name":"set","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"get","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_x","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]`,
+		Method:   "get",
+		GasLimit: "1000000",
+		GasPrice: "1",
+	}
+
+	result, err := iotx.ReadContractByMethod(req)
+
+	require.NoError(err)
+	require.NotNil(result)
+}
+
+func TestExecuteContract(t *testing.T) {
+	require := require.New(t)
+	iotx, err := New(host)
+	require.NoError(err)
+	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
+	require.NoError(err)
+	require.NotNil(acc)
+
+	req := &ContractRequest{
+		From:     accountAddress,
+		Address:  "io17sn486alutrnzlrdz9vv44g7qyc38hygf7s6h0",
+		Abi:      `[{"constant":false,"inputs":[{"name":"x","type":"uint256"}],"name":"set","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"get","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_x","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]`,
+		Method:   "set",
+		Amount:   "0",
+		GasLimit: "1000000",
+		GasPrice: "1",
+	}
+
+	result, err := iotx.ExecuteContract(req, big.NewInt(8))
+
+	require.NoError(err)
+	require.NotNil(result)
+}
+
+func TestReadContractByHash(t *testing.T) {
+	require := require.New(t)
+	iotx, err := New(host)
+	require.NoError(err)
+
+	result, err := iotx.ReadContractByHash("6605c15d717b48613a80be1fe38ec60cc7cc38453fa390284d98a79083752dca")
+	require.NoError(err)
+	require.NotNil(result)
 }
