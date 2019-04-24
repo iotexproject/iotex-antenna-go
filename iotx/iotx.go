@@ -24,8 +24,6 @@ import (
 
 // Error strings
 var (
-	// ErrAccountNotExist indicates error for not exist account
-	ErrAccountNotExist = fmt.Errorf("account not exist")
 	// ErrAmount indicates error for error amount convert
 	ErrAmount = fmt.Errorf("error amount")
 )
@@ -46,11 +44,11 @@ func New(host string) (*Iotx, error) {
 	return iotx, nil
 }
 
-func (i *Iotx) normalizeGas(acc *account.Account, ac *action.IotexActionCore, gasLimit, gasPrice string) (uint64, *big.Int, error) {
+func (i *Iotx) normalizeGas(acc account.Account, ac *action.IotexActionCore, gasLimit, gasPrice string) (uint64, *big.Int, error) {
 	var limit uint64
 	var price *big.Int
 	if gasLimit == "" {
-		sealed, err := ac.Sign(*acc.Private())
+		sealed, err := ac.Sign(acc)
 		if err != nil {
 			return 0, nil, err
 		}
@@ -86,9 +84,9 @@ func (i *Iotx) normalizeGas(acc *account.Account, ac *action.IotexActionCore, ga
 
 // SendTransfer invoke send transfer action by rpc
 func (i *Iotx) SendTransfer(req *TransferRequest) (string, error) {
-	sender, ok := i.Accounts.GetAccount(req.From)
-	if !ok {
-		return "", ErrAccountNotExist
+	sender, err := i.Accounts.GetAccount(req.From)
+	if err != nil {
+		return "", err
 	}
 
 	// get account nonce
@@ -122,9 +120,9 @@ func (i *Iotx) SendTransfer(req *TransferRequest) (string, error) {
 
 // DeployContract invoke execution action for deploy contract
 func (i *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (string, error) {
-	sender, ok := i.Accounts.GetAccount(req.From)
-	if !ok {
-		return "", ErrAccountNotExist
+	sender, err := i.Accounts.GetAccount(req.From)
+	if err != nil {
+		return "", err
 	}
 
 	// get account nonce
@@ -160,8 +158,8 @@ func (i *Iotx) DeployContract(req *ContractRequest, args ...interface{}) (string
 	return i.sendAction(sender, act)
 }
 
-func (i *Iotx) sendAction(acc *account.Account, ta *action.IotexActionCore) (string, error) {
-	sealed, err := ta.Sign(*acc.Private())
+func (i *Iotx) sendAction(acc account.Account, ta *action.IotexActionCore) (string, error) {
+	sealed, err := ta.Sign(acc)
 	if err != nil {
 		return "", err
 	}
@@ -175,20 +173,18 @@ func (i *Iotx) sendAction(acc *account.Account, ta *action.IotexActionCore) (str
 
 // ExecuteContract returns execute contract method action hash
 func (i *Iotx) ExecuteContract(req *ContractRequest, args ...interface{}) (string, error) {
+	sender, err := i.Accounts.GetAccount(req.From)
+	if err != nil {
+		return "", err
+	}
+
 	if req.Address == "" || req.Method == "" {
 		return "", errors.New("contract address and method can not empty")
 	}
-
 	amount, ok := big.NewInt(0).SetString(req.Amount, 10)
 	if !ok {
 		return "", ErrAmount
 	}
-
-	sender, ok := i.Accounts.GetAccount(req.From)
-	if !ok {
-		return "", ErrAccountNotExist
-	}
-
 	// get account nonce
 	accountReq := &rpcmethod.GetAccountRequest{Address: req.From}
 	res, err := i.GetAccount(accountReq)
@@ -245,15 +241,14 @@ func (i *Iotx) ReadContractByHash(hash string) (string, error) {
 
 // ReadContractByMethod returns execute contract view method result
 func (i *Iotx) ReadContractByMethod(req *ContractRequest, args ...interface{}) (string, error) {
+	sender, err := i.Accounts.GetAccount(req.From)
+	if err != nil {
+		return "", err
+	}
+
 	if req.Address == "" || req.Method == "" {
 		return "", errors.New("contract address and method can not empty")
 	}
-
-	sender, ok := i.Accounts.GetAccount(req.From)
-	if !ok {
-		return "", ErrAccountNotExist
-	}
-
 	// get account nonce
 	accountReq := &rpcmethod.GetAccountRequest{Address: req.From}
 	res, err := i.GetAccount(accountReq)
@@ -284,7 +279,7 @@ func (i *Iotx) ReadContractByMethod(req *ContractRequest, args ...interface{}) (
 	if err != nil {
 		return "", err
 	}
-	sealed, err := act.Sign(*sender.Private())
+	sealed, err := act.Sign(sender)
 	if err != nil {
 		return "", err
 	}

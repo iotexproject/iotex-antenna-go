@@ -6,9 +6,7 @@
 
 package account
 
-import (
-	"github.com/iotexproject/iotex-core/pkg/keypair"
-)
+import "github.com/pkg/errors"
 
 // Accounts type
 type Accounts struct {
@@ -24,42 +22,30 @@ func NewAccounts() *Accounts {
 }
 
 // Create new account
-func (acts *Accounts) Create() (*Account, error) {
-	private, err := keypair.GenerateKey()
+func (acts *Accounts) Create() (Account, error) {
+	acc, err := NewAccount()
 	if err != nil {
 		return nil, err
 	}
-	acc, err := privateToAccount(private.EcdsaPrivateKey())
-	if err != nil {
-		return nil, err
-	}
-	acts.accounts[acc.Address] = *acc
+	acts.accounts[acc.Address()] = acc
 	return acc, nil
 }
 
 // GetAccount by address
-func (acts *Accounts) GetAccount(addr string) (*Account, bool) {
-	if acc, ok := acts.accounts[addr]; ok {
-		return &acc, true
+func (acts *Accounts) GetAccount(addr string) (Account, error) {
+	acc, ok := acts.accounts[addr]
+	if !ok {
+		return nil, errors.Errorf("Account %s does not exist", addr)
 	}
-	return nil, false
-}
-
-// PrivateKeyToAccount new Account by privateKey
-func (acts *Accounts) PrivateKeyToAccount(privateKey string) (*Account, error) {
-	acc, err := FromPrivateKey(privateKey)
-	if err != nil {
-		return nil, err
-	}
-	acts.accounts[acc.Address] = *acc
 	return acc, nil
 }
 
-// Sign by accounts
-func (acts *Accounts) Sign(data []byte, privateKey string) ([]byte, error) {
-	act, err := FromPrivateKey(privateKey)
+// PrivateKeyToAccount new Account by privateKey
+func (acts *Accounts) PrivateKeyToAccount(privateKey string) (Account, error) {
+	acc, err := NewAccountFromPrivateKey(privateKey)
 	if err != nil {
 		return nil, err
 	}
-	return act.Sign(data)
+	acts.accounts[acc.Address()] = acc
+	return acc, nil
 }

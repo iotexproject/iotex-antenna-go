@@ -13,18 +13,28 @@ import (
 )
 
 func TestAccounts_Create(t *testing.T) {
+	assert := assert.New(t)
+
 	acts := NewAccounts()
 	act, err := acts.Create()
-	assert.NoError(t, err)
-	assert.NotEmpty(t, act.PrivateKey)
-	assert.NotEmpty(t, act.PublicKey)
-	assert.NotEmpty(t, act.Address)
+	assert.NoError(err)
+	assert.NotEmpty(act.PrivateKey())
+	assert.NotEmpty(act.PublicKey())
+	assert.NotEmpty(act.Address)
+
+	b, err := acts.GetAccount(act.Address())
+	assert.NoError(err)
+	assert.Equal(act, b)
 }
 
 func TestAccounts_PrivateKeyToAccount(t *testing.T) {
+	assert := assert.New(t)
+
 	acts := NewAccounts()
-	act, _ := acts.PrivateKeyToAccount(testAcct.PrivateKey)
-	assert.Equal(t, testAcct.Address, act.Address)
-	assert.Equal(t, testAcct.PrivateKey, act.PrivateKey)
-	assert.Equal(t, testAcct.PublicKey, act.PublicKey)
+	act, err := acts.PrivateKeyToAccount(PrivateKey)
+	assert.NoError(err)
+
+	b, err := acts.GetAccount(act.Address())
+	assert.NoError(err)
+	assert.Equal(act, b)
 }
