@@ -7,19 +7,19 @@
 package iotx
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
 	"strconv"
 
-	"github.com/iotexproject/iotex-antenna-go/contract"
-	"github.com/iotexproject/iotex-antenna-go/rpcmethod"
-
-	"github.com/iotexproject/iotex-antenna-go/action"
+	"github.com/iotexproject/iotex-core/protogen/iotexapi"
 
 	"github.com/iotexproject/iotex-antenna-go/account"
+	"github.com/iotexproject/iotex-antenna-go/action"
+	"github.com/iotexproject/iotex-antenna-go/contract"
+	"github.com/iotexproject/iotex-antenna-go/rpcmethod"
 	"github.com/iotexproject/iotex-antenna-go/utils"
-	"github.com/iotexproject/iotex-core/protogen/iotexapi"
 )
 
 // Error strings
@@ -89,6 +89,15 @@ func (i *Iotx) SendTransfer(req *TransferRequest) (string, error) {
 		return "", err
 	}
 
+	amount, ok := big.NewInt(0).SetString(req.Value, 10)
+	if !ok {
+		return "", ErrAmount
+	}
+	data, err := hex.DecodeString(req.Payload)
+	if err != nil {
+		return "", err
+	}
+
 	// get account nonce
 	accountReq := &rpcmethod.GetAccountRequest{Address: req.From}
 	res, err := i.GetAccount(accountReq)
@@ -97,12 +106,7 @@ func (i *Iotx) SendTransfer(req *TransferRequest) (string, error) {
 	}
 	nonce := res.AccountMeta.PendingNonce
 
-	amount, ok := big.NewInt(0).SetString(req.Value, 10)
-	if !ok {
-		return "", ErrAmount
-	}
-
-	act, err := action.NewTransfer(nonce, 0, big.NewInt(0), amount, req.To, req.Payload)
+	act, err := action.NewTransfer(nonce, 0, big.NewInt(0), amount, req.To, data)
 	if err != nil {
 		return "", err
 	}
@@ -111,7 +115,7 @@ func (i *Iotx) SendTransfer(req *TransferRequest) (string, error) {
 		return "", err
 	}
 
-	act, err = action.NewTransfer(nonce, gasLimit, gasPrice, amount, req.To, req.Payload)
+	act, err = action.NewTransfer(nonce, gasLimit, gasPrice, amount, req.To, data)
 	if err != nil {
 		return "", err
 	}
