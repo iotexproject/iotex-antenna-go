@@ -16,7 +16,6 @@ import (
 const (
 	host              = "api.testnet.iotex.one:80"
 	accountPrivateKey = "9cdf22c5caa8a4d99eb674da27756b438c05c6b1e8995f4a0586745e2071b115"
-	accountAddress    = "io14gnqxf9dpkn05g337rl7eyt2nxasphf5m6n0rd"
 	to                = "io1emxf8zzqckhgjde6dqd97ts0y3q496gm3fdrl6"
 )
 
@@ -26,10 +25,9 @@ func TestTransfer(t *testing.T) {
 	require.NoError(err)
 	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
 	require.NoError(err)
-	require.EqualValues(acc.Address, accountAddress)
 
 	req := &TransferRequest{
-		From:     accountAddress,
+		From:     acc.Address(),
 		To:       to,
 		Value:    "1000000000000000000",
 		Payload:  "",
@@ -48,10 +46,9 @@ func TestDeployContract(t *testing.T) {
 	require.NoError(err)
 	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
 	require.NoError(err)
-	require.EqualValues(acc.Address, accountAddress)
 
 	req := &ContractRequest{
-		From:     accountAddress,
+		From:     acc.Address(),
 		Abi:      `[{"constant":false,"inputs":[{"name":"x","type":"uint256"}],"name":"set","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"get","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_x","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]`,
 		Data:     "608060405234801561001057600080fd5b506040516020806100f2833981016040525160005560bf806100336000396000f30060806040526004361060485763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166360fe47b18114604d5780636d4ce63c146064575b600080fd5b348015605857600080fd5b5060626004356088565b005b348015606f57600080fd5b506076608d565b60408051918252519081900360200190f35b600055565b600054905600a165627a7a723058208d4f6c9737f34d9b28ef070baa8127c0876757fbf6f3945a7ea8d4387ca156590029",
 		GasLimit: "1000000",
@@ -70,10 +67,9 @@ func TestReadContract(t *testing.T) {
 	require.NoError(err)
 	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
 	require.NoError(err)
-	require.EqualValues(acc.Address, accountAddress)
 
 	req := &ContractRequest{
-		From:     accountAddress,
+		From:     acc.Address(),
 		Address:  "io17sn486alutrnzlrdz9vv44g7qyc38hygf7s6h0",
 		Abi:      `[{"constant":false,"inputs":[{"name":"x","type":"uint256"}],"name":"set","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"get","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_x","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]`,
 		Method:   "get",
@@ -96,7 +92,7 @@ func TestExecuteContract(t *testing.T) {
 	require.NotNil(acc)
 
 	req := &ContractRequest{
-		From:     accountAddress,
+		From:     acc.Address(),
 		Address:  "io17sn486alutrnzlrdz9vv44g7qyc38hygf7s6h0",
 		Abi:      `[{"constant":false,"inputs":[{"name":"x","type":"uint256"}],"name":"set","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"get","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_x","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]`,
 		Method:   "set",
