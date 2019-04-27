@@ -55,9 +55,13 @@ all: test build clean
 build:
 	$(GOBUILD) -ldflags "$(PackageFlags)" -o ./$(BUILD_TARGET_SERVER) -v .
 
+.PHONY: fmt
+fmt:
+	$(GOCMD) fmt ./...
+
 .PHONY: test
-test: lint
-	go list ./... | grep -v /vendor/ | xargs $(GOTEST)
+test: fmt lint
+	$(GOTEST) ./... -v -short -race
 
 .PHONY: lint
 lint:

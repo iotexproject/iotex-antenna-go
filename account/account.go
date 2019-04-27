@@ -30,8 +30,8 @@ type (
 	}
 
 	account struct {
-	    private keypair.PrivateKey
-	    address string
+		private keypair.PrivateKey
+		address string
 	}
 )
 

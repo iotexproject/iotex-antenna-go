@@ -8,8 +8,8 @@ package action
 
 import (
 	"github.com/golang/protobuf/proto"
-	"github.com/iotexproject/iotex-core/protogen/iotextypes"
 	"github.com/iotexproject/iotex-antenna-go/account"
+	"github.com/iotexproject/iotex-core/protogen/iotextypes"
 )
 
 type (

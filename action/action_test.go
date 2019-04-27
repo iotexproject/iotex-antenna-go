@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/iotexproject/iotex-core/pkg/hash"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/iotexproject/iotex-antenna-go/account"
@@ -36,8 +37,12 @@ func TestActionTransfer(t *testing.T) {
 	)
 	marshaled, err := proto.Marshal(ac)
 	assert.NoError(err)
+	h := hash.Hash256b(marshaled)
+	assert.Equal("0f17cd7f43bdbeff73dfe8f5cb0c0045f2990884e5050841de887cf22ca35b50", hex.EncodeToString(h[:]))
 	assert.True(testAcct.Verify(marshaled, sac.Signature))
 	marshaled, err = proto.Marshal(sac)
 	assert.NoError(err)
+	h = hash.Hash256b(marshaled)
+	assert.Equal("6c84ac119058e859a015221f87a4e187c393d0c6ee283959342eac95fad08c33", hex.EncodeToString(h[:]))
 	assert.False(testAcct.Verify(marshaled, sac.Signature))
 }
