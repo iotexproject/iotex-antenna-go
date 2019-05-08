@@ -7,9 +7,9 @@
 package account
 
 import (
+	"github.com/iotexproject/go-pkgs/crypto"
+	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/iotexproject/iotex-address/address"
-	"github.com/iotexproject/iotex-core/pkg/hash"
-	"github.com/iotexproject/iotex-core/pkg/keypair"
 )
 
 type (
@@ -18,9 +18,9 @@ type (
 		// Address returns the IoTeX address
 		Address() string
 		// PrivateKey returns the embedded private key interface
-		PrivateKey() keypair.PrivateKey
+		PrivateKey() crypto.PrivateKey
 		// PublicKey returns the embedded public key interface
-		PublicKey() keypair.PublicKey
+		PublicKey() crypto.PublicKey
 		// Sign signs the message using the private key
 		Sign([]byte) ([]byte, error)
 		// Verify verifies the message using the public key
@@ -30,14 +30,14 @@ type (
 	}
 
 	account struct {
-		private keypair.PrivateKey
+		private crypto.PrivateKey
 		address string
 	}
 )
 
 // NewAccount generates a new account
 func NewAccount() (Account, error) {
-	pk, err := keypair.GenerateKey()
+	pk, err := crypto.GenerateKey()
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func NewAccount() (Account, error) {
 
 // NewAccountFromPrivateKey generates an account from private key string
 func NewAccountFromPrivateKey(privateKey string) (Account, error) {
-	pk, err := keypair.HexStringToPrivateKey(privateKey)
+	pk, err := crypto.HexStringToPrivateKey(privateKey)
 	if err != nil {
 		return nil, err
 	}
@@ -73,12 +73,12 @@ func (act *account) Address() string {
 }
 
 // PrivateKey return the embedded private key
-func (act *account) PrivateKey() keypair.PrivateKey {
+func (act *account) PrivateKey() crypto.PrivateKey {
 	return act.private
 }
 
 // PublicKey returns the embedded public key interface
-func (act *account) PublicKey() keypair.PublicKey {
+func (act *account) PublicKey() crypto.PublicKey {
 	return act.private.PublicKey()
 }
 

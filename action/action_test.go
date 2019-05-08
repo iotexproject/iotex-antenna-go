@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/iotexproject/iotex-core/pkg/hash"
+	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/iotexproject/iotex-antenna-go/account"

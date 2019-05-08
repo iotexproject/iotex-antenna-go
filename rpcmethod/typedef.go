@@ -7,7 +7,7 @@
 package rpcmethod
 
 import (
-	"github.com/iotexproject/iotex-core/protogen/iotexapi"
+	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 )
 
 // GetAccountRequest is a type of iotexapi types

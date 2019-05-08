@@ -8,12 +8,13 @@ package iotx
 
 import (
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"math/big"
 	"strconv"
 
-	"github.com/iotexproject/iotex-core/protogen/iotexapi"
+	"github.com/iotexproject/iotex-address/address"
+	"github.com/iotexproject/iotex-proto/golang/iotexapi"
+	"github.com/pkg/errors"
 
 	"github.com/iotexproject/iotex-antenna-go/account"
 	"github.com/iotexproject/iotex-antenna-go/action"
@@ -224,22 +225,36 @@ func (i *Iotx) ExecuteContract(req *ContractRequest, args ...interface{}) (strin
 
 // ReadContractByHash returns execute contract method result by action hash
 func (i *Iotx) ReadContractByHash(hash string) (string, error) {
-	actionResponse, err := i.GetActions(&iotexapi.GetActionsRequest{Lookup: &iotexapi.GetActionsRequest_ByHash{
-		ByHash: &iotexapi.GetActionByHashRequest{
-			ActionHash:   hash,
-			CheckPending: true,
+	actionResponse, err := i.GetActions(&iotexapi.GetActionsRequest{
+		Lookup: &iotexapi.GetActionsRequest_ByHash{
+			ByHash: &iotexapi.GetActionByHashRequest{
+				ActionHash:   hash,
+				CheckPending: true,
+			},
 		},
-	}})
+	})
 	if err != nil {
 		return "", err
 	}
 
-	request := &iotexapi.ReadContractRequest{Action: actionResponse.ActionInfo[0].Action}
-	response, err := i.ReadContract(request)
+	action := actionResponse.ActionInfo[0].Action
+	if action == nil {
+		return "", errors.Errorf("action %x is not valid", hash)
+	}
+	caller, _ := address.FromBytes(action.SenderPubKey)
+
+	execution := action.GetCore().GetExecution()
+	if execution == nil {
+		return "", errors.Errorf("action %x is not an execution", hash)
+	}
+
+	response, err := i.ReadContract(&iotexapi.ReadContractRequest{
+		Execution:     execution,
+		CallerAddress: caller.String(),
+	})
 	if err != nil {
 		return "", err
 	}
-
 	return response.Data, nil
 }
 
@@ -283,15 +298,13 @@ func (i *Iotx) ReadContractByMethod(req *ContractRequest, args ...interface{}) (
 	if err != nil {
 		return "", err
 	}
-	sealed, err := act.Sign(sender)
-	if err != nil {
-		return "", err
+	request := &iotexapi.ReadContractRequest{
+		Execution:     act.GetExecution(),
+		CallerAddress: sender.Address(),
 	}
-	request := &iotexapi.ReadContractRequest{Action: sealed.Action}
 	response, err := i.ReadContract(request)
 	if err != nil {
 		return "", err
 	}
-
 	return response.Data, nil
 }

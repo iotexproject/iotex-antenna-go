@@ -10,9 +10,8 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/iotexproject/iotex-core/pkg/hash"
 )
 
 var (

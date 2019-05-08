@@ -12,26 +12,23 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/iotexproject/go-pkgs/hash"
+	"github.com/iotexproject/iotex-proto/golang/iotexapi"
+	"github.com/iotexproject/iotex-proto/golang/iotextypes"
 	"github.com/stretchr/testify/require"
 
-	"github.com/iotexproject/iotex-core/pkg/hash"
-	"github.com/iotexproject/iotex-core/pkg/keypair"
-	"github.com/iotexproject/iotex-core/protogen/iotexapi"
-	"github.com/iotexproject/iotex-core/protogen/iotextypes"
-	ta "github.com/iotexproject/iotex-core/test/testaddress"
-	"github.com/iotexproject/iotex-core/testutil"
+	"github.com/iotexproject/iotex-address/address"
+	"github.com/iotexproject/iotex-antenna-go/account"
+	"github.com/iotexproject/iotex-antenna-go/action"
+)
+
+var (
+	Address    = "io15jcpv957y5rn3zkyvd22cerfxcw4wc86hghyhn"
+	PrivateKey = "0806c458b262edd333a191e92f561aff338211ee3e18ab315a074a2d82aa343f"
 )
 
 const (
 	host = "api.testnet.iotex.one:80"
-)
-
-var (
-	testTransfer, _ = testutil.SignedTransfer(ta.Addrinfo["alfa"].String(),
-		ta.Keyinfo["alfa"].PriKey, 3, big.NewInt(10), []byte{}, testutil.TestGasLimit,
-		big.NewInt(testutil.TestGasPriceInt64))
-
-	testTransferPb = testTransfer.Proto()
 )
 
 func TestServer_GetAccount(t *testing.T) {
@@ -97,17 +94,22 @@ func TestServer_SendAction(t *testing.T) {
 	if accountPrivateKey == "" || accountPendingNonce == "" {
 		t.Skip("skipping test; some params not set")
 	}
-
 	accountPendingNonceInt, err := strconv.ParseUint(accountPendingNonce, 10, 64)
-	priKey, err := keypair.HexStringToPrivateKey(accountPrivateKey)
 	require.NoError(err)
 
-	testTransfer, err := testutil.SignedTransfer("io15jcpv957y5rn3zkyvd22cerfxcw4wc86hghyhn",
-		priKey, accountPendingNonceInt, big.NewInt(1000000000000000000), []byte{}, 2000000,
-		big.NewInt(1000000000000))
+	act, err := account.NewAccountFromPrivateKey(accountPrivateKey)
 	require.NoError(err)
-	testTransferPb := testTransfer.Proto()
-	request := &iotexapi.SendActionRequest{Action: testTransferPb}
+	transfer, err := action.NewTransfer(
+		accountPendingNonceInt,
+		2000000,
+		big.NewInt(1000000000000),
+		big.NewInt(1000000000000000000),
+		Address,
+		nil)
+	require.NoError(err)
+	sealed, err := transfer.Sign(act)
+	require.NoError(err)
+	request := &iotexapi.SendActionRequest{Action: sealed.Action}
 	_, err = rpc.SendAction(request)
 	require.NoError(err)
 }
@@ -358,9 +360,13 @@ func TestServer_ReadContract(t *testing.T) {
 	}
 	res, err := svr.GetActions(request)
 	require.NoError(err)
-	request2 := &iotexapi.ReadContractRequest{Action: res.ActionInfo[0].Action}
-
-	_, err = svr.ReadContract(request2)
+	action := res.ActionInfo[0].Action
+	require.NotNil(action)
+	caller, _ := address.FromBytes(action.SenderPubKey)
+	_, err = svr.ReadContract(&iotexapi.ReadContractRequest{
+		Execution:     action.GetCore().GetExecution(),
+		CallerAddress: caller.String(),
+	})
 	require.Error(err)
 }
 
@@ -370,7 +376,7 @@ func TestServer_SuggestGasPrice(t *testing.T) {
 	require.NoError(err)
 	res, err := svr.SuggestGasPrice(&iotexapi.SuggestGasPriceRequest{})
 	require.NoError(err)
-	require.Equal(uint64(1), res.GasPrice)
+	require.Equal(uint64(1000000000000), res.GasPrice)
 }
 
 func TestServer_EstimateGasForAction(t *testing.T) {
@@ -378,7 +384,19 @@ func TestServer_EstimateGasForAction(t *testing.T) {
 	svr, err := NewRPCMethod(host)
 	require.NoError(err)
 
-	request := &iotexapi.EstimateGasForActionRequest{Action: testTransferPb}
+	act, err := account.NewAccountFromPrivateKey(PrivateKey)
+	require.NoError(err)
+	transfer, err := action.NewTransfer(
+		3,
+		20000,
+		big.NewInt(10),
+		big.NewInt(0),
+		Address,
+		nil)
+	require.NoError(err)
+	sealed, err := transfer.Sign(act)
+	require.NoError(err)
+	request := &iotexapi.EstimateGasForActionRequest{Action: sealed.Action}
 	res, err := svr.EstimateGasForAction(request)
 	require.NoError(err)
 	require.Equal(uint64(10000), res.Gas)
