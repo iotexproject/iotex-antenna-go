@@ -18,7 +18,7 @@ type Antenna struct {
 
 // NewAntenna returns Antenna instance
 func NewAntenna(host string) (*Antenna, error) {
-	iotx, err := iotx.New(host)
+	iotx, err := iotx.NewIotx(host, false)
 	if err != nil {
 		return nil, err
 	}

@@ -12,6 +12,7 @@ import (
 	"math/big"
 	"strconv"
 
+	"github.com/iotexproject/go-pkgs/crypto"
 	"github.com/iotexproject/iotex-address/address"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 	"github.com/pkg/errors"
@@ -35,14 +36,23 @@ type Iotx struct {
 	Accounts *account.Accounts
 }
 
-// New return Iotx instance
-func New(host string) (*Iotx, error) {
-	rpc, err := rpcmethod.NewRPCMethod(host)
+// NewIotx return Iotx instance
+func NewIotx(host string, tls bool) (*Iotx, error) {
+	var rpc *rpcmethod.RPCMethod
+	var err error
+
+	if tls {
+		rpc, err = rpcmethod.NewRPCWithTLSEnabled(host)
+	} else {
+		rpc, err = rpcmethod.NewRPCMethod(host)
+	}
 	if err != nil {
 		return nil, err
 	}
-	iotx := &Iotx{rpc, account.NewAccounts()}
-	return iotx, nil
+	return &Iotx{
+		rpc,
+		account.NewAccounts(),
+	}, nil
 }
 
 func (i *Iotx) normalizeGas(acc account.Account, ac *action.IotexActionCore, gasLimit, gasPrice string) (uint64, *big.Int, error) {
@@ -241,7 +251,8 @@ func (i *Iotx) ReadContractByHash(hash string) (string, error) {
 	if action == nil {
 		return "", errors.Errorf("action %x is not valid", hash)
 	}
-	caller, _ := address.FromBytes(action.SenderPubKey)
+	pk, _ := crypto.BytesToPublicKey(action.SenderPubKey)
+	caller, _ := address.FromBytes(pk.Hash())
 
 	execution := action.GetCore().GetExecution()
 	if execution == nil {

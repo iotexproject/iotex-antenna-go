@@ -14,15 +14,17 @@ import (
 )
 
 const (
-	host              = "api.testnet.iotex.one:80"
+	testnet           = "api.testnet.iotex.one:80"
+	mainnet           = "api.iotex.one:443"
 	accountPrivateKey = "9cdf22c5caa8a4d99eb674da27756b438c05c6b1e8995f4a0586745e2071b115"
 	to                = "io1emxf8zzqckhgjde6dqd97ts0y3q496gm3fdrl6"
 )
 
 func TestTransfer(t *testing.T) {
 	require := require.New(t)
-	iotx, err := New(host)
+	iotx, err := NewIotx(testnet, false)
 	require.NoError(err)
+	defer iotx.Close()
 	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
 	require.NoError(err)
 
@@ -42,8 +44,9 @@ func TestTransfer(t *testing.T) {
 
 func TestDeployContract(t *testing.T) {
 	require := require.New(t)
-	iotx, err := New(host)
+	iotx, err := NewIotx(testnet, false)
 	require.NoError(err)
+	defer iotx.Close()
 	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
 	require.NoError(err)
 
@@ -62,9 +65,14 @@ func TestDeployContract(t *testing.T) {
 }
 
 func TestReadContract(t *testing.T) {
+	// TODO: re-enable test when new gPRC API has been pushed to testnet/mainnet
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	require := require.New(t)
-	iotx, err := New(host)
+	iotx, err := NewIotx(mainnet, true)
 	require.NoError(err)
+	defer iotx.Close()
 	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
 	require.NoError(err)
 
@@ -78,15 +86,15 @@ func TestReadContract(t *testing.T) {
 	}
 
 	result, err := iotx.ReadContractByMethod(req)
-
 	require.NoError(err)
 	require.NotNil(result)
 }
 
 func TestExecuteContract(t *testing.T) {
 	require := require.New(t)
-	iotx, err := New(host)
+	iotx, err := NewIotx(testnet, false)
 	require.NoError(err)
+	defer iotx.Close()
 	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
 	require.NoError(err)
 	require.NotNil(acc)
@@ -108,11 +116,16 @@ func TestExecuteContract(t *testing.T) {
 }
 
 func TestReadContractByHash(t *testing.T) {
+	// TODO: re-enable test when new gPRC API has been pushed to testnet/mainnet
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	require := require.New(t)
-	iotx, err := New(host)
+	iotx, err := NewIotx(mainnet, true)
 	require.NoError(err)
+	defer iotx.Close()
 
-	result, err := iotx.ReadContractByHash("6605c15d717b48613a80be1fe38ec60cc7cc38453fa390284d98a79083752dca")
+	result, err := iotx.ReadContractByHash("edf65e7ccbfb05e4fbd394db1acc276029c309994879e3a8c07023a753ea8886")
 	require.NoError(err)
 	require.NotNil(result)
 }
