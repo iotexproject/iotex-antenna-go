@@ -38,14 +38,7 @@ type Iotx struct {
 
 // NewIotx return Iotx instance
 func NewIotx(host string, tls bool) (*Iotx, error) {
-	var rpc *rpcmethod.RPCMethod
-	var err error
-
-	if tls {
-		rpc, err = rpcmethod.NewRPCWithTLSEnabled(host)
-	} else {
-		rpc, err = rpcmethod.NewRPCMethod(host)
-	}
+	rpc, err := rpcmethod.NewRPCMethod(host, tls)
 	if err != nil {
 		return nil, err
 	}
