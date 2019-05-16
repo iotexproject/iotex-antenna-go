@@ -5,34 +5,26 @@ version: 2
 jobs:
   build_test_docker:
     docker:
-      - image: circleci/golang:1.11.6
+      - image: circleci/golang:1.12.5
       
-    working_directory: /go/src/github.com/iotexproject/iotex-antenna-go
+    working_directory: ~/iotex-antenna-go
 #    environment:
 #      - GOPATH: "${HOME}/go"
     steps:
       - checkout
-
       - restore_cache:
-          key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
-          paths:
-              - /go/src/github.com/iotexproject/iotex-antenna-go/vendor
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
       - run:
-          name: "get vendor"
+          name: go mod
           command: |
-            export GOPATH=/go
-            if [ ! -d /go/src/github.com/iotexproject/iotex-antenna-go/vendor ]; then
-                dep ensure
-            fi
-      - run:
-          name: "build libsecp256k1"
-          command: |
-            chmod +x buildlibsecp256k1.sh
-            ./buildlibsecp256k1.sh
+            export PATH=$PATH:/usr/local/go/bin
+            go mod download
+            go mod vendor
       - save_cache:
-          key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+          key: go-mod-v1-{{ checksum "go.sum" }}
           paths:
-              - /go/src/github.com/iotexproject/iotex-antenna-go/vendor
+              - ~/go/pkg/mod
       - run: go get golang.org/x/lint/golint
       - run: golint -set_exit_status $(go list ./... | grep -v /vendor/)
       - run: go vet $(go list ./... | grep -v /vendor/)
