@@ -34,7 +34,7 @@ const (
 
 func TestServer_GetAccount(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCWithTLSEnabled(mainnet)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
 
 	account := "io1066kus4vlyvk0ljql39fzwqw0k22h7j8wmef3n"
@@ -49,7 +49,7 @@ func TestServer_GetAccount(t *testing.T) {
 
 func TestServer_GetActions(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 
 	request := &iotexapi.GetActionsRequest{
@@ -67,7 +67,7 @@ func TestServer_GetActions(t *testing.T) {
 
 func TestServer_SendAction(t *testing.T) {
 	require := require.New(t)
-	rpc, err := NewRPCMethod(testnet)
+	rpc, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 	accountPrivateKey := os.Getenv("accountPrivateKey")
 	accountPendingNonce := os.Getenv("accountPendingNonce")
@@ -96,7 +96,7 @@ func TestServer_SendAction(t *testing.T) {
 
 func TestServer_GetAction(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 	actionHash := os.Getenv("actionHash")
 	actionActionInfoLen := os.Getenv("actionActionInfoLen")
@@ -126,7 +126,7 @@ func TestServer_GetAction(t *testing.T) {
 
 func TestServer_GetActionsByAddress(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 	accountAddress := os.Getenv("accountAddress")
 	getActionsByAddressActionHash := os.Getenv("getActionsByAddressActionHash")
@@ -150,7 +150,7 @@ func TestServer_GetActionsByAddress(t *testing.T) {
 
 func TestServer_GetUnconfirmedActionsByAddress(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 	accountAddress := os.Getenv("accountAddress")
 	if accountAddress == "" {
@@ -173,7 +173,7 @@ func TestServer_GetUnconfirmedActionsByAddress(t *testing.T) {
 
 func TestServer_GetActionsByBlock(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 	blk60801Hash := os.Getenv("blk60801Hash")
 	if blk60801Hash == "" {
@@ -196,7 +196,7 @@ func TestServer_GetActionsByBlock(t *testing.T) {
 
 func TestServer_GetBlockMetas(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 
 	request := &iotexapi.GetBlockMetasRequest{
@@ -222,7 +222,7 @@ func TestServer_GetBlockMetas(t *testing.T) {
 
 func TestServer_GetBlockMeta(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 	blk60801Hash := os.Getenv("blk60801Hash")
 	blk60801HashNumActions := os.Getenv("blk60801HashNumActions")
@@ -249,7 +249,7 @@ func TestServer_GetBlockMeta(t *testing.T) {
 
 func TestServer_GetChainMeta(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 
 	res, err := svr.GetChainMeta(&iotexapi.GetChainMetaRequest{})
@@ -265,7 +265,7 @@ func TestServer_GetChainMeta(t *testing.T) {
 
 func TestServer_GetServerMeta(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 	res, err := svr.GetServerMeta(&iotexapi.GetServerMetaRequest{})
 	require.NoError(err)
@@ -278,7 +278,7 @@ func TestServer_GetServerMeta(t *testing.T) {
 
 func TestServer_ReadState(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 	accountAddress := os.Getenv("accountAddress")
 	accountAddressUnclaimedBalance := os.Getenv("accountAddressUnclaimedBalance")
@@ -302,7 +302,7 @@ func TestServer_ReadState(t *testing.T) {
 
 func TestServer_GetReceiptByAction(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 	actionHash := os.Getenv("actionHash")
 	getReceiptByActionBlkHeight := os.Getenv("getReceiptByActionBlkHeight")
@@ -323,7 +323,7 @@ func TestServer_GetReceiptByAction(t *testing.T) {
 
 func TestServer_ReadContract(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 	readContractActionHash := os.Getenv("readContractActionHash")
 	if readContractActionHash == "" {
@@ -352,7 +352,7 @@ func TestServer_ReadContract(t *testing.T) {
 
 func TestServer_SuggestGasPrice(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 	res, err := svr.SuggestGasPrice(&iotexapi.SuggestGasPriceRequest{})
 	require.NoError(err)
@@ -361,7 +361,7 @@ func TestServer_SuggestGasPrice(t *testing.T) {
 
 func TestServer_EstimateGasForAction(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 
 	act, err := account.NewAccountFromPrivateKey(PrivateKey)
@@ -384,7 +384,7 @@ func TestServer_EstimateGasForAction(t *testing.T) {
 
 func TestServer_GetEpochMeta(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 	epochDataHeight := os.Getenv("epochDataHeight")
 	epochGravityChainStartHeight := os.Getenv("epochGravityChainStartHeight")

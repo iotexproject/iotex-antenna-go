@@ -53,7 +53,7 @@ all: test build clean
 
 .PHONY: build
 build:
-	$(GOBUILD) -ldflags "$(PackageFlags)" -o ./$(BUILD_TARGET_SERVER) -v .
+	$(GOBUILD) -ldflags "$(PackageFlags)" -v ./...
 
 .PHONY: fmt
 fmt:
