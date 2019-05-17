@@ -37,7 +37,7 @@ const (
 
 func TestServer_GetAccount(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCWithTLSEnabled(mainnet)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
 
 	account := "io1066kus4vlyvk0ljql39fzwqw0k22h7j8wmef3n"
@@ -70,7 +70,7 @@ func TestServer_GetActions(t *testing.T) {
 
 func TestServer_SendAction(t *testing.T) {
 	require := require.New(t)
-	rpc, err := NewRPCMethod(testnet)
+	rpc, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 	accountPrivateKey := os.Getenv("accountPrivateKey")
 	accountPendingNonce := os.Getenv("accountPendingNonce")
@@ -287,7 +287,7 @@ func TestServer_GetReceiptByAction(t *testing.T) {
 
 func TestServer_ReadContract(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet)
+	svr, err := NewRPCMethod(testnet, false)
 	require.NoError(err)
 	readContractActionHash := os.Getenv("readContractActionHash")
 	if readContractActionHash == "" {

@@ -24,23 +24,14 @@ type RPCMethod struct {
 }
 
 // NewRPCMethod returns RPCMethod interacting with endpoint
-func NewRPCMethod(endpoint string) (*RPCMethod, error) {
-	conn, err := grpc.Dial(endpoint, grpc.WithInsecure())
-	if err != nil {
-		return nil, err
+func NewRPCMethod(endpoint string, secure bool) (*RPCMethod, error) {
+	var conn *grpc.ClientConn
+	var err error
+	if secure {
+		conn, err = grpc.Dial(endpoint, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
+	} else {
+		conn, err = grpc.Dial(endpoint, grpc.WithInsecure())
 	}
-	cli := iotexapi.NewAPIServiceClient(conn)
-
-	return &RPCMethod{
-		Endpoint: endpoint,
-		conn:     conn,
-		cli:      cli,
-	}, nil
-}
-
-// NewRPCWithTLSEnabled returns RPCMethod with TLS enabled
-func NewRPCWithTLSEnabled(endpoint string) (*RPCMethod, error) {
-	conn, err := grpc.Dial(endpoint, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
 	if err != nil {
 		return nil, err
 	}
