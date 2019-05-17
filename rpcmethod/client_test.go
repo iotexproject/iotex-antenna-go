@@ -11,6 +11,7 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
@@ -23,8 +24,11 @@ import (
 )
 
 var (
-	Address    = "io15jcpv957y5rn3zkyvd22cerfxcw4wc86hghyhn"
-	PrivateKey = "0806c458b262edd333a191e92f561aff338211ee3e18ab315a074a2d82aa343f"
+	Address            = "io15jcpv957y5rn3zkyvd22cerfxcw4wc86hghyhn"
+	PrivateKey         = "0806c458b262edd333a191e92f561aff338211ee3e18ab315a074a2d82aa343f"
+	mainnetAddress     = "io1066kus4vlyvk0ljql39fzwqw0k22h7j8wmef3n"
+	mainnetBlockHash   = "89bbf8b1d3cbfb6020a1074a11c5430ef77eb220c00143dbd6f76d1cab94a1c2"
+	mainnetReceiptHash = "246b9b47f390a6faee9d725d9637b00b7ec56fa7cdffe3d39aeaad277edbb8f4"
 )
 
 const (
@@ -49,7 +53,7 @@ func TestServer_GetAccount(t *testing.T) {
 
 func TestServer_GetActions(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet, false)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
 
 	request := &iotexapi.GetActionsRequest{
@@ -96,19 +100,9 @@ func TestServer_SendAction(t *testing.T) {
 
 func TestServer_GetAction(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet, false)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
-	actionHash := os.Getenv("actionHash")
-	actionActionInfoLen := os.Getenv("actionActionInfoLen")
-	actionActionNonce := os.Getenv("actionActionNonce")
-	if actionHash == "" || actionActionInfoLen == "" || actionActionNonce == "" {
-		t.Skip("skipping test; some params not set")
-	}
-
-	actionActionInfoLenInt, err := strconv.ParseInt(actionActionInfoLen, 10, 64)
-	require.NoError(err)
-	actionActionNonceInt, err := strconv.ParseUint(actionActionNonce, 10, 64)
-	require.NoError(err)
+	actionHash := "93de5923763c4ea79a01be023b49000838b1a4c22bdceed99dc23eeea8c9c757"
 	request := &iotexapi.GetActionsRequest{
 		Lookup: &iotexapi.GetActionsRequest_ByHash{
 			ByHash: &iotexapi.GetActionByHashRequest{
@@ -119,24 +113,21 @@ func TestServer_GetAction(t *testing.T) {
 	}
 	res, err := svr.GetActions(request)
 	require.NoError(err)
-	require.Equal(int(actionActionInfoLenInt), len(res.ActionInfo))
+	require.Equal(1, len(res.ActionInfo))
 	act := res.ActionInfo[0]
-	require.Equal(actionActionNonceInt, act.Action.GetCore().GetNonce())
+	require.Equal(uint64(27), act.Action.GetCore().GetNonce())
+	require.Equal("5000000000000000000", act.Action.GetCore().GetTransfer().Amount)
 }
 
 func TestServer_GetActionsByAddress(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet, false)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
-	accountAddress := os.Getenv("accountAddress")
-	getActionsByAddressActionHash := os.Getenv("getActionsByAddressActionHash")
-	if accountAddress == "" || getActionsByAddressActionHash == "" {
-		t.Skip("skipping test; some params not set")
-	}
+	actionHash := "633cf62ab47611476423d7416bb74395be9c9b602062074ac36744ddd31fd122"
 	request := &iotexapi.GetActionsRequest{
 		Lookup: &iotexapi.GetActionsRequest_ByAddr{
 			ByAddr: &iotexapi.GetActionsByAddressRequest{
-				Address: accountAddress,
+				Address: mainnetAddress,
 				Start:   1,
 				Count:   1,
 			},
@@ -144,23 +135,26 @@ func TestServer_GetActionsByAddress(t *testing.T) {
 	}
 	res, err := svr.GetActions(request)
 	require.NoError(err)
-	require.Equal(getActionsByAddressActionHash, res.ActionInfo[0].ActHash)
+	act := res.ActionInfo[0]
+	require.Equal(actionHash, act.ActHash)
 	require.Equal(1, len(res.ActionInfo))
+	require.Equal(uint64(2), act.Action.GetCore().GetNonce())
+	actionCore := act.Action.GetCore().GetAction()
+	_, ok := actionCore.(*iotextypes.ActionCore_Execution)
+	require.True(ok)
+	require.Equal("40000000000000000000000", act.Action.GetCore().GetExecution().Amount)
+	require.Equal("io1pcg2ja9krrhujpazswgz77ss46xgt88afqlk6y", act.Action.GetCore().GetExecution().Contract)
 }
 
 func TestServer_GetUnconfirmedActionsByAddress(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet, false)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
-	accountAddress := os.Getenv("accountAddress")
-	if accountAddress == "" {
-		t.Skip("skipping test; some params not set")
-	}
 
 	request := &iotexapi.GetActionsRequest{
 		Lookup: &iotexapi.GetActionsRequest_UnconfirmedByAddr{
 			UnconfirmedByAddr: &iotexapi.GetUnconfirmedActionsByAddressRequest{
-				Address: accountAddress,
+				Address: mainnetAddress,
 				Start:   1,
 				Count:   10,
 			},
@@ -173,69 +167,87 @@ func TestServer_GetUnconfirmedActionsByAddress(t *testing.T) {
 
 func TestServer_GetActionsByBlock(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet, false)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
-	blk60801Hash := os.Getenv("blk60801Hash")
-	if blk60801Hash == "" {
-		t.Skip("skipping test; some params not set")
-	}
 
 	request := &iotexapi.GetActionsRequest{
 		Lookup: &iotexapi.GetActionsRequest_ByBlk{
 			ByBlk: &iotexapi.GetActionsByBlockRequest{
-				BlkHash: blk60801Hash,
-				Start:   1,
+				BlkHash: mainnetBlockHash,
+				Start:   0,
 				Count:   10,
 			},
 		},
 	}
 	res, err := svr.GetActions(request)
 	require.NoError(err)
-	require.Equal(0, len(res.ActionInfo))
+	require.Equal(2, len(res.ActionInfo))
+
+	actionHash1 := "246b9b47f390a6faee9d725d9637b00b7ec56fa7cdffe3d39aeaad277edbb8f4"
+	act := res.ActionInfo[0]
+	require.Equal(actionHash1, act.ActHash)
+	require.Equal(uint64(1), act.Action.GetCore().GetNonce())
+	actionCore := act.Action.GetCore().GetAction()
+	_, ok := actionCore.(*iotextypes.ActionCore_Execution)
+	require.True(ok)
+	require.Equal("1020000000000000000000", act.Action.GetCore().GetExecution().Amount)
+	require.Equal("io1pcg2ja9krrhujpazswgz77ss46xgt88afqlk6y", act.Action.GetCore().GetExecution().Contract)
+
+	actionHash2 := "66f837de6459e045c66f42f69204678c56e7fb752109f3ba8aef63d38cb4529a"
+	act = res.ActionInfo[1]
+	require.Equal(actionHash2, act.ActHash)
+	require.Equal(uint64(0), act.Action.GetCore().GetNonce())
+	actionCore = act.Action.GetCore().GetAction()
+	_, ok = actionCore.(*iotextypes.ActionCore_GrantReward)
+	require.True(ok)
+	require.Equal(iotextypes.RewardType_BlockReward, act.Action.GetCore().GetGrantReward().GetType())
+	require.Equal(uint64(56664), act.Action.GetCore().GetGrantReward().GetHeight())
 }
 
 func TestServer_GetBlockMetas(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet, false)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
 
 	request := &iotexapi.GetBlockMetasRequest{
 		Lookup: &iotexapi.GetBlockMetasRequest_ByIndex{
 			ByIndex: &iotexapi.GetBlockMetasByIndexRequest{
-				Start: 10,
-				Count: 10,
+				Start: 214612,
+				Count: 1,
 			},
 		},
 	}
 	res, err := svr.GetBlockMetas(request)
 	require.NoError(err)
-	require.Equal(10, len(res.GetBlkMetas()))
+	require.Equal(1, len(res.GetBlkMetas()))
+	require.Equal(uint64(0), res.Total)
 	var prevBlkPb *iotextypes.BlockMeta
 	for _, blkPb := range res.BlkMetas {
 		if prevBlkPb != nil {
 			require.True(blkPb.Height > prevBlkPb.Height)
 		}
 		prevBlkPb = blkPb
+		require.Equal("b85279d7321c856ed3942824db5d35297d473250e23166bd52b2b8c7fb2751b6", blkPb.Hash)
+		require.Equal(uint64(214612), blkPb.Height)
+		require.Equal(int64(1), blkPb.NumActions)
+		require.Equal("0", blkPb.TransferAmount)
+		require.Equal("io1ztqalgh0zl9309a48k7wjwyump6agq24cf4zdq", blkPb.ProducerAddress)
+		require.Equal("ce0d705691005544bec96e288687c423558456109ddecb42e29a7330da1c07d7", blkPb.TxRoot)
+		require.Equal("93fd9a3d594776cc512061af60b88acce2cd657a1f843abc9680c7fa0f3188e7", blkPb.ReceiptRoot)
+		require.Equal("4cd3222168049d58a0b7c44c3a90614d37858b1ed5f3b6af561bf243becd293e", blkPb.DeltaStateDigest)
 	}
 
 }
 
 func TestServer_GetBlockMeta(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet, false)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
-	blk60801Hash := os.Getenv("blk60801Hash")
-	blk60801HashNumActions := os.Getenv("blk60801HashNumActions")
-	blk60801HashTransferAmount := os.Getenv("blk60801HashTransferAmount")
-	if blk60801Hash == "" || blk60801HashNumActions == "" || blk60801HashTransferAmount == "" {
-		t.Skip("skipping test; some params not set")
-	}
 
-	blk60801HashNumActionsInt, err := strconv.ParseInt(blk60801HashNumActions, 10, 64)
 	request := &iotexapi.GetBlockMetasRequest{
 		Lookup: &iotexapi.GetBlockMetasRequest_ByHash{
 			ByHash: &iotexapi.GetBlockMetaByHashRequest{
-				BlkHash: blk60801Hash,
+				BlkHash: mainnetBlockHash,
 			},
 		},
 	}
@@ -243,82 +255,72 @@ func TestServer_GetBlockMeta(t *testing.T) {
 	require.NoError(err)
 	require.Equal(1, len(res.BlkMetas))
 	blkPb := res.BlkMetas[0]
-	require.Equal(blk60801HashNumActionsInt, blkPb.NumActions)
-	require.Equal(blk60801HashTransferAmount, blkPb.TransferAmount)
+	require.Equal(int64(2), blkPb.NumActions)
+	require.Equal("0", blkPb.TransferAmount)
 }
 
 func TestServer_GetChainMeta(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet, false)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
 
 	res, err := svr.GetChainMeta(&iotexapi.GetChainMetaRequest{})
 	require.NoError(err)
 	chainMetaPb := res.ChainMeta
-	require.Equal(true, chainMetaPb.Height > 1)
-	require.Equal(true, chainMetaPb.NumActions > 1)
+	require.Equal(true, chainMetaPb.Height > 208646)
+	require.Equal(true, chainMetaPb.NumActions > 211443)
 	require.Equal(true, chainMetaPb.Tps >= 0)
-	require.Equal(true, chainMetaPb.Epoch.Num > 1)
-	require.Equal(true, chainMetaPb.Epoch.Height > 1)
-	require.Equal(true, chainMetaPb.Epoch.GravityChainStartHeight > 1)
+	require.Equal(true, chainMetaPb.Epoch.Num >= 580)
+	require.Equal(true, chainMetaPb.Epoch.Height >= 208441)
+	require.Equal(true, chainMetaPb.Epoch.GravityChainStartHeight >= 7769900)
 }
 
 func TestServer_GetServerMeta(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet, false)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
 	res, err := svr.GetServerMeta(&iotexapi.GetServerMetaRequest{})
 	require.NoError(err)
-	getServerMetaPackageCommitID := os.Getenv("getServerMetaPackageCommitID")
-	if getServerMetaPackageCommitID == "" {
-		t.Skip("skipping test; some params not set")
-	}
-	require.Equal(getServerMetaPackageCommitID, res.GetServerMeta().PackageCommitID)
+	meta := res.GetServerMeta()
+	require.NotEqual("", meta.PackageCommitID)
+	require.Equal("clean", meta.GitStatus)
+	ti, err := time.Parse("2006-01-02-UTC/15:04:05", meta.BuildTime)
+	require.NoError(err)
+	expected, err := time.Parse("2006-01-02-UTC/15:04:05", "2019-04-30-UTC/22:09:37")
+	require.NoError(err)
+	require.True(ti.After(expected))
 }
 
 func TestServer_ReadState(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet, false)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
-	accountAddress := os.Getenv("accountAddress")
-	accountAddressUnclaimedBalance := os.Getenv("accountAddressUnclaimedBalance")
-	if accountAddress == "" || accountAddressUnclaimedBalance == "" {
-		t.Skip("skipping test; some params not set")
-	}
-
 	out, err := svr.ReadState(&iotexapi.ReadStateRequest{
 		ProtocolID: []byte("rewarding"),
-		MethodName: []byte("UnclaimedBalance"),
-		Arguments:  [][]byte{[]byte(accountAddress)},
+		MethodName: []byte("TotalBalance"),
 	})
 	require.NoError(err)
 	require.NotNil(out)
 	val, ok := big.NewInt(0).SetString(string(out.Data), 10)
 	require.True(ok)
-	expected, ok := new(big.Int).SetString(accountAddressUnclaimedBalance, 10)
-	require.True(ok)
-	require.Equal(0, val.Cmp(expected))
+	require.Equal(1, val.Cmp(big.NewInt(0)))
 }
 
 func TestServer_GetReceiptByAction(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet, false)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
-	actionHash := os.Getenv("actionHash")
-	getReceiptByActionBlkHeight := os.Getenv("getReceiptByActionBlkHeight")
-	if actionHash == "" || getReceiptByActionBlkHeight == "" {
-		t.Skip("skipping test; some params not set")
-	}
-
-	getReceiptByActionBlkHeightInt, err := strconv.ParseUint(getReceiptByActionBlkHeight, 10, 64)
-	request := &iotexapi.GetReceiptByActionRequest{ActionHash: actionHash}
+	request := &iotexapi.GetReceiptByActionRequest{ActionHash: mainnetReceiptHash}
 	res, err := svr.GetReceiptByAction(request)
 	require.NoError(err)
 	require.NotNil(res)
 	receiptPb := res.ReceiptInfo.Receipt
-	require.Equal(uint64(3151), receiptPb.Status)
-	require.Equal(getReceiptByActionBlkHeightInt, receiptPb.BlkHeight)
+	require.Equal(uint64(1), receiptPb.Status)
+	require.Equal(uint64(56664), receiptPb.BlkHeight)
 	require.NotEqual(hash.ZeroHash256, res.ReceiptInfo.BlkHash)
+	require.Equal(uint64(98239), res.ReceiptInfo.Receipt.GasConsumed)
+	require.Equal("io1pcg2ja9krrhujpazswgz77ss46xgt88afqlk6y", res.ReceiptInfo.Receipt.Logs[0].ContractAddress)
+	require.Equal(1, len(res.ReceiptInfo.Receipt.Logs))
 }
 
 func TestServer_ReadContract(t *testing.T) {
@@ -352,7 +354,7 @@ func TestServer_ReadContract(t *testing.T) {
 
 func TestServer_SuggestGasPrice(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet, false)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
 	res, err := svr.SuggestGasPrice(&iotexapi.SuggestGasPriceRequest{})
 	require.NoError(err)
@@ -361,7 +363,7 @@ func TestServer_SuggestGasPrice(t *testing.T) {
 
 func TestServer_EstimateGasForAction(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet, false)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
 
 	act, err := account.NewAccountFromPrivateKey(PrivateKey)
@@ -384,22 +386,14 @@ func TestServer_EstimateGasForAction(t *testing.T) {
 
 func TestServer_GetEpochMeta(t *testing.T) {
 	require := require.New(t)
-	svr, err := NewRPCMethod(testnet, false)
+	svr, err :=NewRPCMethod(mainnet, true)
 	require.NoError(err)
-	epochDataHeight := os.Getenv("epochDataHeight")
-	epochGravityChainStartHeight := os.Getenv("epochGravityChainStartHeight")
-	if epochDataHeight == "" || epochGravityChainStartHeight == "" {
-		t.Skip("skipping test; some params not set")
-	}
-
-	epochDataHeightInt, err := strconv.ParseUint(epochDataHeight, 10, 64)
-	epochGravityChainStartHeightInt, err := strconv.ParseUint(epochGravityChainStartHeight, 10, 64)
 
 	res, err := svr.GetEpochMeta(&iotexapi.GetEpochMetaRequest{EpochNumber: 1})
 	require.NoError(err)
 	require.Equal(uint64(1), res.EpochData.Num)
-	require.Equal(epochDataHeightInt, res.EpochData.Height)
-	require.Equal(epochGravityChainStartHeightInt, res.EpochData.GravityChainStartHeight)
+	require.Equal(uint64(1), res.EpochData.Height)
+	require.Equal(uint64(0x743088), res.EpochData.GravityChainStartHeight)
 	require.Equal(360, int(res.TotalBlocks))
-	require.Equal(24, len(res.BlockProducersInfo))
+	require.Equal(36, len(res.BlockProducersInfo))
 }
