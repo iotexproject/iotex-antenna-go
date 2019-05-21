@@ -51,18 +51,30 @@ func NewAccount() (Account, error) {
 	}, nil
 }
 
-// NewAccountFromPrivateKey generates an account from private key string
-func NewAccountFromPrivateKey(privateKey string) (Account, error) {
-	pk, err := crypto.HexStringToPrivateKey(privateKey)
+// HexStringToAccount generates an account from private key string
+func HexStringToAccount(privateKey string) (Account, error) {
+	sk, err := crypto.HexStringToPrivateKey(privateKey)
 	if err != nil {
 		return nil, err
 	}
-	addr, err := address.FromBytes(pk.PublicKey().Hash())
+	addr, err := address.FromBytes(sk.PublicKey().Hash())
 	if err != nil {
 		return nil, err
 	}
 	return &account{
-		pk,
+		sk,
+		addr.String(),
+	}, nil
+}
+
+// PrivateKeyToAccount generates an account from an existing private key interface
+func PrivateKeyToAccount(key crypto.PrivateKey) (Account, error) {
+	addr, err := address.FromBytes(key.PublicKey().Hash())
+	if err != nil {
+		return nil, err
+	}
+	return &account{
+		key,
 		addr.String(),
 	}, nil
 }

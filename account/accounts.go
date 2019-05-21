@@ -40,12 +40,21 @@ func (acts *Accounts) GetAccount(addr string) (Account, error) {
 	return acc, nil
 }
 
-// PrivateKeyToAccount new Account by privateKey
-func (acts *Accounts) PrivateKeyToAccount(privateKey string) (Account, error) {
-	acc, err := NewAccountFromPrivateKey(privateKey)
-	if err != nil {
-		return nil, err
+// AddAccount add an account
+func (acts *Accounts) AddAccount(acc Account) error {
+	addr := acc.Address()
+	if _, ok := acts.accounts[addr]; ok {
+		return errors.Errorf("Account %s already exists", addr)
 	}
-	acts.accounts[acc.Address()] = acc
-	return acc, nil
+	acts.accounts[addr] = acc
+	return nil
+}
+
+// RemoveAccount removes an account
+func (acts *Accounts) RemoveAccount(addr string) {
+	if v, ok := acts.accounts[addr]; ok {
+		// zero the private key
+		v.Zero()
+	}
+	delete(acts.accounts, addr)
 }

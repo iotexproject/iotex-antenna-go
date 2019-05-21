@@ -25,7 +25,7 @@ var (
 func TestActionTransfer(t *testing.T) {
 	assert := assert.New(t)
 
-	testAcct, err := account.NewAccountFromPrivateKey(PrivateKey)
+	testAcct, err := account.HexStringToAccount(PrivateKey)
 	assert.NoError(err)
 	ac, err := NewTransfer(123, uint64(888), big.NewInt(999), big.NewInt(456), testAcct.Address(), []byte("hello world!"))
 	assert.NoError(err)

@@ -35,10 +35,14 @@ func TestHash256b(t *testing.T) {
 func TestAccount(t *testing.T) {
 	assert := assert.New(t)
 
-	act, err := NewAccountFromPrivateKey(PrivateKey)
+	act, err := HexStringToAccount(PrivateKey)
 	assert.NoError(err)
 	assert.Equal(Address, act.Address())
 	assert.Equal(PublicKey, act.PrivateKey().PublicKey().HexString())
+
+	act1, err := PrivateKeyToAccount(act.PrivateKey())
+	assert.NoError(err)
+	assert.Equal(act, act1)
 
 	b, err := act.Sign([]byte(text))
 	assert.NoError(err)
@@ -48,4 +52,8 @@ func TestAccount(t *testing.T) {
 	)
 	// verify the signature
 	assert.True(act.Verify([]byte(text), b))
+
+	act.Zero()
+	b, err = act.Sign([]byte(text))
+	assert.Equal("invalid private key", err.Error())
 }

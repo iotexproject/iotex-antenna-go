@@ -27,14 +27,20 @@ func TestAccounts_Create(t *testing.T) {
 	assert.Equal(act, b)
 }
 
-func TestAccounts_PrivateKeyToAccount(t *testing.T) {
+func TestAccounts_AddAccount(t *testing.T) {
 	assert := assert.New(t)
 
 	acts := NewAccounts()
-	act, err := acts.PrivateKeyToAccount(PrivateKey)
+	act, err := HexStringToAccount(PrivateKey)
 	assert.NoError(err)
+	assert.NoError(acts.AddAccount(act))
 
 	b, err := acts.GetAccount(act.Address())
 	assert.NoError(err)
 	assert.Equal(act, b)
+
+	acts.RemoveAccount(act.Address())
+	b, err = acts.GetAccount(act.Address())
+	assert.Error(err)
+	assert.Nil(b)
 }
