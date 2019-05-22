@@ -11,6 +11,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/iotexproject/iotex-antenna-go/account"
 )
 
 const (
@@ -25,8 +27,10 @@ func TestTransfer(t *testing.T) {
 	iotx, err := NewIotx(testnet, false)
 	require.NoError(err)
 	defer iotx.Close()
-	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
+
+	acc, err := account.HexStringToAccount(accountPrivateKey)
 	require.NoError(err)
+	require.NoError(iotx.Accounts.AddAccount(acc))
 
 	req := &TransferRequest{
 		From:     acc.Address(),
@@ -47,8 +51,10 @@ func TestDeployContract(t *testing.T) {
 	iotx, err := NewIotx(testnet, false)
 	require.NoError(err)
 	defer iotx.Close()
-	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
+
+	acc, err := account.HexStringToAccount(accountPrivateKey)
 	require.NoError(err)
+	require.NoError(iotx.Accounts.AddAccount(acc))
 
 	req := &ContractRequest{
 		From:     acc.Address(),
@@ -73,8 +79,10 @@ func TestReadContract(t *testing.T) {
 	iotx, err := NewIotx(mainnet, true)
 	require.NoError(err)
 	defer iotx.Close()
-	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
+
+	acc, err := account.HexStringToAccount(accountPrivateKey)
 	require.NoError(err)
+	require.NoError(iotx.Accounts.AddAccount(acc))
 
 	req := &ContractRequest{
 		From:     acc.Address(),
@@ -95,9 +103,10 @@ func TestExecuteContract(t *testing.T) {
 	iotx, err := NewIotx(testnet, false)
 	require.NoError(err)
 	defer iotx.Close()
-	acc, err := iotx.Accounts.PrivateKeyToAccount(accountPrivateKey)
+
+	acc, err := account.HexStringToAccount(accountPrivateKey)
 	require.NoError(err)
-	require.NotNil(acc)
+	require.NoError(iotx.Accounts.AddAccount(acc))
 
 	req := &ContractRequest{
 		From:     acc.Address(),

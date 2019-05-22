@@ -60,13 +60,11 @@ fmt:
 	$(GOCMD) fmt ./...
 
 .PHONY: test
-test: fmt lint
+test: lint fmt
 	$(GOTEST) ./... -v -short -race
 
 .PHONY: lint
 lint:
-	@echo "Installing golint..."
-	go get golang.org/x/lint/golint
 	go list ./... | grep -v /vendor/ | xargs $(GOLINT)
 
 .PHONY: clean

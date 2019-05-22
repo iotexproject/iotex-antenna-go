@@ -47,8 +47,8 @@ func TestServer_GetAccount(t *testing.T) {
 	require.NoError(err)
 	accountMeta := res.AccountMeta
 	require.Equal(account, accountMeta.Address)
-	require.True(7 <= accountMeta.Nonce)
-	require.True(9 == accountMeta.NumActions)
+	require.True(9 <= accountMeta.Nonce)
+	require.True(11 <= accountMeta.NumActions)
 }
 
 func TestServer_GetActions(t *testing.T) {
@@ -81,7 +81,7 @@ func TestServer_SendAction(t *testing.T) {
 	accountPendingNonceInt, err := strconv.ParseUint(accountPendingNonce, 10, 64)
 	require.NoError(err)
 
-	act, err := account.NewAccountFromPrivateKey(accountPrivateKey)
+	act, err := account.HexStringToAccount(accountPrivateKey)
 	require.NoError(err)
 	transfer, err := action.NewTransfer(
 		accountPendingNonceInt,
@@ -366,7 +366,7 @@ func TestServer_EstimateGasForAction(t *testing.T) {
 	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
 
-	act, err := account.NewAccountFromPrivateKey(PrivateKey)
+	act, err := account.HexStringToAccount(PrivateKey)
 	require.NoError(err)
 	transfer, err := action.NewTransfer(
 		3,
@@ -386,7 +386,7 @@ func TestServer_EstimateGasForAction(t *testing.T) {
 
 func TestServer_GetEpochMeta(t *testing.T) {
 	require := require.New(t)
-	svr, err :=NewRPCMethod(mainnet, true)
+	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
 
 	res, err := svr.GetEpochMeta(&iotexapi.GetEpochMetaRequest{EpochNumber: 1})
