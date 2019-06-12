@@ -36,11 +36,12 @@ type AuthedClient interface {
 	ReadOnlyClient
 
 	Contract(contractAddr, abi string) (Contract, error)
-	Transfer(to string, value big.Int) TransferCaller
+	Transfer(to string, value *big.Int) TransferCaller
 	DeployContract(abi string, data []byte) DeployContractCaller
 }
 
 type ReadOnlyClient interface {
+	ReadOnlyContract(contractAddr, abi string) (ReadOnlyContract, error)
 	GetReceipt(actionHash string) GetReceiptCaller
 }
 
