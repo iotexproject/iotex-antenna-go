@@ -4,13 +4,16 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/iotexproject/go-pkgs/hash"
+	"github.com/iotexproject/iotex-address/address"
 	"github.com/iotexproject/iotex-antenna-go/account"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 	"google.golang.org/grpc"
 )
 
 type SendActionCaller interface {
-	Call(ctx context.Context, opts ...grpc.CallOption) (actHash string, err error)
+	Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error)
 }
 
 type TransferCaller interface {
@@ -35,14 +38,14 @@ type GetReceiptCaller interface {
 type AuthedClient interface {
 	ReadOnlyClient
 
-	Contract(contractAddr, abi string) (Contract, error)
-	Transfer(to string, value *big.Int) TransferCaller
-	DeployContract(abi string, data []byte) DeployContractCaller
+	Contract(contract address.Address, abi abi.ABI) (Contract, error)
+	Transfer(to address.Address, value *big.Int) TransferCaller
+	DeployContract(data []byte) DeployContractCaller
 }
 
 type ReadOnlyClient interface {
-	ReadOnlyContract(contractAddr, abi string) (ReadOnlyContract, error)
-	GetReceipt(actionHash string) GetReceiptCaller
+	ReadOnlyContract(contract address.Address, abi abi.ABI) (ReadOnlyContract, error)
+	GetReceipt(actionHash hash.Hash256) GetReceiptCaller
 }
 
 func NewAuthedClient(iotexapi.APIServiceClient, account.Account) AuthedClient { return nil }

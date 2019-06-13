@@ -5,6 +5,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/iotexproject/iotex-address/address"
 	"google.golang.org/grpc"
 )
 
@@ -38,6 +39,6 @@ type ReadOnlyContract interface {
 }
 
 type contract struct {
-	address string
+	address address.Address
 	abi     *abi.ABI
 }
