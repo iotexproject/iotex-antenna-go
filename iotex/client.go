@@ -1,7 +1,6 @@
 package iotex
 
 import (
-	"context"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -9,45 +8,68 @@ import (
 	"github.com/iotexproject/iotex-address/address"
 	"github.com/iotexproject/iotex-antenna-go/account"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
-	"google.golang.org/grpc"
 )
 
-type SendActionCaller interface {
-	Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error)
+type authedClient struct {
+	client
+
+	account account.Account
 }
 
-type TransferCaller interface {
-	SendActionCaller
-
-	SetGasPrice(*big.Int) TransferCaller
-	SetGasLimit(uint64) TransferCaller
-	SetPayload([]byte) TransferCaller
+func NewAuthedClient(api iotexapi.APIServiceClient, a account.Account) AuthedClient {
+	return &authedClient{
+		client: client{
+			api: api,
+		},
+		account: a,
+	}
 }
 
-type DeployContractCaller interface {
-	SendActionCaller
-
-	SetGasPrice(*big.Int) DeployContractCaller
-	SetGasLimit(uint64) DeployContractCaller
+func (c *authedClient) Contract(co address.Address, abi abi.ABI) Contract {
+	return &contract{
+		address: co,
+		abi:     &abi,
+		api:     c.api,
+		account: c.account,
+	}
 }
 
-type GetReceiptCaller interface {
-	Call(ctx context.Context, opts ...grpc.CallOption) (*iotexapi.GetReceiptByActionResponse, error)
+func (c *authedClient) Transfer(to address.Address, value *big.Int) TransferCaller {
+	return &transferCaller{
+		account:   c.account,
+		api:       c.api,
+		amount:    value,
+		recipient: to,
+	}
 }
 
-type AuthedClient interface {
-	ReadOnlyClient
-
-	Contract(contract address.Address, abi abi.ABI) (Contract, error)
-	Transfer(to address.Address, value *big.Int) TransferCaller
-	DeployContract(data []byte) DeployContractCaller
+func (c *authedClient) DeployContract(data []byte) DeployContractCaller {
+	return &deployContractCaller{
+		account: c.account,
+		api:     c.api,
+		data:    data,
+	}
 }
 
-type ReadOnlyClient interface {
-	ReadOnlyContract(contract address.Address, abi abi.ABI) (ReadOnlyContract, error)
-	GetReceipt(actionHash hash.Hash256) GetReceiptCaller
+func NewReadOnlyClient(c iotexapi.APIServiceClient) ReadOnlyClient {
+	return &client{api: c}
 }
 
-func NewAuthedClient(iotexapi.APIServiceClient, account.Account) AuthedClient { return nil }
+type client struct {
+	api iotexapi.APIServiceClient
+}
 
-func NewReadOnlyClient(iotexapi.APIServiceClient) ReadOnlyClient { return nil }
+func (c *client) ReadOnlyContract(contract address.Address, abi abi.ABI) ReadOnlyContract {
+	return &readOnlyContract{
+		address: contract,
+		abi:     &abi,
+		api:     c.api,
+	}
+}
+
+func (c *client) GetReceipt(actionHash hash.Hash256) GetReceiptCaller {
+	return &getReceiptCaller{
+		api:        c.api,
+		actionHash: actionHash,
+	}
+}

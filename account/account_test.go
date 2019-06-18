@@ -37,7 +37,7 @@ func TestAccount(t *testing.T) {
 
 	act, err := HexStringToAccount(PrivateKey)
 	assert.NoError(err)
-	assert.Equal(Address, act.Address())
+	assert.Equal(Address, act.Address().String())
 	assert.Equal(PublicKey, act.PrivateKey().PublicKey().HexString())
 
 	act1, err := PrivateKeyToAccount(act.PrivateKey())

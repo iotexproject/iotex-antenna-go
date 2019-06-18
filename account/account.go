@@ -16,7 +16,7 @@ type (
 	// Account is a user account
 	Account interface {
 		// Address returns the IoTeX address
-		Address() string
+		Address() address.Address
 		// PrivateKey returns the embedded private key interface
 		PrivateKey() crypto.PrivateKey
 		// PublicKey returns the embedded public key interface
@@ -31,7 +31,7 @@ type (
 
 	account struct {
 		private crypto.PrivateKey
-		address string
+		address address.Address
 	}
 )
 
@@ -47,7 +47,7 @@ func NewAccount() (Account, error) {
 	}
 	return &account{
 		pk,
-		addr.String(),
+		addr,
 	}, nil
 }
 
@@ -63,7 +63,7 @@ func HexStringToAccount(privateKey string) (Account, error) {
 	}
 	return &account{
 		sk,
-		addr.String(),
+		addr,
 	}, nil
 }
 
@@ -75,12 +75,12 @@ func PrivateKeyToAccount(key crypto.PrivateKey) (Account, error) {
 	}
 	return &account{
 		key,
-		addr.String(),
+		addr,
 	}, nil
 }
 
 // Address returns the IoTeX address
-func (act *account) Address() string {
+func (act *account) Address() address.Address {
 	return act.address
 }
 
