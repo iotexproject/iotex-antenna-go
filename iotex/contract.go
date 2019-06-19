@@ -8,12 +8,14 @@ import (
 	"github.com/iotexproject/iotex-antenna-go/account"
 )
 
+// Data is the data returned from read contract.
 type Data struct {
 	method string
 	abi    *abi.ABI
 	Raw    []byte
 }
 
+// Unmarshal unmarshals data into a data holder object.
 func (d Data) Unmarshal(v interface{}) error { return d.abi.Unpack(v, d.method, d.Raw) }
 
 type contract struct {

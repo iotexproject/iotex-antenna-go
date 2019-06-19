@@ -8,6 +8,7 @@ package unit
 
 import "math/big"
 
+// IotexUnit defines iotex unit type.
 type IotexUnit int64
 
 const (
@@ -27,6 +28,7 @@ const (
 	Iotx = Jin * 1000
 )
 
+// FromString converts string to IotexUnit.
 func (u *IotexUnit) FromString(s string) {
 	var unitInt IotexUnit
 	switch s {

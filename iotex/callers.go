@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc"
 )
 
+// ProtocolVersion is the iotex protocol version to use. Currently 1.
 const ProtocolVersion = 1
 
 type sendActionCaller struct {

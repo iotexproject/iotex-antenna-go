@@ -16,6 +16,7 @@ type authedClient struct {
 	account account.Account
 }
 
+// NewAuthedClient creates an AuthedClient using given account's credentials.
 func NewAuthedClient(api iotexapi.APIServiceClient, a account.Account) AuthedClient {
 	return &authedClient{
 		client: client{
@@ -51,6 +52,7 @@ func (c *authedClient) DeployContract(data []byte) DeployContractCaller {
 	}
 }
 
+// NewReadOnlyClient creates a ReadOnlyClient.
 func NewReadOnlyClient(c iotexapi.APIServiceClient) ReadOnlyClient {
 	return &client{api: c}
 }

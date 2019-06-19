@@ -11,11 +11,13 @@ import (
 	"google.golang.org/grpc"
 )
 
+// SendActionCaller is used to perform a send action call.
 type SendActionCaller interface {
 	API() iotexapi.APIServiceClient
 	Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error)
 }
 
+// TransferCaller is used to perform a transfer call.
 type TransferCaller interface {
 	SendActionCaller
 
@@ -24,6 +26,7 @@ type TransferCaller interface {
 	SetPayload([]byte) TransferCaller
 }
 
+// DeployContractCaller is used to perform a deploy contract call.
 type DeployContractCaller interface {
 	SendActionCaller
 
@@ -32,10 +35,12 @@ type DeployContractCaller interface {
 	SetGasLimit(uint64) DeployContractCaller
 }
 
+// GetReceiptCaller is used to perform a get receipt call.
 type GetReceiptCaller interface {
 	Call(ctx context.Context, opts ...grpc.CallOption) (*iotexapi.GetReceiptByActionResponse, error)
 }
 
+// AuthedClient is an iotex client which associate with an account credentials, so it can perform write actions.
 type AuthedClient interface {
 	ReadOnlyClient
 
@@ -44,15 +49,18 @@ type AuthedClient interface {
 	DeployContract(data []byte) DeployContractCaller
 }
 
+// ReadOnlyClient is an iotex client which can perform read actions.
 type ReadOnlyClient interface {
 	ReadOnlyContract(contract address.Address, abi abi.ABI) ReadOnlyContract
 	GetReceipt(actionHash hash.Hash256) GetReceiptCaller
 }
 
+// ReadContractCaller is used to perform a read contract call.
 type ReadContractCaller interface {
 	Call(ctx context.Context, opts ...grpc.CallOption) (Data, error)
 }
 
+// ExecuteContractCaller is used to perform an execute contract call.
 type ExecuteContractCaller interface {
 	SendActionCaller
 
@@ -61,12 +69,14 @@ type ExecuteContractCaller interface {
 	SetAmount(*big.Int) ExecuteContractCaller
 }
 
+// Contract allows to read or execute on this contract's methods.
 type Contract interface {
 	ReadOnlyContract
 
 	Execute(method string, args ...interface{}) ExecuteContractCaller
 }
 
+// ReadOnlyContract allows to read on this contract's methods.
 type ReadOnlyContract interface {
 	Read(method string, args ...interface{}) ReadContractCaller
 }

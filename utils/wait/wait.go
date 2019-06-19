@@ -11,6 +11,8 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Wait waits on a send action caller to finish (wait 20 second), then fetch the receipt of the action,
+// to make sure the action is on chain.
 func Wait(ctx context.Context, caller iotex.SendActionCaller, opts ...grpc.CallOption) error {
 	h, err := caller.Call(ctx, opts...)
 	if err != nil {
