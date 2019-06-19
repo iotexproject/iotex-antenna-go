@@ -6,7 +6,10 @@
 
 package account
 
-import "github.com/pkg/errors"
+import (
+	"github.com/iotexproject/iotex-address/address"
+	"github.com/pkg/errors"
+)
 
 // Accounts type
 type Accounts struct {
@@ -27,13 +30,13 @@ func (acts *Accounts) Create() (Account, error) {
 	if err != nil {
 		return nil, err
 	}
-	acts.accounts[acc.Address()] = acc
+	acts.accounts[acc.Address().String()] = acc
 	return acc, nil
 }
 
 // GetAccount by address
-func (acts *Accounts) GetAccount(addr string) (Account, error) {
-	acc, ok := acts.accounts[addr]
+func (acts *Accounts) GetAccount(addr address.Address) (Account, error) {
+	acc, ok := acts.accounts[addr.String()]
 	if !ok {
 		return nil, errors.Errorf("Account %s does not exist", addr)
 	}
@@ -43,18 +46,18 @@ func (acts *Accounts) GetAccount(addr string) (Account, error) {
 // AddAccount add an account
 func (acts *Accounts) AddAccount(acc Account) error {
 	addr := acc.Address()
-	if _, ok := acts.accounts[addr]; ok {
+	if _, ok := acts.accounts[addr.String()]; ok {
 		return errors.Errorf("Account %s already exists", addr)
 	}
-	acts.accounts[addr] = acc
+	acts.accounts[addr.String()] = acc
 	return nil
 }
 
 // RemoveAccount removes an account
-func (acts *Accounts) RemoveAccount(addr string) {
-	if v, ok := acts.accounts[addr]; ok {
+func (acts *Accounts) RemoveAccount(addr address.Address) {
+	if v, ok := acts.accounts[addr.String()]; ok {
 		// zero the private key
 		v.Zero()
 	}
-	delete(acts.accounts, addr)
+	delete(acts.accounts, addr.String())
 }
