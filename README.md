@@ -65,7 +65,7 @@ https://github.com/iotexproject/iotex-tube
 	if err != nil {
 		log.Fatal(err)
 	}
-	hash, err := c.Transfer(to, big.NewInt(10).Call(context.Background())
+	hash, err := c.Transfer(to, big.NewInt(10)).Call(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
