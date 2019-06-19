@@ -15,7 +15,6 @@ network for IoT powered by scalability- and privacy-centric blockchains. Please 
 | Components | Version | Description |
 |----------|-------------|-------------|
 | [Golang](https://golang.org) | &ge; 1.11.5 | Go programming language |
-| [Dep](https://golang.github.io/dep/) | &ge; 0.5.0 | Dependency management tool, required only when you update dependencies |
 
 ### Add to your project
 
