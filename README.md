@@ -35,27 +35,39 @@ package main
 import (
 	"log"
 
-	"github.com/iotexproject/iotex-antenna-go/antenna"
+	"github.com/iotexproject/iotex-antenna-go/iotex"
 )
 
 const (
-	host = "api.testnet.iotex.one:80"
+	host = "api.testnet.iotex.one:443"
 )
 
 func main() {
-	antenna, err := antenna.NewAntenna(host)
-
+https://github.com/iotexproject/iotex-tube
+	// Create grpc connection
+	conn, err := NewDefaultGRPCConn(host)
 	if err != nil {
-		log.Fatalf("New antenna error: %v", err)
+		log.Fatal(err)
 	}
-
+	defer conn.Close()
+	
 	// Add account by private key
-	antenna.Iotx.Accounts.PrivateKeyToAccount("...")
-
+	acc, err := account.HexStringToAccount("...")
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+	// create client
+	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
+	
 	// transfer
-	antenna.Iotx.SendTransfer(...)
-
-	// deploy contract
-	antenna.Iotx.DeployContract(...)
+	to, err := address.FromString("to...")
+	if err != nil {
+		log.Fatal(err)
+	}
+	hash, err := c.Transfer(to, big.NewInt(10).Call(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 ```
