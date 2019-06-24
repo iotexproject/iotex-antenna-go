@@ -42,7 +42,7 @@ func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (h
 	case *iotextypes.Transfer:
 		core.Action = &iotextypes.ActionCore_Transfer{Transfer: a}
 	default:
-		return hash.ZeroHash256, errcodes.New("not support action core", errcodes.InternalError)
+		return hash.ZeroHash256, errcodes.New("not support action call", errcodes.InternalError)
 	}
 
 	if c.gasLimit == nil {
