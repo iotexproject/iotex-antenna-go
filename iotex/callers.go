@@ -41,6 +41,8 @@ func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (h
 		core.Action = &iotextypes.ActionCore_Execution{Execution: a}
 	case *iotextypes.Transfer:
 		core.Action = &iotextypes.ActionCore_Transfer{Transfer: a}
+	default:
+		return hash.ZeroHash256, errcodes.New("not support action call", errcodes.InternalError)
 	}
 
 	if c.gasLimit == nil {
@@ -65,6 +67,7 @@ func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (h
 		}
 		c.gasPrice = big.NewInt(0).SetUint64(response.GetGasPrice())
 	}
+	core.GasPrice = c.gasPrice.String()
 
 	sealed, err := sign(c.account, core)
 	if err != nil {
