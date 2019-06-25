@@ -2,7 +2,7 @@ package iotex
 
 import (
 	"github.com/gogo/protobuf/proto"
-	"github.com/iotexproject/iotex-antenna-go/account"
+	"github.com/iotexproject/iotex-antenna-go/v2/account"
 	"github.com/iotexproject/iotex-proto/golang/iotextypes"
 )
 

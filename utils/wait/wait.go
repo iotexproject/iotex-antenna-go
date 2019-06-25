@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"time"
 
-	"github.com/iotexproject/iotex-antenna-go/iotex"
+	"github.com/iotexproject/iotex-antenna-go/v2/iotex"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
