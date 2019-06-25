@@ -178,7 +178,8 @@ func (c *deployContractCaller) Call(ctx context.Context, opts ...grpc.CallOption
 	}
 
 	exec := &iotextypes.Execution{
-		Data: c.data,
+		Data:   c.data,
+		Amount: "0",
 	}
 	sc := &sendActionCaller{
 		account:  c.account,
@@ -232,6 +233,7 @@ func (c *executeContractCaller) Call(ctx context.Context, opts ...grpc.CallOptio
 	exec := &iotextypes.Execution{
 		Contract: c.contract.String(),
 		Data:     actData,
+		Amount:   "0",
 	}
 	if c.amount != nil {
 		exec.Amount = c.amount.String()
