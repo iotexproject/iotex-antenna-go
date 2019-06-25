@@ -1,4 +1,4 @@
-module github.com/iotexproject/iotex-antenna-go
+module github.com/iotexproject/iotex-antenna-go/v2
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -14,7 +14,6 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.3.0
 	golang.org/x/crypto v0.0.0-20190422183909-d864b10871cd // indirect
-	google.golang.org/appengine v1.4.0 // indirect
 	google.golang.org/grpc v1.20.1
 )
 
