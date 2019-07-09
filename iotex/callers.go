@@ -24,16 +24,21 @@ type sendActionCaller struct {
 	gasLimit *uint64
 	gasPrice *big.Int
 	action   interface{}
+	nonce    *uint64
 }
 
 func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
-	res, err := c.api.GetAccount(ctx, &iotexapi.GetAccountRequest{Address: c.account.Address().String()}, opts...)
-	if err != nil {
-		return hash.ZeroHash256, errcodes.NewError(err, errcodes.RPCError)
+	if c.nonce == nil {
+		res, err := c.api.GetAccount(ctx, &iotexapi.GetAccountRequest{Address: c.account.Address().String()}, opts...)
+		if err != nil {
+			return hash.ZeroHash256, errcodes.NewError(err, errcodes.RPCError)
+		}
+		nonce := res.GetAccountMeta().GetPendingNonce()
+		c.nonce = &nonce
 	}
 	core := &iotextypes.ActionCore{
 		Version: ProtocolVersion,
-		Nonce:   res.GetAccountMeta().GetPendingNonce(),
+		Nonce:   *c.nonce,
 	}
 
 	switch a := c.action.(type) {
@@ -93,6 +98,7 @@ type transferCaller struct {
 	payload   []byte
 	gasLimit  *uint64
 	gasPrice  *big.Int
+	nonce     *uint64
 }
 
 func (c *transferCaller) SetPayload(pl []byte) TransferCaller {
@@ -114,6 +120,11 @@ func (c *transferCaller) SetGasPrice(g *big.Int) TransferCaller {
 	return c
 }
 
+func (c *transferCaller) SetNonce(n uint64) TransferCaller {
+	c.nonce = &n
+	return c
+}
+
 func (c *transferCaller) API() iotexapi.APIServiceClient { return c.api }
 
 func (c *transferCaller) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
@@ -131,6 +142,7 @@ func (c *transferCaller) Call(ctx context.Context, opts ...grpc.CallOption) (has
 		api:      c.api,
 		gasLimit: c.gasLimit,
 		gasPrice: c.gasPrice,
+		nonce:    c.nonce,
 		action:   tx,
 	}
 	return sc.Call(ctx, opts...)
@@ -141,6 +153,7 @@ type deployContractCaller struct {
 	api      iotexapi.APIServiceClient
 	gasLimit *uint64
 	gasPrice *big.Int
+	nonce    *uint64
 	abi      *abi.ABI
 	args     []interface{}
 	data     []byte
@@ -159,6 +172,11 @@ func (c *deployContractCaller) SetGasLimit(g uint64) DeployContractCaller {
 
 func (c *deployContractCaller) SetGasPrice(g *big.Int) DeployContractCaller {
 	c.gasPrice = g
+	return c
+}
+
+func (c *deployContractCaller) SetNonce(n uint64) DeployContractCaller {
+	c.nonce = &n
 	return c
 }
 
@@ -186,6 +204,7 @@ func (c *deployContractCaller) Call(ctx context.Context, opts ...grpc.CallOption
 		api:      c.api,
 		gasLimit: c.gasLimit,
 		gasPrice: c.gasPrice,
+		nonce:    c.nonce,
 		action:   exec,
 	}
 	return sc.Call(ctx, opts...)
@@ -201,6 +220,7 @@ type executeContractCaller struct {
 	amount   *big.Int
 	gasLimit *uint64
 	gasPrice *big.Int
+	nonce    *uint64
 }
 
 func (c *executeContractCaller) SetAmount(a *big.Int) ExecuteContractCaller {
@@ -215,6 +235,11 @@ func (c *executeContractCaller) SetGasLimit(g uint64) ExecuteContractCaller {
 
 func (c *executeContractCaller) SetGasPrice(g *big.Int) ExecuteContractCaller {
 	c.gasPrice = g
+	return c
+}
+
+func (c *executeContractCaller) SetNonce(n uint64) ExecuteContractCaller {
+	c.nonce = &n
 	return c
 }
 
@@ -243,6 +268,7 @@ func (c *executeContractCaller) Call(ctx context.Context, opts ...grpc.CallOptio
 		api:      c.api,
 		gasLimit: c.gasLimit,
 		gasPrice: c.gasPrice,
+		nonce:    c.nonce,
 		action:   exec,
 	}
 	return sc.Call(ctx, opts...)
