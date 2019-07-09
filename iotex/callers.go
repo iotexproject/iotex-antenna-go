@@ -6,6 +6,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/iotexproject/go-pkgs/crypto"
 	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/iotexproject/iotex-address/address"
 	"github.com/iotexproject/iotex-antenna-go/v2/account"
@@ -18,6 +19,7 @@ import (
 // ProtocolVersion is the iotex protocol version to use. Currently 1.
 const ProtocolVersion = 1
 
+// sendActionCaller implements SendActionCaller interface
 type sendActionCaller struct {
 	account  account.Account
 	api      iotexapi.APIServiceClient
@@ -85,6 +87,7 @@ func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (h
 	return h, nil
 }
 
+// transferCaller implements TransferCaller interface
 type transferCaller struct {
 	account   account.Account
 	api       iotexapi.APIServiceClient
@@ -136,6 +139,7 @@ func (c *transferCaller) Call(ctx context.Context, opts ...grpc.CallOption) (has
 	return sc.Call(ctx, opts...)
 }
 
+// deployContractCaller implements DeployContractCaller interface
 type deployContractCaller struct {
 	account  account.Account
 	api      iotexapi.APIServiceClient
@@ -191,6 +195,7 @@ func (c *deployContractCaller) Call(ctx context.Context, opts ...grpc.CallOption
 	return sc.Call(ctx, opts...)
 }
 
+// executeContractCaller implements ExecuteContractCaller interface
 type executeContractCaller struct {
 	abi      *abi.ABI
 	contract address.Address
@@ -248,6 +253,7 @@ func (c *executeContractCaller) Call(ctx context.Context, opts ...grpc.CallOptio
 	return sc.Call(ctx, opts...)
 }
 
+// readContractCaller implements ReadContractCaller interface
 type readContractCaller struct {
 	method string
 	args   []interface{}
@@ -289,6 +295,7 @@ func (c *readContractCaller) Call(ctx context.Context, opts ...grpc.CallOption) 
 	}, nil
 }
 
+// getReceiptCaller implements GetReceiptCaller interface
 type getReceiptCaller struct {
 	api        iotexapi.APIServiceClient
 	actionHash hash.Hash256
@@ -297,4 +304,49 @@ type getReceiptCaller struct {
 func (c *getReceiptCaller) Call(ctx context.Context, opts ...grpc.CallOption) (*iotexapi.GetReceiptByActionResponse, error) {
 	h := hex.EncodeToString(c.actionHash[:])
 	return c.api.GetReceiptByAction(ctx, &iotexapi.GetReceiptByActionRequest{ActionHash: h}, opts...)
+}
+
+// getExecutionResultCaller implements GetExecutionResultCaller interface
+type getExecutionResultCaller struct {
+	api        iotexapi.APIServiceClient
+	actionHash hash.Hash256
+}
+
+func (c *getExecutionResultCaller) Call(ctx context.Context, opts ...grpc.CallOption) ([]byte, error) {
+	actionResponse, err := c.api.GetActions(ctx, &iotexapi.GetActionsRequest{
+		Lookup: &iotexapi.GetActionsRequest_ByHash{
+			ByHash: &iotexapi.GetActionByHashRequest{
+				ActionHash:   hex.EncodeToString(c.actionHash[:]),
+				CheckPending: true,
+			},
+		},
+	}, opts...)
+	if err != nil {
+		return nil, errcodes.NewError(err, errcodes.RPCError)
+	}
+
+	action := actionResponse.ActionInfo[0].Action
+	if action == nil {
+		return nil, errcodes.New("action is not valid", errcodes.BadResponse)
+	}
+	pk, _ := crypto.BytesToPublicKey(action.SenderPubKey)
+	caller, _ := address.FromBytes(pk.Hash())
+
+	execution := action.GetCore().GetExecution()
+	if execution == nil {
+		return nil, errcodes.New("action is not an execution", errcodes.BadResponse)
+	}
+
+	resp, err := c.api.ReadContract(ctx, &iotexapi.ReadContractRequest{
+		Execution:     execution,
+		CallerAddress: caller.String(),
+	})
+	if err != nil {
+		return nil, errcodes.NewError(err, errcodes.RPCError)
+	}
+	result, err := hex.DecodeString(resp.Data)
+	if err != nil {
+		return nil, errcodes.NewError(err, errcodes.BadResponse)
+	}
+	return result, nil
 }

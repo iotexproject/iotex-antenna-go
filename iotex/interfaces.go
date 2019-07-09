@@ -40,6 +40,11 @@ type GetReceiptCaller interface {
 	Call(ctx context.Context, opts ...grpc.CallOption) (*iotexapi.GetReceiptByActionResponse, error)
 }
 
+// GetExecutionResultCaller is used to perform a get execution result call.
+type GetExecutionResultCaller interface {
+	Call(ctx context.Context, opts ...grpc.CallOption) ([]byte, error)
+}
+
 // AuthedClient is an iotex client which associate with an account credentials, so it can perform write actions.
 type AuthedClient interface {
 	ReadOnlyClient
@@ -51,8 +56,11 @@ type AuthedClient interface {
 
 // ReadOnlyClient is an iotex client which can perform read actions.
 type ReadOnlyClient interface {
+	API() iotexapi.APIServiceClient
+
 	ReadOnlyContract(contract address.Address, abi abi.ABI) ReadOnlyContract
 	GetReceipt(actionHash hash.Hash256) GetReceiptCaller
+	GetExecutionResult(actionHash hash.Hash256) GetExecutionResultCaller
 }
 
 // ReadContractCaller is used to perform a read contract call.

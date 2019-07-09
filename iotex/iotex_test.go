@@ -16,6 +16,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/stretchr/testify/require"
 
+	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/iotexproject/iotex-address/address"
 	"github.com/iotexproject/iotex-antenna-go/v2/account"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
@@ -100,4 +101,38 @@ func TestReadContract(t *testing.T) {
 
 	_, err = c.ReadOnlyContract(contract, abi).Read("get").Call(context.Background())
 	require.NoError(err)
+}
+
+func TestGetReceipt(t *testing.T) {
+	require := require.New(t)
+
+	conn, err := NewDefaultGRPCConn(_mainnet)
+	require.NoError(err)
+	defer conn.Close()
+
+	c := NewReadOnlyClient(iotexapi.NewAPIServiceClient(conn))
+
+	h, err := hash.HexStringToHash256("f322902f272ee9f8d716ee843e7e1edd426ba4d37ef715b8430ee34f5b40bc75")
+	require.NoError(err)
+	res, err := c.GetReceipt(h).Call(context.Background())
+	require.NoError(err)
+	require.Equal("8715ffa12a776c6bfc9c04ba904ca5ff21c0a25e369ae1262a246b1e02b3e9cf", res.ReceiptInfo.BlkHash)
+	require.Equal(uint64(1), res.ReceiptInfo.Receipt.Status)
+	require.Equal(uint64(378583), res.ReceiptInfo.Receipt.BlkHeight)
+	require.Equal("f322902f272ee9f8d716ee843e7e1edd426ba4d37ef715b8430ee34f5b40bc75", hex.EncodeToString(res.ReceiptInfo.Receipt.ActHash))
+}
+
+func TestGetExecutionResult(t *testing.T) {
+	require := require.New(t)
+	conn, err := NewDefaultGRPCConn(_mainnet)
+	require.NoError(err)
+	defer conn.Close()
+
+	c := NewReadOnlyClient(iotexapi.NewAPIServiceClient(conn))
+
+	h, err := hash.HexStringToHash256("edf65e7ccbfb05e4fbd394db1acc276029c309994879e3a8c07023a753ea8886")
+	require.NoError(err)
+	res, err := c.GetExecutionResult(h).Call(context.Background())
+	require.NoError(err)
+	require.NotNil(res)
 }

@@ -61,6 +61,10 @@ type client struct {
 	api iotexapi.APIServiceClient
 }
 
+func (c *client) API() iotexapi.APIServiceClient {
+	return c.api
+}
+
 func (c *client) ReadOnlyContract(contract address.Address, abi abi.ABI) ReadOnlyContract {
 	return &readOnlyContract{
 		address: contract,
@@ -71,6 +75,13 @@ func (c *client) ReadOnlyContract(contract address.Address, abi abi.ABI) ReadOnl
 
 func (c *client) GetReceipt(actionHash hash.Hash256) GetReceiptCaller {
 	return &getReceiptCaller{
+		api:        c.api,
+		actionHash: actionHash,
+	}
+}
+
+func (c *client) GetExecutionResult(actionHash hash.Hash256) GetExecutionResultCaller {
+	return &getExecutionResultCaller{
 		api:        c.api,
 		actionHash: actionHash,
 	}
