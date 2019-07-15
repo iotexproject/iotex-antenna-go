@@ -52,6 +52,8 @@ func (c *authedClient) DeployContract(data []byte) DeployContractCaller {
 	}
 }
 
+func (c *authedClient) Account() account.Account { return c.account }
+
 // NewReadOnlyClient creates a ReadOnlyClient.
 func NewReadOnlyClient(c iotexapi.APIServiceClient) ReadOnlyClient {
 	return &client{api: c}
@@ -75,3 +77,5 @@ func (c *client) GetReceipt(actionHash hash.Hash256) GetReceiptCaller {
 		actionHash: actionHash,
 	}
 }
+
+func (c *client) API() iotexapi.APIServiceClient { return c.api }

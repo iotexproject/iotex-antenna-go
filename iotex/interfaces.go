@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/iotexproject/iotex-address/address"
+	"github.com/iotexproject/iotex-antenna-go/v2/account"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 	"google.golang.org/grpc"
 )
@@ -24,6 +25,7 @@ type TransferCaller interface {
 	SetGasPrice(*big.Int) TransferCaller
 	SetGasLimit(uint64) TransferCaller
 	SetPayload([]byte) TransferCaller
+	SetNonce(uint64) TransferCaller
 }
 
 // DeployContractCaller is used to perform a deploy contract call.
@@ -33,6 +35,7 @@ type DeployContractCaller interface {
 	SetArgs(abi abi.ABI, args ...interface{}) DeployContractCaller
 	SetGasPrice(*big.Int) DeployContractCaller
 	SetGasLimit(uint64) DeployContractCaller
+	SetNonce(uint64) DeployContractCaller
 }
 
 // GetReceiptCaller is used to perform a get receipt call.
@@ -47,12 +50,14 @@ type AuthedClient interface {
 	Contract(contract address.Address, abi abi.ABI) Contract
 	Transfer(to address.Address, value *big.Int) TransferCaller
 	DeployContract(data []byte) DeployContractCaller
+	Account() account.Account
 }
 
 // ReadOnlyClient is an iotex client which can perform read actions.
 type ReadOnlyClient interface {
 	ReadOnlyContract(contract address.Address, abi abi.ABI) ReadOnlyContract
 	GetReceipt(actionHash hash.Hash256) GetReceiptCaller
+	API() iotexapi.APIServiceClient
 }
 
 // ReadContractCaller is used to perform a read contract call.
@@ -67,6 +72,7 @@ type ExecuteContractCaller interface {
 	SetGasPrice(*big.Int) ExecuteContractCaller
 	SetGasLimit(uint64) ExecuteContractCaller
 	SetAmount(*big.Int) ExecuteContractCaller
+	SetNonce(uint64) ExecuteContractCaller
 }
 
 // Contract allows to read or execute on this contract's methods.
