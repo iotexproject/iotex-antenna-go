@@ -44,6 +44,14 @@ func (c *authedClient) Transfer(to address.Address, value *big.Int) TransferCall
 	}
 }
 
+func (c *authedClient) ClaimReward(value *big.Int) ClaimRewardCaller {
+	return &claimRewardCaller{
+		account: c.account,
+		api:     c.api,
+		amount:  value,
+	}
+}
+
 func (c *authedClient) DeployContract(data []byte) DeployContractCaller {
 	return &deployContractCaller{
 		account: c.account,
