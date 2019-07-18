@@ -46,6 +46,23 @@ func TestTransfer(t *testing.T) {
 	require.NotEmpty(hash)
 }
 
+func TestClaimReward(t *testing.T) {
+	require := require.New(t)
+	conn, err := NewDefaultGRPCConn(_testnet)
+	require.NoError(err)
+	defer conn.Close()
+
+	acc, err := account.HexStringToAccount(_accountPrivateKey)
+	require.NoError(err)
+	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
+
+	require.NoError(err)
+	v := big.NewInt(1000000000000000000)
+	hash, err := c.ClaimReward(v).SetGasPrice(big.NewInt(1)).SetGasLimit(1000000).Call(context.Background())
+	require.NoError(err)
+	require.NotEmpty(hash)
+}
+
 func TestDeployContract(t *testing.T) {
 	require := require.New(t)
 	conn, err := NewDefaultGRPCConn(_testnet)

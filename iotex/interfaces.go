@@ -28,6 +28,16 @@ type TransferCaller interface {
 	SetNonce(uint64) TransferCaller
 }
 
+// ClaimRewardCaller is used to perform a claim reward call.
+type ClaimRewardCaller interface {
+	SendActionCaller
+
+	SetGasPrice(*big.Int) ClaimRewardCaller
+	SetGasLimit(uint64) ClaimRewardCaller
+	SetData([]byte) ClaimRewardCaller
+	SetNonce(uint64) ClaimRewardCaller
+}
+
 // DeployContractCaller is used to perform a deploy contract call.
 type DeployContractCaller interface {
 	SendActionCaller
@@ -49,6 +59,7 @@ type AuthedClient interface {
 
 	Contract(contract address.Address, abi abi.ABI) Contract
 	Transfer(to address.Address, value *big.Int) TransferCaller
+	ClaimReward(value *big.Int) ClaimRewardCaller
 	DeployContract(data []byte) DeployContractCaller
 	Account() account.Account
 }

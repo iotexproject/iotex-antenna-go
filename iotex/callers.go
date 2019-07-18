@@ -46,6 +46,8 @@ func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (h
 		core.Action = &iotextypes.ActionCore_Execution{Execution: a}
 	case *iotextypes.Transfer:
 		core.Action = &iotextypes.ActionCore_Transfer{Transfer: a}
+	case *iotextypes.ClaimFromRewardingFund:
+		core.Action = &iotextypes.ActionCore_ClaimFromRewardingFund{ClaimFromRewardingFund: a}
 	default:
 		return hash.ZeroHash256, errcodes.New("not support action call", errcodes.InternalError)
 	}
@@ -136,6 +138,62 @@ func (c *transferCaller) Call(ctx context.Context, opts ...grpc.CallOption) (has
 		Amount:    c.amount.String(),
 		Recipient: c.recipient.String(),
 		Payload:   c.payload,
+	}
+	sc := &sendActionCaller{
+		account:  c.account,
+		api:      c.api,
+		gasLimit: c.gasLimit,
+		gasPrice: c.gasPrice,
+		nonce:    c.nonce,
+		action:   tx,
+	}
+	return sc.Call(ctx, opts...)
+}
+
+type claimRewardCaller struct {
+	account  account.Account
+	api      iotexapi.APIServiceClient
+	amount   *big.Int
+	data     []byte
+	gasLimit *uint64
+	gasPrice *big.Int
+	nonce    *uint64
+}
+
+func (c *claimRewardCaller) SetData(data []byte) ClaimRewardCaller {
+	if data == nil {
+		return c
+	}
+	c.data = make([]byte, len(data))
+	copy(c.data, data)
+	return c
+}
+
+func (c *claimRewardCaller) SetGasLimit(g uint64) ClaimRewardCaller {
+	c.gasLimit = &g
+	return c
+}
+
+func (c *claimRewardCaller) SetGasPrice(g *big.Int) ClaimRewardCaller {
+	c.gasPrice = g
+	return c
+}
+
+func (c *claimRewardCaller) SetNonce(n uint64) ClaimRewardCaller {
+	c.nonce = &n
+	return c
+}
+
+func (c *claimRewardCaller) API() iotexapi.APIServiceClient { return c.api }
+
+func (c *claimRewardCaller) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
+	if c.amount == nil {
+		return hash.ZeroHash256, errcodes.New("claim amount cannot be nil", errcodes.InvalidParam)
+	}
+
+	tx := &iotextypes.ClaimFromRewardingFund{
+		Amount: c.amount.String(),
+		Data:   c.data,
 	}
 	sc := &sendActionCaller{
 		account:  c.account,
