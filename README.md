@@ -33,8 +33,15 @@ package main
 
 import (
 	"log"
+	"context"
+	"fmt"
 
-	"github.com/iotexproject/iotex-antenna-go/iotex"
+
+	"github.com/iotexproject/iotex-antenna-go/v2/account"
+	"github.com/iotexproject/iotex-proto/golang/iotexapi"
+	"github.com/iotexproject/iotex-antenna-go/v2/iotex"
+	"github.com/iotexproject/iotex-address/address"
+
 )
 
 const (
@@ -44,7 +51,7 @@ const (
 func main() {
 https://github.com/iotexproject/iotex-tube
 	// Create grpc connection
-	conn, err := NewDefaultGRPCConn(host)
+	conn, err := iotex.NewDefaultGRPCConn(host)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,7 +64,7 @@ https://github.com/iotexproject/iotex-tube
 	}
 	
 	// create client
-	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
+	c := iotex.NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
 	
 	// transfer
 	to, err := address.FromString("to...")
