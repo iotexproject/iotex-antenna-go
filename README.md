@@ -29,16 +29,14 @@ go get github.com/iotexproject/iotex-antenna-go/v2
 package main
 
 import (
-	"log"
 	"context"
 	"fmt"
+	"log"
 
-
-	"github.com/iotexproject/iotex-antenna-go/v2/account"
-	"github.com/iotexproject/iotex-proto/golang/iotexapi"
-	"github.com/iotexproject/iotex-antenna-go/v2/iotex"
 	"github.com/iotexproject/iotex-address/address"
-
+	"github.com/iotexproject/iotex-antenna-go/v2/account"
+	"github.com/iotexproject/iotex-antenna-go/v2/iotex"
+	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 )
 
 const (
