@@ -19,11 +19,8 @@ network for IoT powered by scalability- and privacy-centric blockchains. Please 
 ### Add to your project
 
 ```
-// dep
-dep ensure -add github.com/iotexproject/iotex-antenna-go
-
 // go mod
-go get github.com/iotexproject/iotex-antenna-go
+go get github.com/iotexproject/iotex-antenna-go/v2
 ```
 
 ### Sample
@@ -49,7 +46,6 @@ const (
 )
 
 func main() {
-https://github.com/iotexproject/iotex-tube
 	// Create grpc connection
 	conn, err := iotex.NewDefaultGRPCConn(host)
 	if err != nil {
