@@ -128,3 +128,21 @@ func (r *RPCMethod) GetEpochMeta(in *iotexapi.GetEpochMetaRequest) (*iotexapi.Ge
 	ctx := context.Background()
 	return r.cli.GetEpochMeta(ctx, in)
 }
+
+// GetRawBlocks get raw blocks data
+func (r *RPCMethod) GetRawBlocks(in *iotexapi.GetRawBlocksRequest) (*iotexapi.GetRawBlocksResponse, error) {
+	ctx := context.Background()
+	return r.cli.GetRawBlocks(ctx, in)
+}
+
+// GetLogs get logs filtered by contract address and topics
+func (r *RPCMethod) GetLogs(in *iotexapi.GetLogsRequest) (*iotexapi.GetLogsResponse, error) {
+	ctx := context.Background()
+	return r.cli.GetLogs(ctx, in)
+}
+
+// GetVotes get a single address' votes
+func (r *RPCMethod) GetVotes(in *iotexapi.GetVotesRequest) (*iotexapi.GetVotesResponse, error) {
+	ctx := context.Background()
+	return r.cli.GetVotes(ctx, in)
+}

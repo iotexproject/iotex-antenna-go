@@ -123,7 +123,6 @@ func TestServer_GetActionsByAddress(t *testing.T) {
 	require := require.New(t)
 	svr, err := NewRPCMethod(mainnet, true)
 	require.NoError(err)
-	actionHash := "633cf62ab47611476423d7416bb74395be9c9b602062074ac36744ddd31fd122"
 	request := &iotexapi.GetActionsRequest{
 		Lookup: &iotexapi.GetActionsRequest_ByAddr{
 			ByAddr: &iotexapi.GetActionsByAddressRequest{
@@ -136,14 +135,13 @@ func TestServer_GetActionsByAddress(t *testing.T) {
 	res, err := svr.GetActions(request)
 	require.NoError(err)
 	act := res.ActionInfo[0]
-	require.Equal(actionHash, act.ActHash)
+	require.Equal("93de5923763c4ea79a01be023b49000838b1a4c22bdceed99dc23eeea8c9c757", act.ActHash)
 	require.Equal(1, len(res.ActionInfo))
-	require.Equal(uint64(2), act.Action.GetCore().GetNonce())
-	actionCore := act.Action.GetCore().GetAction()
-	_, ok := actionCore.(*iotextypes.ActionCore_Execution)
-	require.True(ok)
-	require.Equal("40000000000000000000000", act.Action.GetCore().GetExecution().Amount)
-	require.Equal("io1pcg2ja9krrhujpazswgz77ss46xgt88afqlk6y", act.Action.GetCore().GetExecution().Contract)
+	require.Equal(uint64(27), act.Action.GetCore().GetNonce())
+	actionCore := act.Action.GetCore().GetTransfer()
+	require.NotNil(actionCore)
+	require.Equal("5000000000000000000", actionCore.Amount)
+	require.Equal(mainnetAddress, actionCore.Recipient)
 }
 
 func TestServer_GetUnconfirmedActionsByAddress(t *testing.T) {
@@ -220,7 +218,7 @@ func TestServer_GetBlockMetas(t *testing.T) {
 	res, err := svr.GetBlockMetas(request)
 	require.NoError(err)
 	require.Equal(1, len(res.GetBlkMetas()))
-	require.Equal(uint64(0), res.Total)
+	require.True(res.Total > 847970)
 	var prevBlkPb *iotextypes.BlockMeta
 	for _, blkPb := range res.BlkMetas {
 		if prevBlkPb != nil {
@@ -283,7 +281,7 @@ func TestServer_GetServerMeta(t *testing.T) {
 	require.NoError(err)
 	meta := res.GetServerMeta()
 	require.NotEqual("", meta.PackageCommitID)
-	require.Equal("clean", meta.GitStatus)
+	require.Equal("dirty", meta.GitStatus)
 	ti, err := time.Parse("2006-01-02-UTC/15:04:05", meta.BuildTime)
 	require.NoError(err)
 	expected, err := time.Parse("2006-01-02-UTC/15:04:05", "2019-04-30-UTC/22:09:37")
