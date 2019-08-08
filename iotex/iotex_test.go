@@ -180,7 +180,13 @@ func TestExecuteContractWithAddressArgument(t *testing.T) {
 	contract, err := address.FromString("io1up8gd9nxhc0k0fjff7nrl6jn626vkdzj7y3g09")
 	require.NoError(err)
 
-	recipients := [2]string{"io18jaldgzc8wlyfnzamgas62yu3kg5nw527czg37", "io1ntprz4p5zw38fvtfrcczjtcv3rkr3nqs6sm3pj"}
+	recipient1, err := address.FromString("io18jaldgzc8wlyfnzamgas62yu3kg5nw527czg37")
+	require.NoError(err)
+	recipient2, err := address.FromString("io1ntprz4p5zw38fvtfrcczjtcv3rkr3nqs6sm3pj")
+	require.NoError(err)
+
+	recipients := [2]address.Address{recipient1, recipient2}
+	//recipients := [2]string{"io18jaldgzc8wlyfnzamgas62yu3kg5nw527czg37", "io1ntprz4p5zw38fvtfrcczjtcv3rkr3nqs6sm3pj"}
 	amounts := [2]*big.Int{big.NewInt(1), big.NewInt(2)}
 	actionHash, err := c.Contract(contract, abi).Execute("multiSend", recipients, amounts, "payload").SetGasPrice(big.NewInt(1000000000000)).SetGasLimit(1000000).Call(context.Background())
 	require.NoError(err)

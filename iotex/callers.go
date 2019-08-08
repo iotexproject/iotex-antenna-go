@@ -416,36 +416,42 @@ func encodeArgument(method abi.Method, args []interface{}) ([]interface{}, error
 	newArgs := make([]interface{}, len(args))
 	for index, input := range method.Inputs {
 		if input.Type.String() == "address" {
-			s, ok := args[index].(string)
+			str, ok := args[index].(string)
 			if !ok {
-				return nil, errcodes.New("fail to convert from interface to string", errcodes.InvalidParam)
+				addr, check := args[index].(address.Address)
+				if !check {
+					return nil, errcodes.New("fail to convert from interface to string or ioAddress", errcodes.InvalidParam)
+				}
+				newArgs[index] = common.HexToAddress(hex.EncodeToString(addr.Bytes()))
+				continue
 			}
-			ethAddress, err := address.FromString(s)
+			ioAddress, err := address.FromString(str)
 			if err != nil {
-				return nil, errcodes.New("fail to convert string to address(iotex)", errcodes.InvalidParam)
+				return nil, errcodes.New("fail to convert string to ioAddress", errcodes.InvalidParam)
 			}
-			newArgs[index] = common.HexToAddress(hex.EncodeToString(ethAddress.Bytes()))
+			newArgs[index] = common.HexToAddress(hex.EncodeToString(ioAddress.Bytes()))
 
 		} else if input.Type.String() == "address[]" {
 			s := reflect.ValueOf(args[index])
 			if s.Kind() != reflect.Slice && s.Kind() != reflect.Array {
-				panic("InterfaceSlice() given a non-slice and non-array type")
-			}
-			ret := make([]interface{}, s.Len())
-			for i := 0; i < s.Len(); i++ {
-				ret[i] = s.Index(i).Interface()
+				return nil, errcodes.New("fail because the type is non-slice, non-array", errcodes.InvalidParam)
 			}
 			newArr := make([]common.Address, s.Len())
-			for j, elem := range ret {
-				str, ok := elem.(string)
+			for j := 0; j < s.Len(); j++ {
+				str, ok := s.Index(j).Interface().(string)
 				if !ok {
-					return nil, errcodes.New("fail to convert from interface to string in array", errcodes.InvalidParam)
+					addr, check := s.Index(j).Interface().(address.Address)
+					if !check {
+						return nil, errcodes.New("fail to convert from interface to string or ioAddress", errcodes.InvalidParam)
+					}
+					newArgs[index] = common.HexToAddress(hex.EncodeToString(addr.Bytes()))
+					continue
 				}
-				ethAddress, err := address.FromString(str)
+				ioAddress, err := address.FromString(str)
 				if err != nil {
-					return nil, errcodes.New("fail to convert from string to address(iotex)", errcodes.InvalidParam)
+					return nil, errcodes.New("fail to convert from string to ioAddress", errcodes.InvalidParam)
 				}
-				newArr[j] = common.HexToAddress(hex.EncodeToString(ethAddress.Bytes()))
+				newArr[j] = common.HexToAddress(hex.EncodeToString(ioAddress.Bytes()))
 			}
 			newArgs[index] = newArr
 		} else {
