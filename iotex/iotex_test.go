@@ -102,6 +102,91 @@ func TestExecuteContract(t *testing.T) {
 	require.NotNil(hash)
 }
 
+func TestExecuteContractWithAddressArgument(t *testing.T) {
+	require := require.New(t)
+	conn, err := NewDefaultGRPCConn(_testnet)
+	require.NoError(err)
+	defer conn.Close()
+
+	acc, err := account.HexStringToAccount(_accountPrivateKey)
+	require.NoError(err)
+	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
+	abi, err := abi.JSON(strings.NewReader(`[
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "recipients",
+				"type": "address[]"
+			},
+			{
+				"name": "amounts",
+				"type": "uint256[]"
+			},
+			{
+				"name": "payload",
+				"type": "string"
+			}
+		],
+		"name": "multiSend",
+		"outputs": [],
+		"payable": true,
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "recipient",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "Transfer",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "refund",
+				"type": "uint256"
+			}
+		],
+		"name": "Refund",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "payload",
+				"type": "string"
+			}
+		],
+		"name": "Payload",
+		"type": "event"
+	}
+]`))
+	require.NoError(err)
+	contract, err := address.FromString("io1up8gd9nxhc0k0fjff7nrl6jn626vkdzj7y3g09")
+	require.NoError(err)
+
+	recipients := [2]string{"io18jaldgzc8wlyfnzamgas62yu3kg5nw527czg37", "io1ntprz4p5zw38fvtfrcczjtcv3rkr3nqs6sm3pj"}
+	amounts := [2]*big.Int{big.NewInt(1), big.NewInt(2)}
+	actionHash, err := c.Contract(contract, abi).Execute("multiSend", recipients, amounts, "payload").SetGasPrice(big.NewInt(1000000000000)).SetGasLimit(1000000).Call(context.Background())
+	require.NoError(err)
+	require.NotNil(actionHash)
+}
+
 func TestReadContract(t *testing.T) {
 	require := require.New(t)
 	conn, err := NewDefaultGRPCConn(_mainnet)
