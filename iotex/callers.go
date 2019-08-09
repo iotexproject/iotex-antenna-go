@@ -415,13 +415,14 @@ func encodeArgument(method abi.Method, args []interface{}) ([]interface{}, error
 	}
 	newArgs := make([]interface{}, len(args))
 	for index, input := range method.Inputs {
-		if input.Type.String() == "address" {
+		switch input.Type.String() {
+		case "address":
 			var err error
 			newArgs[index], err = addressTypeAssert(args[index])
 			if err != nil {
 				return nil, errcodes.NewError(err, errcodes.InvalidParam)
 			}
-		} else if input.Type.String() == "address[]" {
+		case "address[]":
 			s := reflect.ValueOf(args[index])
 			if s.Kind() != reflect.Slice && s.Kind() != reflect.Array {
 				return nil, errcodes.New("fail because the type is non-slice, non-array", errcodes.InvalidParam)
@@ -435,7 +436,7 @@ func encodeArgument(method abi.Method, args []interface{}) ([]interface{}, error
 				}
 			}
 			newArgs[index] = newArr
-		} else {
+		default:
 			newArgs[index] = args[index]
 		}
 	}
