@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/hex"
 	"math/big"
+	"reflect"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/iotexproject/iotex-address/address"
 	"github.com/iotexproject/iotex-antenna-go/v2/account"
@@ -244,8 +246,12 @@ func (c *deployContractCaller) Call(ctx context.Context, opts ...grpc.CallOption
 	if len(c.data) == 0 {
 		return hash.ZeroHash256, errcodes.New("contract data can not empty", errcodes.InvalidParam)
 	}
-
 	if len(c.args) > 0 {
+		var err error
+		c.args, err = encodeArgument(c.abi.Constructor, c.args)
+		if err != nil {
+			return hash.ZeroHash256, errcodes.NewError(err, errcodes.InvalidParam)
+		}
 		packed, err := c.abi.Pack("", c.args...)
 		if err != nil {
 			return hash.ZeroHash256, errcodes.New("failed to pack args", errcodes.InvalidParam)
@@ -308,6 +314,16 @@ func (c *executeContractCaller) Call(ctx context.Context, opts ...grpc.CallOptio
 		return hash.ZeroHash256, errcodes.New("contract address and method can not empty", errcodes.InvalidParam)
 	}
 
+	method, exist := c.abi.Methods[c.method]
+	if !exist {
+		return hash.ZeroHash256, errcodes.New("method is not found", errcodes.InvalidParam)
+	}
+	var err error
+	c.args, err = encodeArgument(method, c.args)
+	if err != nil {
+		return hash.ZeroHash256, errcodes.NewError(err, errcodes.InvalidParam)
+	}
+
 	actData, err := c.abi.Pack(c.method, c.args...)
 	if err != nil {
 		return hash.ZeroHash256, errcodes.NewError(err, errcodes.InvalidParam)
@@ -342,6 +358,16 @@ type readContractCaller struct {
 func (c *readContractCaller) Call(ctx context.Context, opts ...grpc.CallOption) (Data, error) {
 	if c.method == "" {
 		return Data{}, errcodes.New("contract address and method can not empty", errcodes.InvalidParam)
+	}
+
+	method, exist := c.rc.abi.Methods[c.method]
+	if !exist {
+		return Data{}, errcodes.New("method is not found", errcodes.InvalidParam)
+	}
+	var err error
+	c.args, err = encodeArgument(method, c.args)
+	if err != nil {
+		return Data{}, errcodes.NewError(err, errcodes.InvalidParam)
 	}
 
 	actData, err := c.rc.abi.Pack(c.method, c.args...)
@@ -381,4 +407,55 @@ type getReceiptCaller struct {
 func (c *getReceiptCaller) Call(ctx context.Context, opts ...grpc.CallOption) (*iotexapi.GetReceiptByActionResponse, error) {
 	h := hex.EncodeToString(c.actionHash[:])
 	return c.api.GetReceiptByAction(ctx, &iotexapi.GetReceiptByActionRequest{ActionHash: h}, opts...)
+}
+
+func encodeArgument(method abi.Method, args []interface{}) ([]interface{}, error) {
+	if len(method.Inputs) != len(args) {
+		return nil, errcodes.New("the number of arguments is not correct", errcodes.InvalidParam)
+	}
+	newArgs := make([]interface{}, len(args))
+	for index, input := range method.Inputs {
+		switch input.Type.String() {
+		case "address":
+			var err error
+			newArgs[index], err = addressTypeAssert(args[index])
+			if err != nil {
+				return nil, errcodes.NewError(err, errcodes.InvalidParam)
+			}
+		case "address[]":
+			s := reflect.ValueOf(args[index])
+			if s.Kind() != reflect.Slice && s.Kind() != reflect.Array {
+				return nil, errcodes.New("fail because the type is non-slice, non-array", errcodes.InvalidParam)
+			}
+			newArr := make([]common.Address, s.Len())
+			for j := 0; j < s.Len(); j++ {
+				var err error
+				newArr[j], err = addressTypeAssert(s.Index(j).Interface())
+				if err != nil {
+					return nil, errcodes.NewError(err, errcodes.InvalidParam)
+				}
+			}
+			newArgs[index] = newArr
+		default:
+			newArgs[index] = args[index]
+		}
+	}
+	return newArgs, nil
+}
+
+func addressTypeAssert(preVal interface{}) (common.Address, error) {
+	switch v := preVal.(type) {
+	case string:
+		ioAddress, err := address.FromString(v)
+		if err != nil {
+			return common.Address{}, errcodes.New("fail to convert string to ioAddress", errcodes.InvalidParam)
+		}
+		return common.HexToAddress(hex.EncodeToString(ioAddress.Bytes())), nil
+	case address.Address:
+		return common.HexToAddress(hex.EncodeToString(v.Bytes())), nil
+	case common.Address:
+		return v, nil
+	default:
+		return common.Address{}, errcodes.New("fail to convert from interface to string/ioAddress/ethAddress", errcodes.InvalidParam)
+	}
 }
