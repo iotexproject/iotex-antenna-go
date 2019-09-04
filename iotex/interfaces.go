@@ -53,7 +53,7 @@ type GetReceiptCaller interface {
 	Call(ctx context.Context, opts ...grpc.CallOption) (*iotexapi.GetReceiptByActionResponse, error)
 }
 
-// get logs filtered by contract address and topics
+// GetLogsCaller is used to get logs
 type GetLogsCaller interface {
 	Call(ctx context.Context, opts ...grpc.CallOption) (*iotexapi.GetLogsResponse, error)
 }
