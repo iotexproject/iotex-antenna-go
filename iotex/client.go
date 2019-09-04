@@ -86,4 +86,11 @@ func (c *client) GetReceipt(actionHash hash.Hash256) GetReceiptCaller {
 	}
 }
 
+func (c *client) GetLogs(request *iotexapi.GetLogsRequest) GetLogsCaller {
+	return &getLogsCaller{
+		api:     c.api,
+		Request: request,
+	}
+}
+
 func (c *client) API() iotexapi.APIServiceClient { return c.api }
