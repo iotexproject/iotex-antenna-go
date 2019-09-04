@@ -209,3 +209,48 @@ func TestReadContract(t *testing.T) {
 	_, err = c.ReadOnlyContract(contract, abi).Read("get").Call(context.Background())
 	require.NoError(err)
 }
+
+func TestGetReceipt(t *testing.T) {
+	require := require.New(t)
+	conn, err := NewDefaultGRPCConn(_testnet)
+	require.NoError(err)
+	defer conn.Close()
+
+	c := NewReadOnlyClient(iotexapi.NewAPIServiceClient(conn))
+
+	_, err = c.GetReceipt(decodeHash("163ece70353acfe8fa7929e756d96b1b3cfec1246bc5a8f397ca77f20a0d5c5f")).Call(context.Background())
+	require.NoError(err)
+}
+func decodeHash(in string) [32]byte {
+	hash, _ := hex.DecodeString(in)
+	var arr [32]byte
+	copy(arr[:], hash[:32])
+	return arr
+}
+
+func TestGetLogs(t *testing.T) {
+	require := require.New(t)
+	conn, err := NewDefaultGRPCConn(_testnet)
+	require.NoError(err)
+	defer conn.Close()
+
+	c := NewReadOnlyClient(iotexapi.NewAPIServiceClient(conn))
+
+	_, err = c.GetLogs(&iotexapi.GetLogsRequest{
+		//Filter: &iotexapi.LogsFilter{
+		//	Address : []string{"163ece70353acfe8fa7929e756d96b1b3cfec1246bc5a8f397ca77f20a0d5c5f"},
+		//},
+		//Lookup: &iotexapi.GetLogsRequest_ByBlock{
+		//	ByBlock: &iotexapi.GetLogsByBlock{
+		//		BlockHash : []byte("781b4df7fc0287e654c93167cdbb17df1e1cfe3a3e2857a1b66766ac3a827741"),
+		//	},
+		//},
+		Lookup: &iotexapi.GetLogsRequest_ByRange{
+			ByRange: &iotexapi.GetLogsByRange{
+				FromBlock: 177143,
+				Count:     100,
+			},
+		},
+	}).Call(context.Background())
+	require.NoError(err)
+}

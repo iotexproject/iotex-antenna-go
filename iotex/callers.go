@@ -409,6 +409,15 @@ func (c *getReceiptCaller) Call(ctx context.Context, opts ...grpc.CallOption) (*
 	return c.api.GetReceiptByAction(ctx, &iotexapi.GetReceiptByActionRequest{ActionHash: h}, opts...)
 }
 
+type getLogsCaller struct {
+	api     iotexapi.APIServiceClient
+	Request *iotexapi.GetLogsRequest
+}
+
+func (c *getLogsCaller) Call(ctx context.Context, opts ...grpc.CallOption) (*iotexapi.GetLogsResponse, error) {
+	return c.api.GetLogs(ctx, c.Request, opts...)
+}
+
 func encodeArgument(method abi.Method, args []interface{}) ([]interface{}, error) {
 	if len(method.Inputs) != len(args) {
 		return nil, errcodes.New("the number of arguments is not correct", errcodes.InvalidParam)

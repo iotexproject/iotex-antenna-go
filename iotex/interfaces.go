@@ -53,6 +53,11 @@ type GetReceiptCaller interface {
 	Call(ctx context.Context, opts ...grpc.CallOption) (*iotexapi.GetReceiptByActionResponse, error)
 }
 
+// get logs filtered by contract address and topics
+type GetLogsCaller interface {
+	Call(ctx context.Context, opts ...grpc.CallOption) (*iotexapi.GetLogsResponse, error)
+}
+
 // AuthedClient is an iotex client which associate with an account credentials, so it can perform write actions.
 type AuthedClient interface {
 	ReadOnlyClient
@@ -68,6 +73,7 @@ type AuthedClient interface {
 type ReadOnlyClient interface {
 	ReadOnlyContract(contract address.Address, abi abi.ABI) ReadOnlyContract
 	GetReceipt(actionHash hash.Hash256) GetReceiptCaller
+	GetLogs(request *iotexapi.GetLogsRequest) GetLogsCaller
 	API() iotexapi.APIServiceClient
 }
 
