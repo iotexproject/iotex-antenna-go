@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"time"
 
+	"github.com/cenkalti/backoff"
 	"github.com/iotexproject/iotex-antenna-go/v2/iotex"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 	"github.com/pkg/errors"
@@ -18,13 +19,18 @@ func Wait(ctx context.Context, caller iotex.SendActionCaller, opts ...grpc.CallO
 	if err != nil {
 		return err
 	}
-	time.Sleep(20 * time.Second)
 
-	response, err := caller.API().GetReceiptByAction(ctx, &iotexapi.GetReceiptByActionRequest{
-		ActionHash: hex.EncodeToString(h[:]),
-	}, opts...)
-	if err != nil {
+	time.Sleep(25 * time.Second)
+
+	var response *iotexapi.GetReceiptByActionResponse
+	rerr := backoff.Retry(func() error {
+		response, err = caller.API().GetReceiptByAction(ctx, &iotexapi.GetReceiptByActionRequest{
+			ActionHash: hex.EncodeToString(h[:]),
+		}, opts...)
 		return err
+	}, backoff.WithMaxRetries(backoff.NewConstantBackOff(30*time.Second), 3))
+	if rerr != nil {
+		return errors.Errorf("execution get receipt timed out: %v", rerr)
 	}
 	if response.ReceiptInfo.Receipt.Status != 1 {
 		return errors.Errorf("execution failed: %x", h)

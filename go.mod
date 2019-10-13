@@ -1,6 +1,7 @@
 module github.com/iotexproject/iotex-antenna-go/v2
 
 require (
+	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/ethereum/go-ethereum v1.8.27
 	github.com/gogo/protobuf v1.2.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
