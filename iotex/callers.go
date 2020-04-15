@@ -34,6 +34,12 @@ type sendActionCaller struct {
 	nonce    *uint64
 }
 
+// reclaim type to differentiate unstake and withdraw
+type reclaim struct {
+	action     interface{}
+	isWithdraw bool
+}
+
 func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
 	if c.nonce == nil {
 		res, err := c.api.GetAccount(ctx, &iotexapi.GetAccountRequest{Address: c.account.Address().String()}, opts...)
@@ -55,6 +61,27 @@ func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (h
 		core.Action = &iotextypes.ActionCore_Transfer{Transfer: a}
 	case *iotextypes.ClaimFromRewardingFund:
 		core.Action = &iotextypes.ActionCore_ClaimFromRewardingFund{ClaimFromRewardingFund: a}
+	case *iotextypes.StakeCreate:
+		core.Action = &iotextypes.ActionCore_StakeCreate{StakeCreate: a}
+		// special reclaim type to differentiate unstake and withdraw
+	case *reclaim:
+		if a.isWithdraw {
+			core.Action = &iotextypes.ActionCore_StakeWithdraw{StakeWithdraw: a.action.(*iotextypes.StakeReclaim)}
+		} else {
+			core.Action = &iotextypes.ActionCore_StakeUnstake{StakeUnstake: a.action.(*iotextypes.StakeReclaim)}
+		}
+	case *iotextypes.StakeAddDeposit:
+		core.Action = &iotextypes.ActionCore_StakeAddDeposit{StakeAddDeposit: a}
+	case *iotextypes.StakeRestake:
+		core.Action = &iotextypes.ActionCore_StakeRestake{StakeRestake: a}
+	case *iotextypes.StakeTransferOwnership:
+		core.Action = &iotextypes.ActionCore_StakeTransferOwnership{StakeTransferOwnership: a}
+	case *iotextypes.StakeChangeCandidate:
+		core.Action = &iotextypes.ActionCore_StakeChangeCandidate{StakeChangeCandidate: a}
+	case *iotextypes.CandidateRegister:
+		core.Action = &iotextypes.ActionCore_CandidateRegister{CandidateRegister: a}
+	case *iotextypes.CandidateBasicInfo:
+		core.Action = &iotextypes.ActionCore_CandidateUpdate{CandidateUpdate: a}
 	default:
 		return hash.ZeroHash256, errcodes.New("not support action call", errcodes.InternalError)
 	}
