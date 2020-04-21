@@ -66,6 +66,9 @@ type AuthedClient interface {
 	Transfer(to address.Address, value *big.Int) TransferCaller
 	ClaimReward(value *big.Int) ClaimRewardCaller
 	DeployContract(data []byte) DeployContractCaller
+	// staking related
+	Staking() StakingCaller
+	Candidate() CandidateCaller
 	Account() account.Account
 }
 
@@ -102,4 +105,30 @@ type Contract interface {
 // ReadOnlyContract allows to read on this contract's methods.
 type ReadOnlyContract interface {
 	Read(method string, args ...interface{}) ReadContractCaller
+}
+
+// StakingCaller is used to perform a staking call.
+type StakingCaller interface {
+	Create(candidateName string, amount *big.Int, duration uint32, autoStake bool) StakingAPICaller
+	Unstake(bucketIndex uint64) StakingAPICaller
+	Withdraw(bucketIndex uint64) StakingAPICaller
+	AddDeposit(index uint64, amount *big.Int) StakingAPICaller
+	ChangeCandidate(candName string, bucketIndex uint64) StakingAPICaller
+	StakingTransfer(voterAddress address.Address, bucketIndex uint64) StakingAPICaller
+	Restake(index uint64, duration uint32, autoStake bool) StakingAPICaller
+}
+
+// CandidateCaller is used to perform a candidate call.
+type CandidateCaller interface {
+	Register(name, operatorAddr, rewardAddr address.Address, amount *big.Int, duration uint32, autoStake bool) StakingAPICaller
+	Update(name string, operatorAddr, rewardAddr address.Address) StakingAPICaller
+}
+
+// StakingAPICaller is used to perform extra info call.
+type StakingAPICaller interface {
+	SendActionCaller
+	SetGasPrice(*big.Int) StakingAPICaller
+	SetGasLimit(uint64) StakingAPICaller
+	SetNonce(uint64) StakingAPICaller
+	SetPayload([]byte) StakingAPICaller
 }
