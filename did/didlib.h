@@ -102,16 +102,16 @@ struct UpdateHash_return {
 
 extern struct UpdateHash_return UpdateHash(GoString p0, GoString p1, GoString p2, GoString p3, GoString p4, GoUint64 p5, GoString p6, GoString p7);
 
-/* Return type for UpdateUri */
-struct UpdateUri_return {
+/* Return type for UpdateURI */
+struct UpdateURI_return {
 	char* r0;
 	GoUint64 r1;
 	char* r2;
 };
 
-//UpdateUri returns transaction hash,transaction if success,error message
+//UpdateURI returns transaction hash,transaction if success,error message
 
-extern struct UpdateUri_return UpdateUri(GoString p0, GoString p1, GoString p2, GoString p3, GoString p4, GoUint64 p5, GoString p6, GoString p7);
+extern struct UpdateURI_return UpdateURI(GoString p0, GoString p1, GoString p2, GoString p3, GoString p4, GoUint64 p5, GoString p6, GoString p7);
 
 /* Return type for GetHash */
 struct GetHash_return {
@@ -124,16 +124,16 @@ struct GetHash_return {
 
 extern struct GetHash_return GetHash(GoString p0, GoString p1, GoString p2, GoString p3);
 
-/* Return type for GetUri */
-struct GetUri_return {
+/* Return type for GetURI */
+struct GetURI_return {
 	char* r0;
 	GoUint64 r1;
 	char* r2;
 };
 
-//GetUri returns did uri,transaction if success,error message
+//GetURI returns did uri,transaction if success,error message
 
-extern struct GetUri_return GetUri(GoString p0, GoString p1, GoString p2, GoString p3);
+extern struct GetURI_return GetURI(GoString p0, GoString p1, GoString p2, GoString p3);
 
 #ifdef __cplusplus
 }

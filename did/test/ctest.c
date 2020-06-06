@@ -56,25 +56,25 @@ int main ()
     struct GetHash_return GetHashRet=GetHash(Endpoint,Contract,Abi,Did);
     printf("GetHash %s %lld %s\n",GetHashRet.r0,GetHashRet.r1,GetHashRet.r2);
     //GetUri
-    struct GetUri_return GetUriRet=GetUri(Endpoint,Contract,Abi,Did);
-    printf("GetUri %s %lld %s\n",GetUriRet.r0,GetUriRet.r1,GetUriRet.r2);
+    struct GetURI_return GetURIRet=GetURI(Endpoint,Contract,Abi,Did);
+    printf("GetURI %s %lld %s\n",GetURIRet.r0,GetURIRet.r1,GetURIRet.r2);
 
     //UpdateHash
     struct UpdateHash_return UpdateHashRet=UpdateHash(Endpoint,PrivateKey,Contract,Abi,GasPrice,1000000,Id,UpdatedHash);
     printf("UpdateHash %s %lld %s\n",UpdateHashRet.r0,UpdateHashRet.r1,UpdateHashRet.r2);
     sleep(10);
-    //UpdateUri
-    struct UpdateUri_return UpdateUriRet=UpdateUri(Endpoint,PrivateKey,Contract,Abi,GasPrice,1000000,Id,UpdatedUri);
-    printf("UpdateUri %s %lld %s\n",UpdateUriRet.r0,UpdateUriRet.r1,UpdateUriRet.r2);
+    //UpdateURI
+    struct UpdateURI_return UpdateURIRet=UpdateURI(Endpoint,PrivateKey,Contract,Abi,GasPrice,1000000,Id,UpdatedUri);
+    printf("UpdateURI %s %lld %s\n",UpdateURIRet.r0,UpdateURIRet.r1,UpdateURIRet.r2);
     sleep(10);
 
     printf("after update\n");
     //GetHash
     GetHashRet=GetHash(Endpoint,Contract,Abi,Did);
     printf("GetHash %s %lld %s\n",GetHashRet.r0,GetHashRet.r1,GetHashRet.r2);
-    //GetUri
-    GetUriRet=GetUri(Endpoint,Contract,Abi,Did);
-    printf("GetUri %s %lld %s\n",GetUriRet.r0,GetUriRet.r1,GetUriRet.r2);
+    //GetURI
+    GetURIRet=GetURI(Endpoint,Contract,Abi,Did);
+    printf("GetURI %s %lld %s\n",GetURIRet.r0,GetURIRet.r1,GetURIRet.r2);
 
     //DeleteDID
     struct DeleteDID_return DeleteDIDRet=DeleteDID(Endpoint,PrivateKey,Contract,Abi,GasPrice,1000000,Id);
@@ -85,9 +85,9 @@ int main ()
     //GetHash
     GetHashRet=GetHash(Endpoint,Contract,Abi,Did);
     printf("GetHash %s %lld %s\n",GetHashRet.r0,GetHashRet.r1,GetHashRet.r2);
-    //GetUri
-    GetUriRet=GetUri(Endpoint,Contract,Abi,Did);
-    printf("GetUri %s %lld %s\n",GetUriRet.r0,GetUriRet.r1,GetUriRet.r2);
+    //GetURI
+    GetURIRet=GetURI(Endpoint,Contract,Abi,Did);
+    printf("GetURI %s %lld %s\n",GetURIRet.r0,GetURIRet.r1,GetURIRet.r2);
 
     return 0;
 }

@@ -25,13 +25,14 @@ const (
 	getURI     = "getURI"
 )
 
+// DID is the did contract interface
 type DID interface {
 	CreateDID(did, didHash, url string) (hash string, err error)
 	DeleteDID(did string) (hash string, err error)
 	UpdateHash(did, didHash string) (hash string, err error)
-	UpdateUri(did, uri string) (hash string, err error)
+	UpdateURI(did, uri string) (hash string, err error)
 	GetHash(did string) (hash string, err error)
-	GetUri(did string) (uri string, err error)
+	GetURI(did string) (uri string, err error)
 }
 
 type did struct {
@@ -43,6 +44,7 @@ type did struct {
 	gasLimit uint64
 }
 
+// NewDID returns new did
 func NewDID(endpoint, privateKey, contract, abiString string, gasPrice *big.Int, gasLimit uint64) (d DID, err error) {
 	abi, err := abi.JSON(strings.NewReader(abiString)) // note,this is IoTeXDID_abi
 	if err != nil {
@@ -64,6 +66,7 @@ func NewDID(endpoint, privateKey, contract, abiString string, gasPrice *big.Int,
 	return
 }
 
+// CreateDID create did
 func (d *did) CreateDID(id, didHash, url string) (hash string, err error) {
 	if len(didHash) != 64 {
 		err = errors.New("hash should be 32 bytes")
@@ -89,6 +92,7 @@ func (d *did) CreateDID(id, didHash, url string) (hash string, err error) {
 	return
 }
 
+// DeleteDID delete did
 func (d *did) DeleteDID(did string) (hash string, err error) {
 	conn, err := iotex.NewDefaultGRPCConn(d.endpoint)
 	if err != nil {
@@ -104,6 +108,7 @@ func (d *did) DeleteDID(did string) (hash string, err error) {
 	return
 }
 
+// UpdateHash update did hash
 func (d *did) UpdateHash(did, didHash string) (hash string, err error) {
 	conn, err := iotex.NewDefaultGRPCConn(d.endpoint)
 	if err != nil {
@@ -125,7 +130,8 @@ func (d *did) UpdateHash(did, didHash string) (hash string, err error) {
 	return
 }
 
-func (d *did) UpdateUri(did, uri string) (hash string, err error) {
+// UpdateURI update did uri
+func (d *did) UpdateURI(did, uri string) (hash string, err error) {
 	conn, err := iotex.NewDefaultGRPCConn(d.endpoint)
 	if err != nil {
 		return
@@ -140,6 +146,7 @@ func (d *did) UpdateUri(did, uri string) (hash string, err error) {
 	return
 }
 
+// GetHash get did hash
 func (d *did) GetHash(did string) (hash string, err error) {
 	conn, err := iotex.NewDefaultGRPCConn(d.endpoint)
 	if err != nil {
@@ -160,7 +167,8 @@ func (d *did) GetHash(did string) (hash string, err error) {
 	return
 }
 
-func (d *did) GetUri(did string) (uri string, err error) {
+// GetURI get did uri
+func (d *did) GetURI(did string) (uri string, err error) {
 	conn, err := iotex.NewDefaultGRPCConn(d.endpoint)
 	if err != nil {
 		return
