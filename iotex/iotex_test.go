@@ -17,9 +17,10 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/iotexproject/iotex-address/address"
+	"github.com/iotexproject/iotex-proto/golang/iotexapi"
+
 	"github.com/iotexproject/iotex-antenna-go/v2/account"
 	"github.com/iotexproject/iotex-antenna-go/v2/utils/unit"
-	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 )
 
 const (
@@ -187,7 +188,7 @@ func TestExecuteContractWithAddressArgument(t *testing.T) {
 	require.NoError(err)
 
 	recipients := [2]address.Address{recipient1, recipient2}
-	//recipients := [2]string{"io18jaldgzc8wlyfnzamgas62yu3kg5nw527czg37", "io1ntprz4p5zw38fvtfrcczjtcv3rkr3nqs6sm3pj"}
+	// recipients := [2]string{"io18jaldgzc8wlyfnzamgas62yu3kg5nw527czg37", "io1ntprz4p5zw38fvtfrcczjtcv3rkr3nqs6sm3pj"}
 	amounts := [2]*big.Int{big.NewInt(1), big.NewInt(2)}
 	actionHash, err := c.Contract(contract, abi).Execute("multiSend", recipients, amounts, "payload").SetGasPrice(big.NewInt(1000000000000)).SetGasLimit(1000000).Call(context.Background())
 	require.NoError(err)
@@ -222,6 +223,7 @@ func TestGetReceipt(t *testing.T) {
 	_, err = c.GetReceipt(decodeHash("163ece70353acfe8fa7929e756d96b1b3cfec1246bc5a8f397ca77f20a0d5c5f")).Call(context.Background())
 	require.NoError(err)
 }
+
 func decodeHash(in string) [32]byte {
 	hash, _ := hex.DecodeString(in)
 	var arr [32]byte
@@ -229,30 +231,29 @@ func decodeHash(in string) [32]byte {
 	return arr
 }
 
-// TODO: This test needs to be fixed
-//func TestGetLogs(t *testing.T) {
-//	require := require.New(t)
-//	conn, err := NewDefaultGRPCConn(_testnet)
-//	require.NoError(err)
-//	defer conn.Close()
-//
-//	c := NewReadOnlyClient(iotexapi.NewAPIServiceClient(conn))
-//
-//	_, err = c.GetLogs(&iotexapi.GetLogsRequest{
-//		//Filter: &iotexapi.LogsFilter{
-//		//	Address : []string{"163ece70353acfe8fa7929e756d96b1b3cfec1246bc5a8f397ca77f20a0d5c5f"},
-//		//},
-//		//Lookup: &iotexapi.GetLogsRequest_ByBlock{
-//		//	ByBlock: &iotexapi.GetLogsByBlock{
-//		//		BlockHash : []byte("781b4df7fc0287e654c93167cdbb17df1e1cfe3a3e2857a1b66766ac3a827741"),
-//		//	},
-//		//},
-//		Lookup: &iotexapi.GetLogsRequest_ByRange{
-//			ByRange: &iotexapi.GetLogsByRange{
-//				FromBlock: 177143,
-//				Count:     100,
-//			},
-//		},
-//	}).Call(context.Background())
-//	require.NoError(err)
-//}
+func TestGetLogs(t *testing.T) {
+	require := require.New(t)
+	conn, err := NewDefaultGRPCConn(_testnet)
+	require.NoError(err)
+	defer conn.Close()
+
+	c := NewReadOnlyClient(iotexapi.NewAPIServiceClient(conn))
+
+	_, err = c.GetLogs(&iotexapi.GetLogsRequest{
+		Filter: &iotexapi.LogsFilter{
+			Address: []string{"io1pgth3m3e4klanwdrfrgk6yelw03ws64ml8c22y"},
+		},
+		// Lookup: &iotexapi.GetLogsRequest_ByBlock{
+		// 	ByBlock: &iotexapi.GetLogsByBlock{
+		// 		BlockHash: []byte("781b4df7fc0287e654c93167cdbb17df1e1cfe3a3e2857a1b66766ac3a827741"),
+		// 	},
+		// },
+		Lookup: &iotexapi.GetLogsRequest_ByRange{
+			ByRange: &iotexapi.GetLogsByRange{
+				FromBlock: 177143,
+				Count:     100,
+			},
+		},
+	}).Call(context.Background())
+	require.NoError(err)
+}
