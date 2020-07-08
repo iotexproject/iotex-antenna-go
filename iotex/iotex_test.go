@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/stretchr/testify/require"
 
 	"github.com/iotexproject/iotex-address/address"
@@ -231,6 +232,34 @@ func decodeHash(in string) [32]byte {
 	return arr
 }
 
+var (
+	addressFilter = &iotexapi.LogsFilter{
+		Address: []string{"io154mvzs09vkgn0hw6gg3ayzw5w39jzp47f8py9v"},
+	}
+	hash256, _    = hash.HexStringToHash256("5d3fa3d426addd459fa768c4ec4bfa07906854a69c4eeeaf79a021af3a780da6")
+	lookupByBlock = &iotexapi.GetLogsRequest_ByBlock{
+		ByBlock: &iotexapi.GetLogsByBlock{
+			BlockHash: hash256[:],
+		},
+	}
+	lookupByRange = &iotexapi.GetLogsRequest_ByRange{
+		ByRange: &iotexapi.GetLogsByRange{
+			FromBlock: 877143,
+			Count:     1,
+		},
+	}
+	getLogsTests = []*iotexapi.GetLogsRequest{
+		{
+			Filter: addressFilter,
+			Lookup: lookupByBlock,
+		},
+		{
+			Filter: addressFilter,
+			Lookup: lookupByRange,
+		},
+	}
+)
+
 func TestGetLogs(t *testing.T) {
 	require := require.New(t)
 	conn, err := NewDefaultGRPCConn(_testnet)
@@ -239,21 +268,8 @@ func TestGetLogs(t *testing.T) {
 
 	c := NewReadOnlyClient(iotexapi.NewAPIServiceClient(conn))
 
-	_, err = c.GetLogs(&iotexapi.GetLogsRequest{
-		Filter: &iotexapi.LogsFilter{
-			Address: []string{"io1pgth3m3e4klanwdrfrgk6yelw03ws64ml8c22y"},
-		},
-		// Lookup: &iotexapi.GetLogsRequest_ByBlock{
-		// 	ByBlock: &iotexapi.GetLogsByBlock{
-		// 		BlockHash: []byte("781b4df7fc0287e654c93167cdbb17df1e1cfe3a3e2857a1b66766ac3a827741"),
-		// 	},
-		// },
-		Lookup: &iotexapi.GetLogsRequest_ByRange{
-			ByRange: &iotexapi.GetLogsByRange{
-				FromBlock: 177143,
-				Count:     100,
-			},
-		},
-	}).Call(context.Background())
-	require.NoError(err)
+	for _, req := range getLogsTests {
+		_, err := c.GetLogs(req).Call(context.Background())
+		require.NoError(err)
+	}
 }
