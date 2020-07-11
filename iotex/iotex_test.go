@@ -221,15 +221,10 @@ func TestGetReceipt(t *testing.T) {
 
 	c := NewReadOnlyClient(iotexapi.NewAPIServiceClient(conn))
 
-	_, err = c.GetReceipt(decodeHash("163ece70353acfe8fa7929e756d96b1b3cfec1246bc5a8f397ca77f20a0d5c5f")).Call(context.Background())
+	actionHash, err := hash.HexStringToHash256("163ece70353acfe8fa7929e756d96b1b3cfec1246bc5a8f397ca77f20a0d5c5f")
 	require.NoError(err)
-}
-
-func decodeHash(in string) [32]byte {
-	hash, _ := hex.DecodeString(in)
-	var arr [32]byte
-	copy(arr[:], hash[:32])
-	return arr
+	_, err = c.GetReceipt(actionHash).Call(context.Background())
+	require.NoError(err)
 }
 
 var (
