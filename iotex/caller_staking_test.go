@@ -2,6 +2,7 @@ package iotex
 
 import (
 	"context"
+	"errors"
 	"math/big"
 	"testing"
 
@@ -29,6 +30,7 @@ var (
 		payload   []byte
 		// expect
 		actionHash hash.Hash256
+		err        error
 	}{
 		{
 			"io10a298zmzvrt4guq79a9f4x7qedj59y7ery84he",
@@ -41,6 +43,21 @@ var (
 			1000000,
 			[]byte("TestCandidateRegister"),
 			testActionHash1,
+			nil,
+		},
+		// failure case
+		{
+			"00000000000000000000000000000000000000000",
+			"00000000000000000000000000000000000000000",
+			"00000000000000000000000000000000000000000",
+			big.NewInt(0),
+			0,
+			false,
+			big.NewInt(int64(0)),
+			0,
+			[]byte(""),
+			hash.Hash256{},
+			errors.New("address error"),
 		},
 	}
 	// Stake tests.
@@ -54,6 +71,7 @@ var (
 		payload       []byte
 		// expect
 		actionHash hash.Hash256
+		err        error
 	}{
 		{
 			"io10a298zmzvrt4guq79a9f4x7qedj59y7ery84he",
@@ -64,6 +82,19 @@ var (
 			1000000,
 			[]byte("TestStaking"),
 			testActionHash1,
+			nil,
+		},
+		// failure case
+		{
+			"00000000000000000000000000000000000000000",
+			big.NewInt(int64(unit.Iotx)),
+			10000,
+			false,
+			big.NewInt(int64(10 * unit.Qev)),
+			1000000,
+			[]byte("TestStaking"),
+			hash.Hash256{},
+			errors.New("address error"),
 		},
 	}
 	// Unstake tests.
@@ -75,6 +106,7 @@ var (
 		payload     []byte
 		// expect
 		actionHash hash.Hash256
+		err        error
 	}{
 		{
 			10000,
@@ -83,6 +115,17 @@ var (
 			1000000,
 			[]byte("TestStaking"),
 			testActionHash1,
+			nil,
+		},
+		// failure case
+		{
+			0,
+			false,
+			big.NewInt(0),
+			0,
+			[]byte{},
+			hash.Hash256{},
+			errors.New("invalid gas price"),
 		},
 	}
 )
@@ -105,21 +148,17 @@ func TestCandidateCaller_Register(t *testing.T) {
 	client.EXPECT().Candidate().Return(candidateCaller).Times(testTimes)
 
 	for _, test := range candidateRegisterTests {
-		stakingAPICaller.EXPECT().Call(gomock.Any()).Return(test.actionHash, nil).Times(1)
-
-		nameAddr, err := address.FromString(test.name)
-		require.NoError(err)
-		operatorAddr, err := address.FromString(test.operator)
-		require.NoError(err)
-		rewardAddr, err := address.FromString(test.reward)
-		require.NoError(err)
+		stakingAPICaller.EXPECT().Call(gomock.Any()).Return(test.actionHash, test.err).Times(1)
+		nameAddr, _ := address.FromString(test.name)
+		operatorAddr, _ := address.FromString(test.operator)
+		rewardAddr, _ := address.FromString(test.reward)
 		ret, err := client.Candidate().
 			Register(nameAddr, operatorAddr, rewardAddr, test.amount, test.duration, test.autoStake).
 			SetGasPrice(test.gasPrice).
 			SetGasLimit(test.gasLimit).
 			SetPayload(test.payload).
 			Call(context.Background())
-		require.NoError(err)
+		require.Equal(test.err, err)
 		require.Equal(test.actionHash, ret)
 	}
 }
@@ -142,15 +181,14 @@ func TestStakingCaller_Create(t *testing.T) {
 	clt.EXPECT().Staking().Return(stakingCaller).Times(testTimes)
 
 	for _, test := range stakeTests {
-		stakingAPICaller.EXPECT().Call(gomock.Any()).Return(test.actionHash, nil).Times(1)
-
+		stakingAPICaller.EXPECT().Call(gomock.Any()).Return(test.actionHash, test.err).Times(1)
 		ret, err := clt.Staking().
 			Create(test.candidateName, test.amount, test.duration, test.autoStake).
 			SetGasPrice(test.gasPrice).
 			SetGasLimit(test.gasLimit).
 			SetPayload(test.payload).
 			Call(context.Background())
-		require.NoError(err)
+		require.Equal(test.err, err)
 		require.Equal(test.actionHash, ret)
 	}
 }
@@ -173,15 +211,14 @@ func TestStakingCaller_Unstake(t *testing.T) {
 	clt.EXPECT().Staking().Return(stakingCaller).Times(testTimes)
 
 	for _, test := range unstakeTests {
-		stakingAPICaller.EXPECT().Call(gomock.Any()).Return(test.actionHash, nil).Times(1)
-
+		stakingAPICaller.EXPECT().Call(gomock.Any()).Return(test.actionHash, test.err).Times(1)
 		ret, err := clt.Staking().
 			Unstake(test.bucketIndex).
 			SetGasPrice(test.gasPrice).
 			SetGasLimit(test.gasLimit).
 			SetPayload(test.payload).
 			Call(context.Background())
-		require.NoError(err)
+		require.Equal(test.err, err)
 		require.Equal(test.actionHash, ret)
 	}
 }
