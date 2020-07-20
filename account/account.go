@@ -133,6 +133,7 @@ func (act *account) SignMessage(data []byte) ([]byte, error) {
 	return act.private.Sign(h[:])
 }
 
+// Recover recover address by message hash and signature
 func Recover(messageHash []byte, signature []byte) (address.Address, error) {
 	if len(signature) != 65 {
 		return nil, fmt.Errorf("wrong size for signature: got %d, want 65", len(signature))
