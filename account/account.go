@@ -31,8 +31,6 @@ type (
 		Verify([]byte, []byte) bool
 		// Zero zeroes the private key data
 		Zero()
-		// HashMessage hash the message using preamble
-		HashMessage(data []byte) hash.Hash256
 		// SignMessage signs the message using preamble
 		SignMessage(data []byte) ([]byte, error)
 	}
@@ -119,22 +117,22 @@ func (act *account) Zero() {
 	act.private.Zero()
 }
 
+// SignMessage signs the message using preamble
+func (act *account) SignMessage(data []byte) ([]byte, error) {
+	h := HashMessage(data)
+	return act.private.Sign(h[:])
+}
+
 // HashMessage hash the message using preamble
-func (act *account) HashMessage(data []byte) hash.Hash256 {
+func HashMessage(data []byte) hash.Hash256 {
 	preamble := fmt.Sprintf("\x16IoTeX Signed Message:\n%d", len(data))
 	iotexMessage := []byte(preamble)
 	iotexMessage = append(iotexMessage, data...)
 	return hash.Hash256b(iotexMessage)
 }
 
-// SignMessage signs the message using preamble
-func (act *account) SignMessage(data []byte) ([]byte, error) {
-	h := act.HashMessage(data)
-	return act.private.Sign(h[:])
-}
-
-// Recover recover address by message hash and signature
-func Recover(messageHash []byte, signature []byte) (address.Address, error) {
+// RecoverAddress recover address by message hash and signature
+func RecoverAddress(messageHash, signature []byte) (address.Address, error) {
 	if len(signature) != 65 {
 		return nil, fmt.Errorf("wrong size for signature: got %d, want 65", len(signature))
 	}
