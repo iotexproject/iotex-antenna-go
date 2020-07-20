@@ -7,6 +7,10 @@
 package account
 
 import (
+	"fmt"
+
+	ethCrypto "github.com/ethereum/go-ethereum/crypto"
+
 	"github.com/iotexproject/go-pkgs/crypto"
 	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/iotexproject/iotex-address/address"
@@ -27,6 +31,10 @@ type (
 		Verify([]byte, []byte) bool
 		// Zero zeroes the private key data
 		Zero()
+		// HashMessage hash the message using preamble
+		HashMessage(data []byte) hash.Hash256
+		// SignMessage signs the message using preamble
+		SignMessage(data []byte) ([]byte, error)
 	}
 
 	account struct {
@@ -109,4 +117,32 @@ func (act *account) Verify(data []byte, sig []byte) bool {
 // Zero zeroes the private key data
 func (act *account) Zero() {
 	act.private.Zero()
+}
+
+// HashMessage hash the message using preamble
+func (act *account) HashMessage(data []byte) hash.Hash256 {
+	preamble := fmt.Sprintf("\x16IoTeX Signed Message:\n%d", len(data))
+	iotexMessage := []byte(preamble)
+	iotexMessage = append(iotexMessage, data...)
+	return hash.Hash256b(iotexMessage)
+}
+
+// SignMessage signs the message using preamble
+func (act *account) SignMessage(data []byte) ([]byte, error) {
+	h := act.HashMessage(data)
+	return act.private.Sign(h[:])
+}
+
+func Recover(messageHash []byte, signature []byte) (address.Address, error) {
+	if len(signature) != 65 {
+		return nil, fmt.Errorf("wrong size for signature: got %d, want 65", len(signature))
+	}
+
+	pub, err := ethCrypto.Ecrecover(messageHash, signature)
+	if err != nil {
+		return nil, err
+	}
+
+	payload := hash.Hash160b(pub[1:])
+	return address.FromBytes(payload[:])
 }

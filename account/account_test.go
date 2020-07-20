@@ -57,3 +57,41 @@ func TestAccount(t *testing.T) {
 	b, err = act.Sign([]byte(text))
 	assert.Equal("invalid private key", err.Error())
 }
+
+func TestHashMessage(t *testing.T) {
+	assert := assert.New(t)
+
+	act, err := HexStringToAccount(PrivateKey)
+	assert.NoError(err)
+
+	h := act.HashMessage([]byte("hello"))
+	assert.Equal(
+		"5077b388a631936d73d9c6c9a0bf6016843a8b594540d1d968f7ea40d1541c58",
+		hex.EncodeToString(h[:]),
+	)
+}
+
+func TestSignMessage(t *testing.T) {
+	assert := assert.New(t)
+
+	act, err := HexStringToAccount(PrivateKey)
+	assert.NoError(err)
+
+	b, err := act.SignMessage([]byte("hello"))
+	assert.NoError(err)
+	assert.Equal(
+		"f09c729cc8617aeda344defba6c0eb0eb3ee71732e26f22d1a9fac5beeaa86da3a368417e31779b44e3df4440dfec89a9ecb40567b60228efb67c79672288cef01",
+		hex.EncodeToString(b),
+	)
+}
+
+func TestRecover(t *testing.T) {
+	assert := assert.New(t)
+
+	h, _ := hex.DecodeString("5077b388a631936d73d9c6c9a0bf6016843a8b594540d1d968f7ea40d1541c58")
+	sig, _ := hex.DecodeString("f09c729cc8617aeda344defba6c0eb0eb3ee71732e26f22d1a9fac5beeaa86da3a368417e31779b44e3df4440dfec89a9ecb40567b60228efb67c79672288cef01")
+
+	addr, err := Recover(h, sig)
+	assert.NoError(err)
+	assert.Equal(Address, addr.String())
+}
