@@ -126,32 +126,33 @@ func (c *executeContractCaller) SetNonce(n uint64) ExecuteContractCaller {
 func (c *executeContractCaller) API() iotexapi.APIServiceClient { return c.api }
 
 func (c *executeContractCaller) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
-	if c.method == "" {
-		return hash.ZeroHash256, errcodes.New("contract address and method can not empty", errcodes.InvalidParam)
-	}
+	var data []byte
+	if c.method != "" {
+		method, exist := c.abi.Methods[c.method]
+		if !exist {
+			return hash.ZeroHash256, errcodes.New("method is not found", errcodes.InvalidParam)
+		}
+		var err error
+		c.args, err = encodeArgument(method, c.args)
+		if err != nil {
+			return hash.ZeroHash256, errcodes.NewError(err, errcodes.InvalidParam)
+		}
 
-	method, exist := c.abi.Methods[c.method]
-	if !exist {
-		return hash.ZeroHash256, errcodes.New("method is not found", errcodes.InvalidParam)
-	}
-	var err error
-	c.args, err = encodeArgument(method, c.args)
-	if err != nil {
-		return hash.ZeroHash256, errcodes.NewError(err, errcodes.InvalidParam)
-	}
-
-	actData, err := c.abi.Pack(c.method, c.args...)
-	if err != nil {
-		return hash.ZeroHash256, errcodes.NewError(err, errcodes.InvalidParam)
+		data, err = c.abi.Pack(c.method, c.args...)
+		if err != nil {
+			return hash.ZeroHash256, errcodes.NewError(err, errcodes.InvalidParam)
+		}
 	}
 
 	exec := &iotextypes.Execution{
 		Contract: c.contract.String(),
-		Data:     actData,
 		Amount:   "0",
 	}
 	if c.amount != nil {
 		exec.Amount = c.amount.String()
+	}
+	if len(data) != 0 {
+		exec.Data = data
 	}
 	sc := &sendActionCaller{
 		account:  c.account,
