@@ -6,6 +6,9 @@ package iotex
 
 import (
 	context "context"
+	big "math/big"
+	reflect "reflect"
+
 	abi "github.com/ethereum/go-ethereum/accounts/abi"
 	gomock "github.com/golang/mock/gomock"
 	hash "github.com/iotexproject/go-pkgs/hash"
@@ -13,8 +16,6 @@ import (
 	account "github.com/iotexproject/iotex-antenna-go/v2/account"
 	iotexapi "github.com/iotexproject/iotex-proto/golang/iotexapi"
 	grpc "google.golang.org/grpc"
-	big "math/big"
-	reflect "reflect"
 )
 
 // MockSendActionCaller is a mock of SendActionCaller interface
@@ -1164,17 +1165,17 @@ func (m *MockCandidateCaller) EXPECT() *MockCandidateCallerMockRecorder {
 }
 
 // Register mocks base method
-func (m *MockCandidateCaller) Register(name, operatorAddr, rewardAddr address.Address, amount *big.Int, duration uint32, autoStake bool) StakingAPICaller {
+func (m *MockCandidateCaller) Register(name string, ownerAddr, operatorAddr, rewardAddr address.Address, amount *big.Int, duration uint32, autoStake bool, payload []byte) StakingAPICaller {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Register", name, operatorAddr, rewardAddr, amount, duration, autoStake)
+	ret := m.ctrl.Call(m, "Register", name, ownerAddr, operatorAddr, rewardAddr, amount, duration, autoStake, payload)
 	ret0, _ := ret[0].(StakingAPICaller)
 	return ret0
 }
 
 // Register indicates an expected call of Register
-func (mr *MockCandidateCallerMockRecorder) Register(name, operatorAddr, rewardAddr, amount, duration, autoStake interface{}) *gomock.Call {
+func (mr *MockCandidateCallerMockRecorder) Register(name, ownerAddr, operatorAddr, rewardAddr, amount, duration, autoStake, payload interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockCandidateCaller)(nil).Register), name, operatorAddr, rewardAddr, amount, duration, autoStake)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockCandidateCaller)(nil).Register), name, ownerAddr, operatorAddr, rewardAddr, amount, duration, autoStake, payload)
 }
 
 // Update mocks base method

@@ -20,6 +20,7 @@ var (
 	candidateRegisterTests = []struct {
 		// input
 		name      string
+		owner     string
 		operator  string
 		reward    string
 		amount    *big.Int
@@ -33,6 +34,7 @@ var (
 		err        error
 	}{
 		{
+			"1111",
 			"io10a298zmzvrt4guq79a9f4x7qedj59y7ery84he",
 			"io10a298zmzvrt4guq79a9f4x7qedj59y7ery84he",
 			"io10a298zmzvrt4guq79a9f4x7qedj59y7ery84he",
@@ -47,6 +49,7 @@ var (
 		},
 		// failure case
 		{
+			"2222",
 			"00000000000000000000000000000000000000000",
 			"00000000000000000000000000000000000000000",
 			"00000000000000000000000000000000000000000",
@@ -143,17 +146,17 @@ func TestCandidateCaller_Register(t *testing.T) {
 	stakingAPICaller.EXPECT().SetGasLimit(gomock.Any()).Return(stakingAPICaller).Times(testTimes)
 	stakingAPICaller.EXPECT().SetPayload(gomock.Any()).Return(stakingAPICaller).Times(testTimes)
 	candidateCaller := NewMockCandidateCaller(ctrl)
-	candidateCaller.EXPECT().Register(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(stakingAPICaller).Times(testTimes)
+	candidateCaller.EXPECT().Register(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(stakingAPICaller).Times(testTimes)
 	client := NewMockAuthedClient(ctrl)
 	client.EXPECT().Candidate().Return(candidateCaller).Times(testTimes)
 
 	for _, test := range candidateRegisterTests {
 		stakingAPICaller.EXPECT().Call(gomock.Any()).Return(test.actionHash, test.err).Times(1)
-		nameAddr, _ := address.FromString(test.name)
+		ownerAddr, _ := address.FromString(test.owner)
 		operatorAddr, _ := address.FromString(test.operator)
 		rewardAddr, _ := address.FromString(test.reward)
 		ret, err := client.Candidate().
-			Register(nameAddr, operatorAddr, rewardAddr, test.amount, test.duration, test.autoStake).
+			Register(test.name, ownerAddr, operatorAddr, rewardAddr, test.amount, test.duration, test.autoStake, test.payload).
 			SetGasPrice(test.gasPrice).
 			SetGasLimit(test.gasLimit).
 			SetPayload(test.payload).
