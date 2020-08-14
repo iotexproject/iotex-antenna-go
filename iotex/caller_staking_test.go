@@ -146,7 +146,7 @@ func TestCandidateCaller_Register(t *testing.T) {
 	stakingAPICaller.EXPECT().SetGasLimit(gomock.Any()).Return(stakingAPICaller).Times(testTimes)
 	stakingAPICaller.EXPECT().SetPayload(gomock.Any()).Return(stakingAPICaller).Times(testTimes)
 	candidateCaller := NewMockCandidateCaller(ctrl)
-	candidateCaller.EXPECT().Register(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(stakingAPICaller).Times(testTimes)
+	candidateCaller.EXPECT().Register(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(stakingAPICaller).Times(testTimes)
 	client := NewMockAuthedClient(ctrl)
 	client.EXPECT().Candidate().Return(candidateCaller).Times(testTimes)
 
