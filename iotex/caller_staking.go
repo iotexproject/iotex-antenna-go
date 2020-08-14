@@ -112,9 +112,9 @@ func (c *stakingCaller) Restake(index uint64, duration uint32, autoStake bool) S
 }
 
 //Register Staking
-func (c *candidateCaller) Register(name, operatorAddr, rewardAddr address.Address, amount *big.Int, duration uint32, autoStake bool) StakingAPICaller {
+func (c *candidateCaller) Register(name string, ownerAddr, operatorAddr, rewardAddr address.Address, amount *big.Int, duration uint32, autoStake bool, payload []byte) StakingAPICaller {
 	basic := &iotextypes.CandidateBasicInfo{
-		Name:            name.String(),
+		Name:            name,
 		OperatorAddress: operatorAddr.String(),
 		RewardAddress:   rewardAddr.String(),
 	}
@@ -123,6 +123,8 @@ func (c *candidateCaller) Register(name, operatorAddr, rewardAddr address.Addres
 		StakedAmount:   amount.String(),
 		StakedDuration: duration,
 		AutoStake:      autoStake,
+		OwnerAddress:   ownerAddr.String(),
+		Payload:        payload,
 	}
 	c.stakingBase.action = tx
 	return c
