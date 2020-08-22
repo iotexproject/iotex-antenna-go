@@ -4,9 +4,7 @@
 [![Go version](https://img.shields.io/badge/go-1.11.5-blue.svg)](https://github.com/moovweb/gvm)
 [![LICENSE](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-Welcome to the official Go implementation of IoTeX Golang SDK! IoTeX is building the next generation of the decentralized 
-network for IoT powered by scalability- and privacy-centric blockchains. Please refer to IoTeX
-[whitepaper](https://iotex.io/academics) for details.
+This is the the official Go implementation of IoTeX SDK! Please refer to IoTeX [whitepaper](https://iotex.io/research) and the [protocol](https://github.com/iotexproject/iotex-core) for details.
 
 ## Get started
 
@@ -23,7 +21,7 @@ network for IoT powered by scalability- and privacy-centric blockchains. Please 
 go get github.com/iotexproject/iotex-antenna-go/v2
 ```
 
-### Sample
+### Example
 
 ```
 package main
