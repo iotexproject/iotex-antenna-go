@@ -69,3 +69,7 @@ func main() {
 	}
 }
 ```
+The other examples are under the examples folder.
+1. The chaininfo folder shows that how to get chain info, block info, tx info and delegate info,etc.
+2. The tokens folder shows that how to transfer XRC20 tokens in the xrc20 contract.
+3. The contract folder shows that how to deploy contract and call contract function.
