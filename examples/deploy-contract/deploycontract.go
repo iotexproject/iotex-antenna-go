@@ -27,10 +27,6 @@ import (
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 )
 
-// This example shows how to programmatically deploy a contract to IoTeX blockchain
-// To run:
-// go build; ./chaininfo
-
 func main() {
 	conn, err := iotex.NewDefaultGRPCConn("api.testnet.iotex.one:443")
 	if err != nil {
