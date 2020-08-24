@@ -14,7 +14,8 @@ import (
 	"github.com/iotexproject/iotex-antenna-go/v2/examples/service"
 )
 
-type xrc20Example interface {
+// Xrc20Example is the Xrc20Example interface
+type Xrc20Example interface {
 	// Transfer is the Transfer interface
 	Transfer(ctx context.Context, to string, amount *big.Int) (string, error)
 }
@@ -30,7 +31,7 @@ type iotexService struct {
 
 // NewIotexService returns xrc20Example
 func NewIotexService(accountPrivate, abiString, contract string, gasPrice *big.Int,
-	gasLimit uint64, endpoint string, secure bool) (xrc20Example, error) {
+	gasLimit uint64, endpoint string, secure bool) (Xrc20Example, error) {
 	abi, err := abi.JSON(strings.NewReader(abiString))
 	if err != nil {
 		return nil, err

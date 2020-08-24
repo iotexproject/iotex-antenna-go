@@ -18,7 +18,8 @@ import (
 	"github.com/iotexproject/iotex-antenna-go/v2/examples/service"
 )
 
-type contractExample interface {
+// ContractExample is the ContractExample interface
+type ContractExample interface {
 	// Deploy is the Deploy interface
 	Deploy(ctx context.Context, waitContractAddress bool, args ...interface{}) (string, error)
 	// BalanceOf is the BalanceOf interface
@@ -36,7 +37,7 @@ type iotexService struct {
 }
 
 // NewIotexService returns contractExample service
-func NewIotexService(accountPrivate, abiString, binString, contract string, gasPrice *big.Int, gasLimit uint64, endpoint string, secure bool) (contractExample, error) {
+func NewIotexService(accountPrivate, abiString, binString, contract string, gasPrice *big.Int, gasLimit uint64, endpoint string, secure bool) (ContractExample, error) {
 	abi, err := abi.JSON(strings.NewReader(abiString))
 	if err != nil {
 		return nil, err
