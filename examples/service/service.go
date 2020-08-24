@@ -14,9 +14,13 @@ import (
 	"github.com/iotexproject/iotex-antenna-go/v2/iotex"
 )
 
+// IotexService is the IotexService interface
 type IotexService interface {
+	// Connect connect to iotex server
 	Connect() error
+	// AuthClient is the client with private key
 	AuthClient() iotex.AuthedClient
+	// ReadOnlyClient is the client without private key
 	ReadOnlyClient() iotex.ReadOnlyClient
 }
 
@@ -31,6 +35,7 @@ type iotexService struct {
 	readOnlyClient iotex.ReadOnlyClient
 }
 
+// NewIotexService returns IotexService
 func NewIotexService(accountPrivate, endpoint string, secure bool) IotexService {
 	return &iotexService{
 		endpoint:       endpoint,
@@ -39,13 +44,17 @@ func NewIotexService(accountPrivate, endpoint string, secure bool) IotexService 
 	}
 }
 
+// Connect connect to iotex server
 func (s *iotexService) Connect() (err error) {
 	return s.connect()
 }
 
+// AuthClient is the client with private key
 func (s *iotexService) AuthClient() iotex.AuthedClient {
 	return s.authedClient
 }
+
+// AuthClient is the client without private key
 func (s *iotexService) ReadOnlyClient() iotex.ReadOnlyClient {
 	return s.readOnlyClient
 }

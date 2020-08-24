@@ -15,6 +15,7 @@ import (
 )
 
 type xrc20Example interface {
+	// Transfer is the Transfer interface
 	Transfer(ctx context.Context, to string, amount *big.Int) (string, error)
 }
 
@@ -27,6 +28,7 @@ type iotexService struct {
 	gasLimit uint64
 }
 
+// NewIotexService returns xrc20Example
 func NewIotexService(accountPrivate, abiString, contract string, gasPrice *big.Int,
 	gasLimit uint64, endpoint string, secure bool) (xrc20Example, error) {
 	abi, err := abi.JSON(strings.NewReader(abiString))
@@ -44,6 +46,7 @@ func NewIotexService(accountPrivate, abiString, contract string, gasPrice *big.I
 	}, nil
 }
 
+// Transfer is the Transfer interface
 func (s *iotexService) Transfer(ctx context.Context, to string, amount *big.Int) (hash string, err error) {
 	err = s.Connect()
 	if err != nil {

@@ -19,11 +19,17 @@ const (
 	readCandidatesLimit = 20000
 )
 
+// GetInfoExample is the GetInfoExample interface
 type GetInfoExample interface {
+	// GetChainMeta is the GetChainMeta interface
 	GetChainMeta(ctx context.Context, in *iotexapi.GetChainMetaRequest) (*iotexapi.GetChainMetaResponse, error)
+	// GetBlockMetas is the GetBlockMetas interface
 	GetBlockMetas(ctx context.Context, in *iotexapi.GetBlockMetasRequest) (*iotexapi.GetBlockMetasResponse, error)
+	// GetActions is the GetActions interface
 	GetActions(ctx context.Context, in *iotexapi.GetActionsRequest) (*iotexapi.GetActionsResponse, error)
+	// GetStakingBuckets is the GetStakingBuckets interface
 	GetStakingBuckets(ctx context.Context, height uint64) (*iotextypes.VoteBucketList, error)
+	// GetStakingCandidates is the GetStakingCandidates interface
 	GetStakingCandidates(ctx context.Context, height uint64) (*iotextypes.CandidateListV2, error)
 }
 
@@ -31,12 +37,14 @@ type iotexService struct {
 	service.IotexService
 }
 
+// NewIotexService returns GetInfoExample service
 func NewIotexService(accountPrivate, endpoint string, secure bool) GetInfoExample {
 	return &iotexService{
 		service.NewIotexService(accountPrivate, endpoint, secure),
 	}
 }
 
+// GetChainMeta is the GetChainMeta interface
 func (s *iotexService) GetChainMeta(ctx context.Context, in *iotexapi.GetChainMetaRequest) (*iotexapi.GetChainMetaResponse, error) {
 	err := s.Connect()
 	if err != nil {
@@ -45,6 +53,7 @@ func (s *iotexService) GetChainMeta(ctx context.Context, in *iotexapi.GetChainMe
 	return s.ReadOnlyClient().API().GetChainMeta(ctx, in)
 }
 
+// GetBlockMetas is the GetBlockMetas interface
 func (s *iotexService) GetBlockMetas(ctx context.Context, in *iotexapi.GetBlockMetasRequest) (*iotexapi.GetBlockMetasResponse, error) {
 	err := s.Connect()
 	if err != nil {
@@ -53,6 +62,7 @@ func (s *iotexService) GetBlockMetas(ctx context.Context, in *iotexapi.GetBlockM
 	return s.ReadOnlyClient().API().GetBlockMetas(ctx, in)
 }
 
+// GetActions is the GetActions interface
 func (s *iotexService) GetActions(ctx context.Context, in *iotexapi.GetActionsRequest) (*iotexapi.GetActionsResponse, error) {
 	err := s.Connect()
 	if err != nil {
@@ -61,6 +71,7 @@ func (s *iotexService) GetActions(ctx context.Context, in *iotexapi.GetActionsRe
 	return s.ReadOnlyClient().API().GetActions(ctx, in)
 }
 
+// GetStakingBuckets is the GetStakingBuckets interface
 func (s *iotexService) GetStakingBuckets(ctx context.Context, height uint64) (voteBucketListAll *iotextypes.VoteBucketList, err error) {
 	err = s.Connect()
 	if err != nil {
@@ -82,6 +93,7 @@ func (s *iotexService) GetStakingBuckets(ctx context.Context, height uint64) (vo
 	return
 }
 
+// GetStakingCandidates is the GetStakingCandidates interface
 func (s *iotexService) GetStakingCandidates(ctx context.Context, height uint64) (candidateListAll *iotextypes.CandidateListV2, err error) {
 	err = s.Connect()
 	if err != nil {

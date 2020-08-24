@@ -12,7 +12,7 @@ var (
 )
 
 func main() {
-	s, err := NewIotexService("583aa7b02dbba44d257cad116e7e427d4b2040a0079c348d83636e100a4a4039", IotexTokenABI, IotexTokenBin, "", gasPrice, gasLimit, "api.testnet.iotex.one:80", false)
+	s, err := NewIotexService("583aa7b02dbba44d257cad116e7e427d4b2040a0079c348d83636e100a4a4039", iotexTokenABI, iotexTokenBin, "", gasPrice, gasLimit, "api.testnet.iotex.one:80", false)
 	if err != nil {
 		return
 	}
@@ -23,7 +23,7 @@ func main() {
 	r, err := s.Deploy(context.Background(), true, initialSupply, tokenName, tokenSymbol)
 	fmt.Println("hash", r, err)
 
-	readOnly, err := NewIotexService("", IotexTokenABI, "", "io1eq786nwuu6ygw4ct075gfp3u2f6xgmp8f5hygq", gasPrice, gasLimit, "api.testnet.iotex.one:80", false)
+	readOnly, err := NewIotexService("", iotexTokenABI, "", "io1eq786nwuu6ygw4ct075gfp3u2f6xgmp8f5hygq", gasPrice, gasLimit, "api.testnet.iotex.one:80", false)
 	if err != nil {
 		return
 	}

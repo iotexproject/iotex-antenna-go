@@ -19,7 +19,9 @@ import (
 )
 
 type contractExample interface {
+	// Deploy is the Deploy interface
 	Deploy(ctx context.Context, waitContractAddress bool, args ...interface{}) (string, error)
+	// BalanceOf is the BalanceOf interface
 	BalanceOf(ctx context.Context, addre string) (balance *big.Int, err error)
 }
 
@@ -33,6 +35,7 @@ type iotexService struct {
 	gasLimit uint64
 }
 
+// NewIotexService returns contractExample service
 func NewIotexService(accountPrivate, abiString, binString, contract string, gasPrice *big.Int, gasLimit uint64, endpoint string, secure bool) (contractExample, error) {
 	abi, err := abi.JSON(strings.NewReader(abiString))
 	if err != nil {
@@ -52,6 +55,7 @@ func NewIotexService(accountPrivate, abiString, binString, contract string, gasP
 	}, nil
 }
 
+// Deploy is the Deploy interface
 func (s *iotexService) Deploy(ctx context.Context, waitContractAddress bool, args ...interface{}) (hash string, err error) {
 	err = s.Connect()
 	if err != nil {
@@ -85,6 +89,7 @@ func (s *iotexService) Deploy(ctx context.Context, waitContractAddress bool, arg
 	return
 }
 
+// BalanceOf is the BalanceOf interface
 func (s *iotexService) BalanceOf(ctx context.Context, addre string) (balance *big.Int, err error) {
 	err = s.Connect()
 	if err != nil {
