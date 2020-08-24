@@ -1,3 +1,13 @@
+// Copyright (c) 2020 IoTeX
+// This is an alpha (internal) release and is not suitable for production. This source code is provided 'as is' and no
+// warranties are given as to title or non-infringement, merchantability or fitness for purpose and, to the extent
+// permitted by law, all liability for your use of the code is disclaimed. This source code is governed by Apache
+// License 2.0 that can be found in the LICENSE file.
+
+// This example shows how to programmatically deploy a contract to IoTeX blockchain and interact with it
+// To run:
+// go build; ././deploy-contract
+
 package main
 
 import (
@@ -16,6 +26,10 @@ import (
 	"github.com/iotexproject/iotex-antenna-go/v2/utils/unit"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 )
+
+// This example shows how to programmatically deploy a contract to IoTeX blockchain
+// To run:
+// go build; ./chaininfo
 
 func main() {
 	conn, err := iotex.NewDefaultGRPCConn("api.testnet.iotex.one:443")
