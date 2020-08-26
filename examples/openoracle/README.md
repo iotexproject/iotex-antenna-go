@@ -30,9 +30,10 @@ ioctl account create
 
 export PrivateKey=d0bd45f30f5efea...7a498
 ```
+Get some testnet IOTX from https://faucet.iotex.io/ for the created account.
+
 
 ### 5. Run
-
 ```
 ./openoracle
 ```
