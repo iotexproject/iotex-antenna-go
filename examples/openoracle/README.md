@@ -1,5 +1,3 @@
-**Prepare the contracts as below before the deployement and invocation**
-
 ### 1. Get Open Oracle Contracts
 
 ```
@@ -21,4 +19,20 @@ curl https://raw.githubusercontent.com/iotexproject/iotex-core/master/install-cl
 ### 3. Compile OpenOraclePriceData Contract
 
 ```
-ioctl contract compile OpenOraclePriceData --abi-out OpenOraclePriceData.abi --bin-out OpenOraclePriceData.bin```
+ioctl contract compile OpenOraclePriceData --abi-out OpenOraclePriceData.abi --bin-out OpenOraclePriceData.bin
+```
+
+### 4. Create and Set Private Key
+
+```
+ioctl account create
+...
+
+export PrivateKey=d0bd45f30f5efea...7a498
+```
+
+### 5. Run
+
+```
+./openoracle
+```
