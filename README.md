@@ -6,22 +6,22 @@
 
 This is the the official Go implementation of IoTeX SDK! Please refer to IoTeX [whitepaper](https://iotex.io/research) and the [protocol](https://github.com/iotexproject/iotex-core) for details.
 
-## Get started
+## Get Started
 
-### Minimum requirements
+### Minimum Requirements
 
 | Components | Version | Description |
 |----------|-------------|-------------|
 | [Golang](https://golang.org) | &ge; 1.11.5 | Go programming language |
 
-### Add to your project
+### Add Dependency
 
 ```
 // go mod
 go get github.com/iotexproject/iotex-antenna-go/v2
 ```
 
-### Example
+### Code It Up
 
 ```
 package main
@@ -69,7 +69,9 @@ func main() {
 	}
 }
 ```
-The other examples are under the examples folder.
-1. The chaininfo folder shows that how to get chain info, block info, tx info and delegate info,etc.
-2. The tokens folder shows that how to transfer XRC20 tokens in the xrc20 contract.
-3. The contract folder shows that how to deploy contract and call contract function.
+
+### More Examples
+There are three examples demostrating the use of this SDK. You can `make examples` to build and try:
+- `./examples/chaininfo` shows **how to use the SDK to pull chain, block, action and delegates info**
+- `./examples/openoracle` shows **how to deploy and invoke [Open Oracle Contracts](https://github.com/compound-finance/open-oracle)**
+- `./examples/xrc20tokens` shows **how to deploy and invoke XRC20 tokens**
