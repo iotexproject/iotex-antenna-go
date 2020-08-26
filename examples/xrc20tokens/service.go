@@ -21,19 +21,21 @@ import (
 	"github.com/iotexproject/iotex-address/address"
 	"github.com/iotexproject/iotex-proto/golang/iotextypes"
 
-	"github.com/iotexproject/iotex-antenna-go/v2/examples/service"
+	"github.com/iotexproject/iotex-antenna-go/v2/examples/util"
 )
 
-// ContractExample is the ContractExample interface
-type ContractExample interface {
+// Xrc20Service is the Xrc20Service interface
+type Xrc20Service interface {
 	// Deploy is the Deploy interface
 	Deploy(ctx context.Context, waitContractAddress bool, args ...interface{}) (string, error)
+	// Transfer is the Transfer interface
+	Transfer(ctx context.Context, to string, amount *big.Int) (string, error)
 	// BalanceOf is the BalanceOf interface
-	BalanceOf(ctx context.Context, addre string) (balance *big.Int, err error)
+	BalanceOf(ctx context.Context, addr string) (*big.Int, error)
 }
 
-type iotexService struct {
-	service.IotexService
+type xrc20Service struct {
+	util.IotexService
 
 	contract address.Address
 	abi      abi.ABI
@@ -42,8 +44,8 @@ type iotexService struct {
 	gasLimit uint64
 }
 
-// NewIotexService returns contractExample service
-func NewIotexService(accountPrivate, abiString, binString, contract string, gasPrice *big.Int, gasLimit uint64, endpoint string, secure bool) (ContractExample, error) {
+// NewXrc20Service returns Xrc20Service
+func NewXrc20Service(accountPrivate, abiString, binString, contract string, gasPrice *big.Int, gasLimit uint64, endpoint string, secure bool) (Xrc20Service, error) {
 	abi, err := abi.JSON(strings.NewReader(abiString))
 	if err != nil {
 		return nil, err
@@ -55,15 +57,14 @@ func NewIotexService(accountPrivate, abiString, binString, contract string, gasP
 			return nil, err
 		}
 	}
-
-	return &iotexService{
-		service.NewIotexService(accountPrivate, endpoint, secure),
+	return &xrc20Service{
+		util.NewIotexService(accountPrivate, endpoint, secure),
 		addr, abi, binString, gasPrice, gasLimit,
 	}, nil
 }
 
 // Deploy is the Deploy interface
-func (s *iotexService) Deploy(ctx context.Context, waitContractAddress bool, args ...interface{}) (hash string, err error) {
+func (s *xrc20Service) Deploy(ctx context.Context, waitContractAddress bool, args ...interface{}) (hash string, err error) {
 	err = s.Connect()
 	if err != nil {
 		return
@@ -96,22 +97,35 @@ func (s *iotexService) Deploy(ctx context.Context, waitContractAddress bool, arg
 	return
 }
 
-// BalanceOf is the BalanceOf interface
-func (s *iotexService) BalanceOf(ctx context.Context, addre string) (balance *big.Int, err error) {
+// Transfer is the Transfer interface
+func (s *xrc20Service) Transfer(ctx context.Context, to string, amount *big.Int) (hash string, err error) {
 	err = s.Connect()
 	if err != nil {
 		return
 	}
-	addr, err := address.FromString(addre)
+	addr, err := address.FromString(to)
 	if err != nil {
 		return
 	}
 	ethAddr := common.HexToAddress(hex.EncodeToString(addr.Bytes()))
-	ret, err := s.ReadOnlyClient().ReadOnlyContract(s.contract, s.abi).Read("balanceOf", ethAddr).Call(ctx)
+	h, err := s.AuthClient().Contract(s.contract, s.abi).Execute("transfer", ethAddr, amount).SetGasPrice(s.gasPrice).SetGasLimit(s.gasLimit).Call(ctx)
 	if err != nil {
 		return
 	}
-	balance = big.NewInt(0)
-	err = ret.Unmarshal(&balance)
+	hash = hex.EncodeToString(h[:])
+	return
+}
+
+// BalanceOf is the BalanceOf interface
+func (s *xrc20Service) BalanceOf(ctx context.Context, addr string) (balance *big.Int, err error) {
+	err = s.Connect()
+	if err != nil {
+		return
+	}
+	ret, err := s.ReadOnlyClient().ReadOnlyContract(s.contract, s.abi).Read("balanceOf", addr).Call(ctx)
+	if err != nil {
+		return
+	}
+	balance = new(big.Int).SetBytes(ret.Raw)
 	return
 }
