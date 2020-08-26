@@ -1,4 +1,4 @@
-### Install solc and ioctl
+### 1. Install ioctl and solc
 
 ```
 wget https://github.com/ethereum/solidity/releases/download/v0.5.16/solc-static-linux
@@ -9,7 +9,25 @@ cp solc-static-linux /usr/local/bin/solc
 
 curl https://raw.githubusercontent.com/iotexproject/iotex-core/master/install-cli.sh | sh -s "unstable"
 ```
-### Compile contract using ioctl
+
+### 2. Compile XRC20 Contract using ioctl
 
 ```
-ioctl contract compile XRC20 --abi-out XRC20.abi --bin-out XRC20.bin```
+ioctl contract compile XRC20 --abi-out XRC20.abi --bin-out XRC20.bin
+```
+
+
+### 3. Create and Set Private Key
+
+```
+ioctl account create
+...
+
+export PrivateKey=d0bd45f30f5efea...7a498
+```
+
+### 4. Run
+
+```
+./xrc20tokens
+```
