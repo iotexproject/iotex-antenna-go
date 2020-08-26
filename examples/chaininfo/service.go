@@ -16,7 +16,7 @@ import (
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 	"github.com/iotexproject/iotex-proto/golang/iotextypes"
 
-	"github.com/iotexproject/iotex-antenna-go/v2/examples/service"
+	"github.com/iotexproject/iotex-antenna-go/v2/examples/util"
 )
 
 const (
@@ -25,8 +25,8 @@ const (
 	readCandidatesLimit = 20000
 )
 
-// GetInfoExample is the GetInfoExample interface
-type GetInfoExample interface {
+// GetInfoService is the GetInfoService interface
+type GetInfoService interface {
 	// GetChainMeta is the GetChainMeta interface
 	GetChainMeta(ctx context.Context, in *iotexapi.GetChainMetaRequest) (*iotexapi.GetChainMetaResponse, error)
 	// GetBlockMetas is the GetBlockMetas interface
@@ -39,19 +39,19 @@ type GetInfoExample interface {
 	GetStakingCandidates(ctx context.Context, height uint64) (*iotextypes.CandidateListV2, error)
 }
 
-type iotexService struct {
-	service.IotexService
+type getInfoService struct {
+	util.IotexService
 }
 
-// NewIotexService returns GetInfoExample service
-func NewIotexService(accountPrivate, endpoint string, secure bool) GetInfoExample {
-	return &iotexService{
-		service.NewIotexService(accountPrivate, endpoint, secure),
+// NewGetInfoService returns GetInfoService
+func NewGetInfoService(accountPrivate, endpoint string, secure bool) GetInfoService {
+	return &getInfoService{
+		util.NewIotexService(accountPrivate, endpoint, secure),
 	}
 }
 
 // GetChainMeta is the GetChainMeta interface
-func (s *iotexService) GetChainMeta(ctx context.Context, in *iotexapi.GetChainMetaRequest) (*iotexapi.GetChainMetaResponse, error) {
+func (s *getInfoService) GetChainMeta(ctx context.Context, in *iotexapi.GetChainMetaRequest) (*iotexapi.GetChainMetaResponse, error) {
 	err := s.Connect()
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (s *iotexService) GetChainMeta(ctx context.Context, in *iotexapi.GetChainMe
 }
 
 // GetBlockMetas is the GetBlockMetas interface
-func (s *iotexService) GetBlockMetas(ctx context.Context, in *iotexapi.GetBlockMetasRequest) (*iotexapi.GetBlockMetasResponse, error) {
+func (s *getInfoService) GetBlockMetas(ctx context.Context, in *iotexapi.GetBlockMetasRequest) (*iotexapi.GetBlockMetasResponse, error) {
 	err := s.Connect()
 	if err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func (s *iotexService) GetBlockMetas(ctx context.Context, in *iotexapi.GetBlockM
 }
 
 // GetActions is the GetActions interface
-func (s *iotexService) GetActions(ctx context.Context, in *iotexapi.GetActionsRequest) (*iotexapi.GetActionsResponse, error) {
+func (s *getInfoService) GetActions(ctx context.Context, in *iotexapi.GetActionsRequest) (*iotexapi.GetActionsResponse, error) {
 	err := s.Connect()
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (s *iotexService) GetActions(ctx context.Context, in *iotexapi.GetActionsRe
 }
 
 // GetStakingBuckets is the GetStakingBuckets interface
-func (s *iotexService) GetStakingBuckets(ctx context.Context, height uint64) (voteBucketListAll *iotextypes.VoteBucketList, err error) {
+func (s *getInfoService) GetStakingBuckets(ctx context.Context, height uint64) (voteBucketListAll *iotextypes.VoteBucketList, err error) {
 	err = s.Connect()
 	if err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ func (s *iotexService) GetStakingBuckets(ctx context.Context, height uint64) (vo
 }
 
 // GetStakingCandidates is the GetStakingCandidates interface
-func (s *iotexService) GetStakingCandidates(ctx context.Context, height uint64) (candidateListAll *iotextypes.CandidateListV2, err error) {
+func (s *getInfoService) GetStakingCandidates(ctx context.Context, height uint64) (candidateListAll *iotextypes.CandidateListV2, err error) {
 	err = s.Connect()
 	if err != nil {
 		return nil, err
@@ -121,7 +121,7 @@ func (s *iotexService) GetStakingCandidates(ctx context.Context, height uint64) 
 	return
 }
 
-func (s *iotexService) getStakingBuckets(ctx context.Context, offset, limit uint32, height uint64) (voteBucketList *iotextypes.VoteBucketList, err error) {
+func (s *getInfoService) getStakingBuckets(ctx context.Context, offset, limit uint32, height uint64) (voteBucketList *iotextypes.VoteBucketList, err error) {
 	methodName, err := proto.Marshal(&iotexapi.ReadStakingDataMethod{
 		Method: iotexapi.ReadStakingDataMethod_BUCKETS,
 	})
@@ -158,7 +158,7 @@ func (s *iotexService) getStakingBuckets(ctx context.Context, offset, limit uint
 	return
 }
 
-func (s *iotexService) getStakingCandidates(ctx context.Context, offset, limit uint32, height uint64) (candidateList *iotextypes.CandidateListV2, err error) {
+func (s *getInfoService) getStakingCandidates(ctx context.Context, offset, limit uint32, height uint64) (candidateList *iotextypes.CandidateListV2, err error) {
 	methodName, err := proto.Marshal(&iotexapi.ReadStakingDataMethod{
 		Method: iotexapi.ReadStakingDataMethod_CANDIDATES,
 	})
