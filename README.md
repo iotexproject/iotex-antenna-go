@@ -48,16 +48,16 @@ func main() {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-	
+
 	// Add account by private key
 	acc, err := account.HexStringToAccount("...")
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	// create client
 	c := iotex.NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
-	
+
 	// transfer
 	to, err := address.FromString("to...")
 	if err != nil {
@@ -71,7 +71,7 @@ func main() {
 ```
 
 ### More Examples
-There are three examples demostrating the use of this SDK. You can `make examples` to build and try:
+There are three examples demostrating the use of this SDK on Testnet. You can `make examples` to build and try:
 - `./examples/chaininfo` shows **how to use the SDK to pull chain, block, action and delegates info**
 - `./examples/openoracle` shows **how to deploy and invoke [Open Oracle Contracts](https://github.com/compound-finance/open-oracle)**
 - `./examples/xrc20tokens` shows **how to deploy and invoke XRC20 tokens**
