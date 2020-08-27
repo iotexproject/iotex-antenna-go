@@ -67,6 +67,12 @@ test: lint fmt
 lint:
 	go list ./... | grep -v /vendor/ | xargs $(GOLINT)
 
+.PHONY: examples
+examples:
+	$(GOBUILD) -o ./examples/chaininfo/chaininfo ./examples/chaininfo
+	$(GOBUILD) -o ./examples/openoracle/openoracle ./examples/openoracle
+	$(GOBUILD) -o ./examples/xrc20tokens/xrc20tokens ./examples/xrc20tokens
+
 .PHONY: clean
 clean:
 	@echo "Cleaning..."

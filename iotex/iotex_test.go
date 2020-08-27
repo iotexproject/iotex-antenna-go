@@ -227,34 +227,6 @@ func TestGetReceipt(t *testing.T) {
 	require.NoError(err)
 }
 
-var (
-	addressFilter = &iotexapi.LogsFilter{
-		Address: []string{"io154mvzs09vkgn0hw6gg3ayzw5w39jzp47f8py9v"},
-	}
-	hash256, _    = hash.HexStringToHash256("5d3fa3d426addd459fa768c4ec4bfa07906854a69c4eeeaf79a021af3a780da6")
-	lookupByBlock = &iotexapi.GetLogsRequest_ByBlock{
-		ByBlock: &iotexapi.GetLogsByBlock{
-			BlockHash: hash256[:],
-		},
-	}
-	lookupByRange = &iotexapi.GetLogsRequest_ByRange{
-		ByRange: &iotexapi.GetLogsByRange{
-			FromBlock: 877143,
-			Count:     1,
-		},
-	}
-	getLogsTests = []*iotexapi.GetLogsRequest{
-		{
-			Filter: addressFilter,
-			Lookup: lookupByBlock,
-		},
-		{
-			Filter: addressFilter,
-			Lookup: lookupByRange,
-		},
-	}
-)
-
 func TestGetLogs(t *testing.T) {
 	require := require.New(t)
 	conn, err := NewDefaultGRPCConn(_testnet)
@@ -263,8 +235,55 @@ func TestGetLogs(t *testing.T) {
 
 	c := NewReadOnlyClient(iotexapi.NewAPIServiceClient(conn))
 
-	for _, req := range getLogsTests {
-		_, err := c.GetLogs(req).Call(context.Background())
-		require.NoError(err)
+	// https://testnet.iotexscan.io/action/22cd0c2d1f7d65298cec7599e2d0e3c650dd8b4ed2b1c816d909026c60d785b2
+	name, _ := hex.DecodeString("000000000000000000000000000000000000007472616e736665725374616b65")
+	index, _ := hex.DecodeString("0000000000000000000000000000000000000000000000000000000000000039")
+	receiver, _ := hex.DecodeString("000000000000000000000000cb68a8318de4d4061e0956de69927c327bcfb352")
+	sender, _ := hex.DecodeString("00000000000000000000000053fbc28faf9a52dfe5f591948a23189e900381b5")
+	filterTopics := [][]byte{name, index, receiver, sender}
+	blkHash, _ := hex.DecodeString("b13199e4cc712b3fee4feda52e39cec664ef5cbbc775ee1a66535305ff3a1af7")
+
+	req := &iotexapi.GetLogsRequest{
+		Filter: &iotexapi.LogsFilter{
+			Address: []string{"io1qnpz47hx5q6r3w876axtrn6yz95d70cjl35r53"},
+			Topics: []*iotexapi.Topics{
+				&iotexapi.Topics{},
+				&iotexapi.Topics{Topic: filterTopics},
+			},
+		},
+		Lookup: &iotexapi.GetLogsRequest_ByBlock{
+			ByBlock: &iotexapi.GetLogsByBlock{
+				BlockHash: blkHash,
+			},
+		},
+	}
+	logs, err := c.GetLogs(req).Call(context.Background())
+	require.NoError(err)
+	require.Equal(1, len(logs.Logs))
+	log := logs.Logs[0]
+	for i := range filterTopics {
+		require.Equal(filterTopics[i], log.Topics[i])
+	}
+
+	// pulling with second topic (bucket ID) = 0x31 in 500 blocks
+	index, _ = hex.DecodeString("0000000000000000000000000000000000000000000000000000000000000031")
+	req.Filter.Topics = []*iotexapi.Topics{
+		&iotexapi.Topics{},
+		&iotexapi.Topics{Topic: [][]byte{index}},
+	}
+	req.Lookup = &iotexapi.GetLogsRequest_ByRange{
+		ByRange: &iotexapi.GetLogsByRange{
+			FromBlock: 4795567,
+			Count:     1000,
+		},
+	}
+	logs, err = c.GetLogs(req).Call(context.Background())
+	require.NoError(err)
+	require.Equal(5, len(logs.Logs))
+
+	// verify index == 0x31
+	for _, log := range logs.Logs {
+		require.True(len(log.Topics) >= 2)
+		require.Equal(index, log.Topics[1])
 	}
 }
