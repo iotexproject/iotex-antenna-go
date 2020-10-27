@@ -176,6 +176,24 @@ func (c *stakingBase) API() iotexapi.APIServiceClient {
 
 //Call call sendActionCaller
 func (c *stakingBase) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
+	if c.payload != nil {
+		switch c.action.(type) {
+		case *iotextypes.StakeCreate:
+			c.action.(*iotextypes.StakeCreate).Payload = c.payload
+		case *iotextypes.StakeReclaim:
+			c.action.(*iotextypes.StakeReclaim).Payload = c.payload
+		case *iotextypes.StakeAddDeposit:
+			c.action.(*iotextypes.StakeAddDeposit).Payload = c.payload
+		case *iotextypes.StakeRestake:
+			c.action.(*iotextypes.StakeRestake).Payload = c.payload
+		case *iotextypes.StakeChangeCandidate:
+			c.action.(*iotextypes.StakeChangeCandidate).Payload = c.payload
+		case *iotextypes.StakeTransferOwnership:
+			c.action.(*iotextypes.StakeTransferOwnership).Payload = c.payload
+		case *iotextypes.CandidateRegister:
+			c.action.(*iotextypes.CandidateRegister).Payload = c.payload
+		}
+	}
 	sc := &sendActionCaller{
 		account:  c.account,
 		api:      c.api,
