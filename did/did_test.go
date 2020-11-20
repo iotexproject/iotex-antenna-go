@@ -10,23 +10,22 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/iotexproject/go-pkgs/crypto"
 	"github.com/stretchr/testify/require"
-
-	"github.com/iotexproject/iotex-antenna-go/v2/account"
 )
 
 func TestCreateDID(t *testing.T) {
 	r := require.New(t)
 
-	a, err := account.NewAccount()
+	a, err := crypto.GenerateKey()
 	r.NoError(err)
 	id := DIDPrefix + "0x" + hex.EncodeToString(a.PublicKey().Hash())
 
-	d := CreateDID(a)
+	d := CreateDID(a.PublicKey())
 	r.Equal(id, d.ID)
 	r.Equal(1, len(d.Authentication))
 	r.Equal(id+DIDOwner, d.Authentication[0].ID)
 	r.Equal(DIDAuthType, d.Authentication[0].Type)
 	r.Equal(id, d.Authentication[0].Controller)
-	r.Equal(hex.EncodeToString(a.PublicKey().Bytes()), d.Authentication[0].PublicKeyHex)
+	r.Equal(a.PublicKey().HexString(), d.Authentication[0].PublicKeyHex)
 }

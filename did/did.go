@@ -9,7 +9,7 @@ package did
 import (
 	"encoding/hex"
 
-	"github.com/iotexproject/iotex-antenna-go/v2/account"
+	"github.com/iotexproject/go-pkgs/crypto"
 )
 
 const (
@@ -38,9 +38,9 @@ type (
 	}
 )
 
-// CreateDID creates a new DID using acc's key
-func CreateDID(acc account.Account) Doc {
-	id := DIDPrefix + "0x" + hex.EncodeToString(acc.PublicKey().Hash())
+// CreateDID creates a new DID using public key
+func CreateDID(pk crypto.PublicKey) Doc {
+	id := DIDPrefix + "0x" + hex.EncodeToString(pk.Hash())
 	return Doc{
 		Context: DIDContext,
 		ID:      id,
@@ -49,7 +49,7 @@ func CreateDID(acc account.Account) Doc {
 				ID:           id + DIDOwner,
 				Type:         DIDAuthType,
 				Controller:   id,
-				PublicKeyHex: hex.EncodeToString(acc.PublicKey().Bytes()),
+				PublicKeyHex: pk.HexString(),
 			},
 		},
 	}
