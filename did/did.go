@@ -7,8 +7,6 @@
 package did
 
 import (
-	"encoding/hex"
-
 	"github.com/iotexproject/go-pkgs/crypto"
 )
 
@@ -40,7 +38,7 @@ type (
 
 // CreateDID creates a new DID using public key
 func CreateDID(pk crypto.PublicKey) Doc {
-	id := DIDPrefix + "0x" + hex.EncodeToString(pk.Hash())
+	id := DIDPrefix + pk.Address().Hex()
 	return Doc{
 		Context: DIDContext,
 		ID:      id,

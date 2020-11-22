@@ -152,9 +152,9 @@ func addressTypeAssert(preVal interface{}) (common.Address, error) {
 		if err != nil {
 			return common.Address{}, errcodes.New("fail to convert string to ioAddress", errcodes.InvalidParam)
 		}
-		return common.HexToAddress(hex.EncodeToString(ioAddress.Bytes())), nil
+		return common.BytesToAddress(ioAddress.Bytes()), nil
 	case address.Address:
-		return common.HexToAddress(hex.EncodeToString(v.Bytes())), nil
+		return common.BytesToAddress(v.Bytes()), nil
 	case common.Address:
 		return v, nil
 	default:

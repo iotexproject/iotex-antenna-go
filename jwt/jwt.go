@@ -59,11 +59,8 @@ func SignJWT(issue, expire int64, subject, scope string, key crypto.PrivateKey) 
 func VerifyJWT(jwtString string) (*JWT, error) {
 	claim := &claimWithScope{}
 	token, err := jwt.ParseWithClaims(jwtString, claim, func(token *jwt.Token) (interface{}, error) {
-		keyHex := claim.Issuer
-		if keyHex[:2] == "0x" || keyHex[:2] == "0X" {
-			keyHex = keyHex[2:]
-		}
-		key, err := crypto.HexStringToPublicKey(keyHex)
+		// issuer is the public key
+		key, err := crypto.HexStringToPublicKey(claim.Issuer)
 		if err != nil {
 			return nil, err
 		}

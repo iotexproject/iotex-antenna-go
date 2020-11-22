@@ -7,7 +7,6 @@
 package did
 
 import (
-	"encoding/hex"
 	"testing"
 
 	"github.com/iotexproject/go-pkgs/crypto"
@@ -19,7 +18,7 @@ func TestCreateDID(t *testing.T) {
 
 	a, err := crypto.GenerateKey()
 	r.NoError(err)
-	id := DIDPrefix + "0x" + hex.EncodeToString(a.PublicKey().Hash())
+	id := DIDPrefix + a.PublicKey().Address().Hex()
 
 	d := CreateDID(a.PublicKey())
 	r.Equal(id, d.ID)

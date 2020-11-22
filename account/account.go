@@ -39,17 +39,13 @@ type (
 
 // NewAccount generates a new account
 func NewAccount() (Account, error) {
-	pk, err := crypto.GenerateKey()
-	if err != nil {
-		return nil, err
-	}
-	addr, err := address.FromBytes(pk.PublicKey().Hash())
+	sk, err := crypto.GenerateKey()
 	if err != nil {
 		return nil, err
 	}
 	return &account{
-		pk,
-		addr,
+		sk,
+		sk.PublicKey().Address(),
 	}, nil
 }
 
@@ -59,13 +55,9 @@ func HexStringToAccount(privateKey string) (Account, error) {
 	if err != nil {
 		return nil, err
 	}
-	addr, err := address.FromBytes(sk.PublicKey().Hash())
-	if err != nil {
-		return nil, err
-	}
 	return &account{
 		sk,
-		addr,
+		sk.PublicKey().Address(),
 	}, nil
 }
 
@@ -120,5 +112,5 @@ func RecoverAddress(messageHash, signature []byte) (address.Address, error) {
 	if err != nil {
 		return nil, err
 	}
-	return address.FromBytes(pub.Hash())
+	return pub.Address(), nil
 }
