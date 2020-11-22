@@ -9,8 +9,6 @@ package account
 import (
 	"fmt"
 
-	ethCrypto "github.com/ethereum/go-ethereum/crypto"
-
 	"github.com/iotexproject/go-pkgs/crypto"
 	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/iotexproject/iotex-address/address"
@@ -29,8 +27,6 @@ type (
 		Sign([]byte) ([]byte, error)
 		// Verify verifies the message using the public key
 		Verify([]byte, []byte) bool
-		// Zero zeroes the private key data
-		Zero()
 		// SignMessage signs the message using preamble
 		SignMessage(data []byte) ([]byte, error)
 	}
@@ -73,18 +69,6 @@ func HexStringToAccount(privateKey string) (Account, error) {
 	}, nil
 }
 
-// PrivateKeyToAccount generates an account from an existing private key interface
-func PrivateKeyToAccount(key crypto.PrivateKey) (Account, error) {
-	addr, err := address.FromBytes(key.PublicKey().Hash())
-	if err != nil {
-		return nil, err
-	}
-	return &account{
-		key,
-		addr,
-	}, nil
-}
-
 // Address returns the IoTeX address
 func (act *account) Address() address.Address {
 	return act.address
@@ -112,11 +96,6 @@ func (act *account) Verify(data []byte, sig []byte) bool {
 	return act.PublicKey().Verify(h[:], sig)
 }
 
-// Zero zeroes the private key data
-func (act *account) Zero() {
-	act.private.Zero()
-}
-
 // SignMessage signs the message using preamble
 func (act *account) SignMessage(data []byte) ([]byte, error) {
 	h := HashMessage(data)
@@ -137,11 +116,9 @@ func RecoverAddress(messageHash, signature []byte) (address.Address, error) {
 		return nil, fmt.Errorf("wrong size for signature: got %d, want 65", len(signature))
 	}
 
-	pub, err := ethCrypto.Ecrecover(messageHash, signature)
+	pub, err := crypto.RecoverPubkey(messageHash, signature)
 	if err != nil {
 		return nil, err
 	}
-
-	payload := hash.Hash160b(pub[1:])
-	return address.FromBytes(payload[:])
+	return address.FromBytes(pub.Hash())
 }

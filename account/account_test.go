@@ -38,11 +38,7 @@ func TestAccount(t *testing.T) {
 	act, err := HexStringToAccount(PrivateKey)
 	assert.NoError(err)
 	assert.Equal(Address, act.Address().String())
-	assert.Equal(PublicKey, act.PrivateKey().PublicKey().HexString())
-
-	act1, err := PrivateKeyToAccount(act.PrivateKey())
-	assert.NoError(err)
-	assert.Equal(act, act1)
+	assert.Equal(PublicKey, act.PublicKey().HexString())
 
 	b, err := act.Sign([]byte(text))
 	assert.NoError(err)
@@ -53,7 +49,7 @@ func TestAccount(t *testing.T) {
 	// verify the signature
 	assert.True(act.Verify([]byte(text), b))
 
-	act.Zero()
+	act.PrivateKey().Zero()
 	b, err = act.Sign([]byte(text))
 	assert.Equal("invalid private key", err.Error())
 }

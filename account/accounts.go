@@ -57,7 +57,7 @@ func (acts *Accounts) AddAccount(acc Account) error {
 func (acts *Accounts) RemoveAccount(addr address.Address) {
 	if v, ok := acts.accounts[addr.String()]; ok {
 		// zero the private key
-		v.Zero()
+		v.PrivateKey().Zero()
 	}
 	delete(acts.accounts, addr.String())
 }
