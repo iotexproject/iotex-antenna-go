@@ -14,6 +14,14 @@ import (
 	"github.com/iotexproject/go-pkgs/crypto"
 )
 
+// const
+const (
+	CREATE = "Create"
+	READ   = "Read"
+	UPDATE = "Update"
+	DELETE = "Delete"
+)
+
 type (
 	// JWT is a JWT object
 	JWT struct {
@@ -21,26 +29,35 @@ type (
 		ExpiresAt  int64
 		Issuer     string
 		Subject    string
+		Scope      string
 		SignMethod string
 		SigHex     string
+	}
+
+	claimWithScope struct {
+		jwt.StandardClaims
+		Scope string
 	}
 )
 
 // SignJWT creates a JWT
-func SignJWT(issue, expire int64, subject string, key crypto.PrivateKey) (string, error) {
-	claim := &jwt.StandardClaims{
-		ExpiresAt: expire,
-		IssuedAt:  issue,
-		Issuer:    "0x" + key.PublicKey().HexString(),
-		Subject:   subject,
+func SignJWT(issue, expire int64, subject, scope string, key crypto.PrivateKey) (string, error) {
+	c := &claimWithScope{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expire,
+			IssuedAt:  issue,
+			Issuer:    "0x" + key.PublicKey().HexString(),
+			Subject:   subject,
+		},
+		Scope: scope,
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claim)
+	token := jwt.NewWithClaims(jwt.SigningMethodES256, c)
 	return token.SignedString(key.EcdsaPrivateKey())
 }
 
 // VerifyJWT verifies the JWT
 func VerifyJWT(jwtString string) (*JWT, error) {
-	claim := &jwt.StandardClaims{}
+	claim := &claimWithScope{}
 	token, err := jwt.ParseWithClaims(jwtString, claim, func(token *jwt.Token) (interface{}, error) {
 		keyHex := claim.Issuer
 		if keyHex[:2] == "0x" || keyHex[:2] == "0X" {
@@ -72,6 +89,7 @@ func VerifyJWT(jwtString string) (*JWT, error) {
 		ExpiresAt:  claim.ExpiresAt,
 		Issuer:     claim.Issuer,
 		Subject:    claim.Subject,
+		Scope:      claim.Scope,
 		SignMethod: token.Header["alg"].(string),
 		SigHex:     hex.EncodeToString(sig),
 	}, nil

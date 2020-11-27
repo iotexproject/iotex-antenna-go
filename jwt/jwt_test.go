@@ -9,8 +9,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/iotexproject/go-pkgs/crypto"
 	"github.com/stretchr/testify/require"
-
-	"github.com/iotexproject/iotex-antenna-go/v2/account"
 )
 
 func TestDecodeJWT(t *testing.T) {
@@ -79,25 +77,25 @@ func TestDecodeJWT(t *testing.T) {
 func TestSignVerifyJWT(t *testing.T) {
 	r := require.New(t)
 
-	a, err := account.NewAccount()
+	a, err := crypto.GenerateKey()
 	r.NoError(err)
 
 	now := time.Now().Unix()
 	jwtTests := []struct {
-		iss, exp int64
-		url      string
-		errStr   string
+		iss, exp   int64
+		url, scope string
+		errStr     string
 	}{
-		{now, 0, "http://example.come/1234", ""},
-		{now, now + 1, "http://example.come/1234", ""},
-		{now, now + 2, "http://example.come/4321", ""},
-		{now, now - 1, "http://example.come/1234", "token is expired by"},
-		{now + 1, now, "http://example.come/1234", "Token used before issued"},
+		{now, 0, "http://example.come/1234", CREATE, ""},
+		{now, now + 1, "http://example.come/1234", READ, ""},
+		{now, now + 2, "http://example.come/4321", DELETE, ""},
+		{now, now - 1, "http://example.come/1234", "", "token is expired by"},
+		{now + 1, now, "http://example.come/1234", "", "Token used before issued"},
 	}
 
 	issuer := "0x" + a.PublicKey().HexString()
 	for _, v := range jwtTests {
-		jwtStr, err := SignJWT(v.iss, v.exp, v.url, a.PrivateKey())
+		jwtStr, err := SignJWT(v.iss, v.exp, v.url, v.scope, a)
 		r.NoError(err)
 		token, err := VerifyJWT(jwtStr)
 		if v.errStr != "" {
@@ -109,21 +107,25 @@ func TestSignVerifyJWT(t *testing.T) {
 		r.Equal(v.exp, token.ExpiresAt)
 		r.Equal(issuer, token.Issuer)
 		r.Equal(v.url, token.Subject)
+		r.Equal(v.scope, token.Scope)
 		r.Equal("ES256", token.SignMethod)
 
 		// signing the token with a diff key fails the verification
-		claim := &jwt.StandardClaims{
-			ExpiresAt: v.exp,
-			IssuedAt:  v.iss,
-			Issuer:    issuer,
-			Subject:   v.url,
+		claim := &claimWithScope{
+			StandardClaims: jwt.StandardClaims{
+				ExpiresAt: v.exp,
+				IssuedAt:  v.iss,
+				Issuer:    issuer,
+				Subject:   v.url,
+			},
+			Scope: v.scope,
 		}
 		tok := jwt.NewWithClaims(jwt.SigningMethodES256, claim)
 		str, err := tok.SigningString()
 		r.NoError(err)
-		b, err := account.NewAccount()
+		b, err := crypto.GenerateKey()
 		r.NoError(err)
-		sig, err := tok.Method.Sign(str, b.PrivateKey().EcdsaPrivateKey())
+		sig, err := tok.Method.Sign(str, b.EcdsaPrivateKey())
 		r.NoError(err)
 		str = strings.Join([]string{str, sig}, ".")
 		r.NotEqual(jwtStr, str)
