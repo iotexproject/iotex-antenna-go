@@ -13,7 +13,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/iotexproject/go-pkgs v0.1.4
 	github.com/iotexproject/iotex-address v0.2.3
-	github.com/iotexproject/iotex-proto v0.4.3
+	github.com/iotexproject/iotex-proto v0.4.4-0.20201029172022-a8466422b0f1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.4.0
 	google.golang.org/grpc v1.27.0

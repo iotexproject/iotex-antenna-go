@@ -36,7 +36,7 @@ type (
 
 	claimWithScope struct {
 		jwt.StandardClaims
-		Scope string
+		Scope string `json:"scope,omitempty"`
 	}
 )
 

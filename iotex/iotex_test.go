@@ -274,7 +274,7 @@ func TestGetLogs(t *testing.T) {
 	req.Lookup = &iotexapi.GetLogsRequest_ByRange{
 		ByRange: &iotexapi.GetLogsByRange{
 			FromBlock: 4795567,
-			Count:     1000,
+			ToBlock:   4796567,
 		},
 	}
 	logs, err = c.GetLogs(req).Call(context.Background())
