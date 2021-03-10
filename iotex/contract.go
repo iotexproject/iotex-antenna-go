@@ -16,7 +16,10 @@ type Data struct {
 }
 
 // Unmarshal unmarshals data into a data holder object.
-func (d Data) Unmarshal(v interface{}) error { return d.abi.Unpack(v, d.method, d.Raw) }
+func (d Data) Unmarshal(v interface{}) (err error) {
+	v, err = d.abi.Unpack(d.method, d.Raw)
+	return
+}
 
 type contract struct {
 	address address.Address
