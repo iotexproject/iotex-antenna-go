@@ -16,10 +16,7 @@ type Data struct {
 }
 
 // Unmarshal unmarshals data into a data holder object.
-func (d Data) Unmarshal(v interface{}) (err error) {
-	v, err = d.abi.Unpack(d.method, d.Raw)
-	return
-}
+func (d Data) Unmarshal() ([]interface{}, error) { return d.abi.Unpack(d.method, d.Raw) }
 
 type contract struct {
 	address address.Address
@@ -40,6 +37,7 @@ func (c *contract) Read(method string, args ...interface{}) ReadContractCaller {
 		sender: c.account.Address(),
 	}
 }
+
 func (c *contract) Execute(method string, args ...interface{}) ExecuteContractCaller {
 	return &executeContractCaller{
 		abi:      c.abi,
