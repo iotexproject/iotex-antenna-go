@@ -44,8 +44,25 @@ func TestTransfer(t *testing.T) {
 
 	to, err := address.FromString(_to)
 	require.NoError(err)
-	v := big.NewInt(1000000000000000000)
+	v := big.NewInt(160000000000000000)
 	hash, err := c.Transfer(to, v).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).Call(context.Background())
+	require.NoError(err)
+	require.NotEmpty(hash)
+}
+
+func TestStake(t *testing.T) {
+	require := require.New(t)
+	conn, err := NewDefaultGRPCConn(_testnet)
+	require.NoError(err)
+	defer conn.Close()
+
+	acc, err := account.HexStringToAccount("afeefca74d9a325cf1d6b6911d61a65c32afa8e02bd5e78e2e4ac2910bab45f5")
+	require.NoError(err)
+	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
+
+	one := big.NewInt(int64(unit.Iotx))
+	hash, err := c.Staking().Create("robotbp00001", one.Lsh(one, 7), 0, false).
+		SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(20000).Call(context.Background())
 	require.NoError(err)
 	require.NotEmpty(hash)
 }
@@ -199,7 +216,7 @@ func TestExecuteContractWithAddressArgument(t *testing.T) {
 
 func TestReadContract(t *testing.T) {
 	require := require.New(t)
-	conn, err := NewDefaultGRPCConn(_mainnet)
+	conn, err := NewDefaultGRPCConn(_testnet)
 	require.NoError(err)
 	defer conn.Close()
 

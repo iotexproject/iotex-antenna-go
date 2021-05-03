@@ -15,31 +15,25 @@ import (
 	"github.com/iotexproject/iotex-proto/golang/iotextypes"
 	"google.golang.org/grpc"
 
-	"github.com/iotexproject/iotex-antenna-go/v2/account"
 	"github.com/iotexproject/iotex-antenna-go/v2/errcodes"
 )
 
 type claimRewardCaller struct {
-	account  account.Account
-	api      iotexapi.APIServiceClient
-	amount   *big.Int
-	data     []byte
-	gasLimit *uint64
-	gasPrice *big.Int
-	nonce    *uint64
+	sendActionCaller
+	amount *big.Int
 }
 
 func (c *claimRewardCaller) SetData(data []byte) ClaimRewardCaller {
 	if data == nil {
 		return c
 	}
-	c.data = make([]byte, len(data))
-	copy(c.data, data)
+	c.payload = make([]byte, len(data))
+	copy(c.payload, data)
 	return c
 }
 
 func (c *claimRewardCaller) SetGasLimit(g uint64) ClaimRewardCaller {
-	c.gasLimit = &g
+	c.gasLimit = g
 	return c
 }
 
@@ -49,7 +43,7 @@ func (c *claimRewardCaller) SetGasPrice(g *big.Int) ClaimRewardCaller {
 }
 
 func (c *claimRewardCaller) SetNonce(n uint64) ClaimRewardCaller {
-	c.nonce = &n
+	c.nonce = n
 	return c
 }
 
@@ -62,15 +56,11 @@ func (c *claimRewardCaller) Call(ctx context.Context, opts ...grpc.CallOption) (
 
 	tx := &iotextypes.ClaimFromRewardingFund{
 		Amount: c.amount.String(),
-		Data:   c.data,
+		Data:   c.payload,
 	}
-	sc := &sendActionCaller{
-		account:  c.account,
-		api:      c.api,
-		gasLimit: c.gasLimit,
-		gasPrice: c.gasPrice,
-		nonce:    c.nonce,
-		action:   tx,
+	c.core = &iotextypes.ActionCore{
+		Version: ProtocolVersion,
+		Action:  &iotextypes.ActionCore_ClaimFromRewardingFund{ClaimFromRewardingFund: tx},
 	}
-	return sc.Call(ctx, opts...)
+	return c.sendActionCaller.Call(ctx, opts...)
 }

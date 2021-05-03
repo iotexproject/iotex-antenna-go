@@ -20,19 +20,13 @@ import (
 	"github.com/iotexproject/iotex-proto/golang/iotextypes"
 	"google.golang.org/grpc"
 
-	"github.com/iotexproject/iotex-antenna-go/v2/account"
 	"github.com/iotexproject/iotex-antenna-go/v2/errcodes"
 )
 
 type deployContractCaller struct {
-	account  account.Account
-	api      iotexapi.APIServiceClient
-	gasLimit *uint64
-	gasPrice *big.Int
-	nonce    *uint64
-	abi      *abi.ABI
-	args     []interface{}
-	data     []byte
+	sendActionCaller
+	abi  *abi.ABI
+	args []interface{}
 }
 
 func (c *deployContractCaller) SetArgs(abi abi.ABI, args ...interface{}) DeployContractCaller {
@@ -42,7 +36,7 @@ func (c *deployContractCaller) SetArgs(abi abi.ABI, args ...interface{}) DeployC
 }
 
 func (c *deployContractCaller) SetGasLimit(g uint64) DeployContractCaller {
-	c.gasLimit = &g
+	c.gasLimit = g
 	return c
 }
 
@@ -52,14 +46,14 @@ func (c *deployContractCaller) SetGasPrice(g *big.Int) DeployContractCaller {
 }
 
 func (c *deployContractCaller) SetNonce(n uint64) DeployContractCaller {
-	c.nonce = &n
+	c.nonce = n
 	return c
 }
 
 func (c *deployContractCaller) API() iotexapi.APIServiceClient { return c.api }
 
 func (c *deployContractCaller) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
-	if len(c.data) == 0 {
+	if len(c.payload) == 0 {
 		return hash.ZeroHash256, errcodes.New("contract data can not empty", errcodes.InvalidParam)
 	}
 	if len(c.args) > 0 {
@@ -72,35 +66,31 @@ func (c *deployContractCaller) Call(ctx context.Context, opts ...grpc.CallOption
 		if err != nil {
 			return hash.ZeroHash256, errcodes.New("failed to pack args", errcodes.InvalidParam)
 		}
-		c.data = append(c.data, packed...)
+		c.payload = append(c.payload, packed...)
 	}
 
 	exec := &iotextypes.Execution{
-		Data:   c.data,
+		Data:   c.payload,
 		Amount: "0",
 	}
-	sc := &sendActionCaller{
-		account:  c.account,
-		api:      c.api,
-		gasLimit: c.gasLimit,
-		gasPrice: c.gasPrice,
-		nonce:    c.nonce,
-		action:   exec,
+	c.core = &iotextypes.ActionCore{
+		Version: ProtocolVersion,
+		Action:  &iotextypes.ActionCore_Execution{Execution: exec},
 	}
-	return sc.Call(ctx, opts...)
+	return c.sendActionCaller.Call(ctx, opts...)
+}
+
+type contractArgs struct {
+	contract address.Address
+	abi      *abi.ABI
+	method   string
+	args     []interface{}
 }
 
 type executeContractCaller struct {
-	abi      *abi.ABI
-	contract address.Address
-	account  account.Account
-	api      iotexapi.APIServiceClient
-	method   string
-	args     []interface{}
-	amount   *big.Int
-	gasLimit *uint64
-	gasPrice *big.Int
-	nonce    *uint64
+	sendActionCaller
+	contractArgs
+	amount *big.Int
 }
 
 func (c *executeContractCaller) SetAmount(a *big.Int) ExecuteContractCaller {
@@ -109,7 +99,7 @@ func (c *executeContractCaller) SetAmount(a *big.Int) ExecuteContractCaller {
 }
 
 func (c *executeContractCaller) SetGasLimit(g uint64) ExecuteContractCaller {
-	c.gasLimit = &g
+	c.gasLimit = g
 	return c
 }
 
@@ -119,7 +109,7 @@ func (c *executeContractCaller) SetGasPrice(g *big.Int) ExecuteContractCaller {
 }
 
 func (c *executeContractCaller) SetNonce(n uint64) ExecuteContractCaller {
-	c.nonce = &n
+	c.nonce = n
 	return c
 }
 
@@ -140,35 +130,29 @@ func (c *executeContractCaller) Call(ctx context.Context, opts ...grpc.CallOptio
 		return hash.ZeroHash256, errcodes.NewError(err, errcodes.InvalidParam)
 	}
 
-	actData, err := c.abi.Pack(c.method, c.args...)
+	c.payload, err = c.abi.Pack(c.method, c.args...)
 	if err != nil {
 		return hash.ZeroHash256, errcodes.NewError(err, errcodes.InvalidParam)
 	}
 
 	exec := &iotextypes.Execution{
 		Contract: c.contract.String(),
-		Data:     actData,
+		Data:     c.payload,
 		Amount:   "0",
 	}
 	if c.amount != nil {
 		exec.Amount = c.amount.String()
 	}
-	sc := &sendActionCaller{
-		account:  c.account,
-		api:      c.api,
-		gasLimit: c.gasLimit,
-		gasPrice: c.gasPrice,
-		nonce:    c.nonce,
-		action:   exec,
+	c.core = &iotextypes.ActionCore{
+		Version: ProtocolVersion,
+		Action:  &iotextypes.ActionCore_Execution{Execution: exec},
 	}
-	return sc.Call(ctx, opts...)
+	return c.sendActionCaller.Call(ctx, opts...)
 }
 
 type readContractCaller struct {
-	method string
-	args   []interface{}
-	sender address.Address
-	rc     *readOnlyContract
+	api iotexapi.APIServiceClient
+	contractArgs
 }
 
 func (c *readContractCaller) Call(ctx context.Context, opts ...grpc.CallOption) (Data, error) {
@@ -176,7 +160,7 @@ func (c *readContractCaller) Call(ctx context.Context, opts ...grpc.CallOption) 
 		return Data{}, errcodes.New("contract address and method can not empty", errcodes.InvalidParam)
 	}
 
-	method, exist := c.rc.abi.Methods[c.method]
+	method, exist := c.abi.Methods[c.method]
 	if !exist {
 		return Data{}, errcodes.New("method is not found", errcodes.InvalidParam)
 	}
@@ -186,19 +170,19 @@ func (c *readContractCaller) Call(ctx context.Context, opts ...grpc.CallOption) 
 		return Data{}, errcodes.NewError(err, errcodes.InvalidParam)
 	}
 
-	actData, err := c.rc.abi.Pack(c.method, c.args...)
+	actData, err := c.abi.Pack(c.method, c.args...)
 	if err != nil {
 		return Data{}, errcodes.NewError(err, errcodes.InvalidParam)
 	}
 
 	request := &iotexapi.ReadContractRequest{
 		Execution: &iotextypes.Execution{
-			Contract: c.rc.address.String(),
+			Contract: c.contract.String(),
 			Data:     actData,
 		},
-		CallerAddress: c.sender.String(),
+		CallerAddress: address.ZeroAddress,
 	}
-	response, err := c.rc.api.ReadContract(ctx, request, opts...)
+	response, err := c.api.ReadContract(ctx, request, opts...)
 	if err != nil {
 		return Data{}, errcodes.NewError(err, errcodes.RPCError)
 	}
@@ -210,7 +194,7 @@ func (c *readContractCaller) Call(ctx context.Context, opts ...grpc.CallOption) 
 
 	return Data{
 		method: c.method,
-		abi:    c.rc.abi,
+		abi:    c.abi,
 		Raw:    decoded,
 	}, nil
 }

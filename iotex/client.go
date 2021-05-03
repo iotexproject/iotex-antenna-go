@@ -6,8 +6,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/iotexproject/iotex-address/address"
-	"github.com/iotexproject/iotex-antenna-go/v2/account"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
+
+	"github.com/iotexproject/iotex-antenna-go/v2/account"
 )
 
 type authedClient struct {
@@ -37,8 +38,10 @@ func (c *authedClient) Contract(co address.Address, abi abi.ABI) Contract {
 
 func (c *authedClient) Transfer(to address.Address, value *big.Int) TransferCaller {
 	return &transferCaller{
-		account:   c.account,
-		api:       c.api,
+		sendActionCaller: sendActionCaller{
+			account: c.account,
+			api:     c.api,
+		},
 		amount:    value,
 		recipient: to,
 	}
@@ -46,24 +49,28 @@ func (c *authedClient) Transfer(to address.Address, value *big.Int) TransferCall
 
 func (c *authedClient) ClaimReward(value *big.Int) ClaimRewardCaller {
 	return &claimRewardCaller{
-		account: c.account,
-		api:     c.api,
-		amount:  value,
+		sendActionCaller: sendActionCaller{
+			account: c.account,
+			api:     c.api,
+		},
+		amount: value,
 	}
 }
 
 func (c *authedClient) DeployContract(data []byte) DeployContractCaller {
 	return &deployContractCaller{
-		account: c.account,
-		api:     c.api,
-		data:    data,
+		sendActionCaller: sendActionCaller{
+			account: c.account,
+			api:     c.api,
+			payload: data,
+		},
 	}
 }
 
 //Staking interface
 func (c *authedClient) Staking() StakingCaller {
 	return &stakingCaller{
-		stakingBase{
+		sendActionCaller: sendActionCaller{
 			account: c.account,
 			api:     c.api,
 		}}
@@ -71,8 +78,8 @@ func (c *authedClient) Staking() StakingCaller {
 
 //Candidate interface
 func (c *authedClient) Candidate() CandidateCaller {
-	return &candidateCaller{
-		stakingBase{
+	return &stakingCaller{
+		sendActionCaller: sendActionCaller{
 			account: c.account,
 			api:     c.api,
 		}}

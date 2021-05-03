@@ -28,66 +28,30 @@ const ProtocolVersion = 1
 type sendActionCaller struct {
 	account  account.Account
 	api      iotexapi.APIServiceClient
-	gasLimit *uint64
+	nonce    uint64
+	gasLimit uint64
 	gasPrice *big.Int
-	action   interface{}
-	nonce    *uint64
+	payload  []byte
+	core     *iotextypes.ActionCore
 }
 
-// reclaim type to differentiate unstake and withdraw
-type reclaim struct {
-	action     interface{}
-	isWithdraw bool
+//API returns api
+func (c *sendActionCaller) API() iotexapi.APIServiceClient {
+	return c.api
 }
 
 func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
-	if c.nonce == nil {
+	if c.nonce == 0 {
 		res, err := c.api.GetAccount(ctx, &iotexapi.GetAccountRequest{Address: c.account.Address().String()}, opts...)
 		if err != nil {
 			return hash.ZeroHash256, errcodes.NewError(err, errcodes.RPCError)
 		}
-		nonce := res.GetAccountMeta().GetPendingNonce()
-		c.nonce = &nonce
+		c.nonce = res.GetAccountMeta().GetPendingNonce()
 	}
-	core := &iotextypes.ActionCore{
-		Version: ProtocolVersion,
-		Nonce:   *c.nonce,
-	}
+	c.core.Nonce = c.nonce
 
-	switch a := c.action.(type) {
-	case *iotextypes.Execution:
-		core.Action = &iotextypes.ActionCore_Execution{Execution: a}
-	case *iotextypes.Transfer:
-		core.Action = &iotextypes.ActionCore_Transfer{Transfer: a}
-	case *iotextypes.ClaimFromRewardingFund:
-		core.Action = &iotextypes.ActionCore_ClaimFromRewardingFund{ClaimFromRewardingFund: a}
-	case *iotextypes.StakeCreate:
-		core.Action = &iotextypes.ActionCore_StakeCreate{StakeCreate: a}
-		// special reclaim type to differentiate unstake and withdraw
-	case *reclaim:
-		if a.isWithdraw {
-			core.Action = &iotextypes.ActionCore_StakeWithdraw{StakeWithdraw: a.action.(*iotextypes.StakeReclaim)}
-		} else {
-			core.Action = &iotextypes.ActionCore_StakeUnstake{StakeUnstake: a.action.(*iotextypes.StakeReclaim)}
-		}
-	case *iotextypes.StakeAddDeposit:
-		core.Action = &iotextypes.ActionCore_StakeAddDeposit{StakeAddDeposit: a}
-	case *iotextypes.StakeRestake:
-		core.Action = &iotextypes.ActionCore_StakeRestake{StakeRestake: a}
-	case *iotextypes.StakeTransferOwnership:
-		core.Action = &iotextypes.ActionCore_StakeTransferOwnership{StakeTransferOwnership: a}
-	case *iotextypes.StakeChangeCandidate:
-		core.Action = &iotextypes.ActionCore_StakeChangeCandidate{StakeChangeCandidate: a}
-	case *iotextypes.CandidateRegister:
-		core.Action = &iotextypes.ActionCore_CandidateRegister{CandidateRegister: a}
-	case *iotextypes.CandidateBasicInfo:
-		core.Action = &iotextypes.ActionCore_CandidateUpdate{CandidateUpdate: a}
-	default:
-		return hash.ZeroHash256, errcodes.New("not support action call", errcodes.InternalError)
-	}
-
-	if c.gasLimit == nil {
-		sealed, err := sign(c.account, core)
+	if c.gasLimit == 0 {
+		sealed, err := sign(c.account, c.core)
 		if err != nil {
 			return hash.ZeroHash256, errcodes.NewError(err, errcodes.InternalError)
 		}
@@ -96,10 +60,9 @@ func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (h
 		if err != nil {
 			return hash.ZeroHash256, errcodes.NewError(err, errcodes.RPCError)
 		}
-		limit := response.GetGas()
-		c.gasLimit = &limit
+		c.gasLimit = response.GetGas()
 	}
-	core.GasLimit = *c.gasLimit
+	c.core.GasLimit = c.gasLimit
 
 	if c.gasPrice == nil {
 		response, err := c.api.SuggestGasPrice(ctx, &iotexapi.SuggestGasPriceRequest{}, opts...)
@@ -108,9 +71,9 @@ func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (h
 		}
 		c.gasPrice = big.NewInt(0).SetUint64(response.GetGasPrice())
 	}
-	core.GasPrice = c.gasPrice.String()
+	c.core.GasPrice = c.gasPrice.String()
 
-	sealed, err := sign(c.account, core)
+	sealed, err := sign(c.account, c.core)
 	if err != nil {
 		return hash.ZeroHash256, errcodes.NewError(err, errcodes.InternalError)
 	}
@@ -123,6 +86,7 @@ func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (h
 	if err != nil {
 		return hash.ZeroHash256, errcodes.NewError(err, errcodes.BadResponse)
 	}
+	c.nonce = 0 // reset before next time use
 	return h, nil
 }
 

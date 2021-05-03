@@ -38,16 +38,6 @@ type ClaimRewardCaller interface {
 	SetNonce(uint64) ClaimRewardCaller
 }
 
-// DeployContractCaller is used to perform a deploy contract call.
-type DeployContractCaller interface {
-	SendActionCaller
-
-	SetArgs(abi abi.ABI, args ...interface{}) DeployContractCaller
-	SetGasPrice(*big.Int) DeployContractCaller
-	SetGasLimit(uint64) DeployContractCaller
-	SetNonce(uint64) DeployContractCaller
-}
-
 // GetReceiptCaller is used to perform a get receipt call.
 type GetReceiptCaller interface {
 	Call(ctx context.Context, opts ...grpc.CallOption) (*iotexapi.GetReceiptByActionResponse, error)
@@ -93,6 +83,16 @@ type ExecuteContractCaller interface {
 	SetGasLimit(uint64) ExecuteContractCaller
 	SetAmount(*big.Int) ExecuteContractCaller
 	SetNonce(uint64) ExecuteContractCaller
+}
+
+// DeployContractCaller is used to perform a deploy contract call.
+type DeployContractCaller interface {
+	SendActionCaller
+
+	SetArgs(abi abi.ABI, args ...interface{}) DeployContractCaller
+	SetGasPrice(*big.Int) DeployContractCaller
+	SetGasLimit(uint64) DeployContractCaller
+	SetNonce(uint64) DeployContractCaller
 }
 
 // Contract allows to read or execute on this contract's methods.

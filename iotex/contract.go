@@ -27,25 +27,28 @@ type contract struct {
 
 func (c *contract) Read(method string, args ...interface{}) ReadContractCaller {
 	return &readContractCaller{
-		method: method,
-		args:   args,
-		rc: &readOnlyContract{
-			address: c.address,
-			abi:     c.abi,
-			api:     c.api,
+		api: c.api,
+		contractArgs: contractArgs{
+			contract: c.address,
+			abi:      c.abi,
+			method:   method,
+			args:     args,
 		},
-		sender: c.account.Address(),
 	}
 }
 
 func (c *contract) Execute(method string, args ...interface{}) ExecuteContractCaller {
 	return &executeContractCaller{
-		abi:      c.abi,
-		api:      c.api,
-		contract: c.address,
-		account:  c.account,
-		method:   method,
-		args:     args,
+		sendActionCaller: sendActionCaller{
+			account: c.account,
+			api:     c.api,
+		},
+		contractArgs: contractArgs{
+			contract: c.address,
+			abi:      c.abi,
+			method:   method,
+			args:     args,
+		},
 	}
 }
 
@@ -56,11 +59,13 @@ type readOnlyContract struct {
 }
 
 func (c *readOnlyContract) Read(method string, args ...interface{}) ReadContractCaller {
-	sender, _ := address.FromString("io1emxf8zzqckhgjde6dqd97ts0y3q496gm3fdrl6")
 	return &readContractCaller{
-		method: method,
-		args:   args,
-		rc:     c,
-		sender: sender,
+		api: c.api,
+		contractArgs: contractArgs{
+			contract: c.address,
+			abi:      c.abi,
+			method:   method,
+			args:     args,
+		},
 	}
 }

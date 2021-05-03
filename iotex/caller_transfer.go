@@ -16,19 +16,13 @@ import (
 	"github.com/iotexproject/iotex-proto/golang/iotextypes"
 	"google.golang.org/grpc"
 
-	"github.com/iotexproject/iotex-antenna-go/v2/account"
 	"github.com/iotexproject/iotex-antenna-go/v2/errcodes"
 )
 
 type transferCaller struct {
-	account   account.Account
-	api       iotexapi.APIServiceClient
+	sendActionCaller
 	amount    *big.Int
 	recipient address.Address
-	payload   []byte
-	gasLimit  *uint64
-	gasPrice  *big.Int
-	nonce     *uint64
 }
 
 func (c *transferCaller) SetPayload(pl []byte) TransferCaller {
@@ -41,7 +35,7 @@ func (c *transferCaller) SetPayload(pl []byte) TransferCaller {
 }
 
 func (c *transferCaller) SetGasLimit(g uint64) TransferCaller {
-	c.gasLimit = &g
+	c.gasLimit = g
 	return c
 }
 
@@ -51,7 +45,7 @@ func (c *transferCaller) SetGasPrice(g *big.Int) TransferCaller {
 }
 
 func (c *transferCaller) SetNonce(n uint64) TransferCaller {
-	c.nonce = &n
+	c.nonce = n
 	return c
 }
 
@@ -67,13 +61,9 @@ func (c *transferCaller) Call(ctx context.Context, opts ...grpc.CallOption) (has
 		Recipient: c.recipient.String(),
 		Payload:   c.payload,
 	}
-	sc := &sendActionCaller{
-		account:  c.account,
-		api:      c.api,
-		gasLimit: c.gasLimit,
-		gasPrice: c.gasPrice,
-		nonce:    c.nonce,
-		action:   tx,
+	c.core = &iotextypes.ActionCore{
+		Version: ProtocolVersion,
+		Action:  &iotextypes.ActionCore_Transfer{Transfer: tx},
 	}
-	return sc.Call(ctx, opts...)
+	return c.sendActionCaller.Call(ctx, opts...)
 }
