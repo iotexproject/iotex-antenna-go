@@ -15,10 +15,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/iotexproject/go-pkgs/hash"
-	"github.com/stretchr/testify/require"
-
 	"github.com/iotexproject/iotex-address/address"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
+	"github.com/iotexproject/iotex-proto/golang/iotextypes"
+	"github.com/stretchr/testify/require"
 
 	"github.com/iotexproject/iotex-antenna-go/v2/account"
 	"github.com/iotexproject/iotex-antenna-go/v2/utils/unit"
@@ -29,6 +29,7 @@ const (
 	_mainnet           = "api.iotex.one:443"
 	_accountPrivateKey = "73c7b4a62bf165dccf8ebdea8278db811efd5b8638e2ed9683d2d94889450426"
 	_to                = "io1emxf8zzqckhgjde6dqd97ts0y3q496gm3fdrl6"
+	_testNetChainID    = 4690
 )
 
 func TestTransfer(t *testing.T) {
@@ -225,6 +226,50 @@ func TestGetReceipt(t *testing.T) {
 	require.NoError(err)
 	_, err = c.GetReceipt(actionHash).Call(context.Background())
 	require.NoError(err)
+}
+
+func TestGetRlpTx(t *testing.T) {
+	require := require.New(t)
+	conn, err := NewDefaultGRPCConn(_testnet)
+	require.NoError(err)
+	defer conn.Close()
+
+	c := iotexapi.NewAPIServiceClient(conn)
+	ctx := context.Background()
+	req := iotexapi.GetRawBlocksRequest{
+		Count:               1,
+		WithTransactionLogs: true,
+	}
+	for _, height := range []uint64{8642211, 8642268} {
+		req.StartHeight = height
+		res, err := c.GetRawBlocks(ctx, &req)
+		require.NoError(err)
+		require.Equal(1, len(res.Blocks))
+		txLog := res.Blocks[0].TransactionLogs
+		require.Equal(1, len(txLog.Logs))
+		log := txLog.Logs[0]
+		require.Equal(2, len(log.Transactions))
+		for i, tx := range log.Transactions {
+			if i == 0 {
+				// first log is for native transfer
+				require.Equal(
+					iotextypes.TransactionLogType_name[int32(iotextypes.TransactionLogType_NATIVE_TRANSFER)],
+					tx.Type.String())
+			} else {
+				// second log is for gas fee in the amount of 0.01 IOTX
+				require.Equal(
+					iotextypes.TransactionLogType_name[int32(iotextypes.TransactionLogType_GAS_FEE)],
+					tx.Type.String())
+				require.Equal("10000000000000000", tx.Amount)
+			}
+		}
+
+		// verify hash
+		act := res.Blocks[0].GetBlock().GetBody().GetActions()[0]
+		h, err := ActionHash(act, _testNetChainID)
+		require.NoError(err)
+		require.Equal(h[:], log.ActionHash)
+	}
 }
 
 func TestGetLogs(t *testing.T) {
