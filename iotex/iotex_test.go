@@ -240,14 +240,22 @@ func TestGetRlpTx(t *testing.T) {
 		Count:               1,
 		WithTransactionLogs: true,
 	}
-	for _, height := range []uint64{8642211, 8642268} {
-		req.StartHeight = height
+	for _, v := range []struct {
+		height uint64
+		hash   string
+	}{
+		{8638208, "bc34eaac7fc9a4e3edc78aff514fa5631f722702ed35b4f696229d5da3f7e914"},
+		{8638638, "a43e8ee6c444da9b7524663afdde84dd3c4976f0127a3fbc3129e18480213386"},
+		{8638658, "76c2b74ea767529a2ecc45721e968b9a75c930be91742ac84dd200375af5ab76"},
+	} {
+		req.StartHeight = v.height
 		res, err := c.GetRawBlocks(ctx, &req)
 		require.NoError(err)
 		require.Equal(1, len(res.Blocks))
 		txLog := res.Blocks[0].TransactionLogs
 		require.Equal(1, len(txLog.Logs))
 		log := txLog.Logs[0]
+		require.Equal(v.hash, hex.EncodeToString(log.ActionHash))
 		require.Equal(2, len(log.Transactions))
 		for i, tx := range log.Transactions {
 			if i == 0 {
@@ -266,6 +274,7 @@ func TestGetRlpTx(t *testing.T) {
 
 		// verify hash
 		act := res.Blocks[0].GetBlock().GetBody().GetActions()[0]
+		require.Equal(act.Encoding, iotextypes.Encoding_ETHEREUM_RLP)
 		h, err := ActionHash(act, _testNetChainID)
 		require.NoError(err)
 		require.Equal(h[:], log.ActionHash)
