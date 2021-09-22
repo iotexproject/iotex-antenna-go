@@ -4,8 +4,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/iotexproject/iotex-address/address"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
-
-	"github.com/iotexproject/iotex-antenna-go/v2/account"
 )
 
 // Data is the data returned from read contract.
@@ -19,10 +17,9 @@ type Data struct {
 func (d Data) Unmarshal() ([]interface{}, error) { return d.abi.Unpack(d.method, d.Raw) }
 
 type contract struct {
+	*sendActionCaller
 	address address.Address
 	abi     *abi.ABI
-	api     iotexapi.APIServiceClient
-	account account.Account
 }
 
 func (c *contract) Read(method string, args ...interface{}) ReadContractCaller {
@@ -39,10 +36,7 @@ func (c *contract) Read(method string, args ...interface{}) ReadContractCaller {
 
 func (c *contract) Execute(method string, args ...interface{}) ExecuteContractCaller {
 	return &executeContractCaller{
-		sendActionCaller: sendActionCaller{
-			account: c.account,
-			api:     c.api,
-		},
+		sendActionCaller: c.sendActionCaller,
 		contractArgs: contractArgs{
 			contract: c.address,
 			abi:      c.abi,

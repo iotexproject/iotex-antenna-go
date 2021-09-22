@@ -12,7 +12,6 @@ import (
 
 	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/iotexproject/iotex-address/address"
-	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 	"github.com/iotexproject/iotex-proto/golang/iotextypes"
 	"google.golang.org/grpc"
 
@@ -20,50 +19,44 @@ import (
 )
 
 type transferCaller struct {
-	sendActionCaller
+	*sendActionCaller
 	amount    *big.Int
 	recipient address.Address
 }
 
-func (c *transferCaller) SetPayload(pl []byte) TransferCaller {
-	if pl == nil {
-		return c
-	}
-	c.payload = make([]byte, len(pl))
-	copy(c.payload, pl)
+func (c *transferCaller) SetPayload(pl []byte) SendActionCaller {
+	c.sendActionCaller.SetPayload(pl)
 	return c
 }
 
-func (c *transferCaller) SetGasLimit(g uint64) TransferCaller {
-	c.gasLimit = g
+func (c *transferCaller) SetGasLimit(g uint64) SendActionCaller {
+	c.sendActionCaller.SetGasLimit(g)
 	return c
 }
 
-func (c *transferCaller) SetGasPrice(g *big.Int) TransferCaller {
-	c.gasPrice = g
+func (c *transferCaller) SetGasPrice(g *big.Int) SendActionCaller {
+	c.sendActionCaller.SetGasPrice(g)
 	return c
 }
 
-func (c *transferCaller) SetNonce(n uint64) TransferCaller {
-	c.nonce = n
+func (c *transferCaller) SetNonce(n uint64) SendActionCaller {
+	c.sendActionCaller.SetNonce(n)
 	return c
 }
-
-func (c *transferCaller) API() iotexapi.APIServiceClient { return c.api }
 
 func (c *transferCaller) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
 	if c.amount == nil {
 		return hash.ZeroHash256, errcodes.New("transfer amount cannot be nil", errcodes.InvalidParam)
 	}
 
-	tx := &iotextypes.Transfer{
+	tx := iotextypes.Transfer{
 		Amount:    c.amount.String(),
 		Recipient: c.recipient.String(),
 		Payload:   c.payload,
 	}
 	c.core = &iotextypes.ActionCore{
 		Version: ProtocolVersion,
-		Action:  &iotextypes.ActionCore_Transfer{Transfer: tx},
+		Action:  &iotextypes.ActionCore_Transfer{Transfer: &tx},
 	}
 	return c.sendActionCaller.Call(ctx, opts...)
 }
