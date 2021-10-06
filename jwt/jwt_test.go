@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"github.com/iotexproject/go-pkgs/crypto"
 	"github.com/stretchr/testify/require"
 )
