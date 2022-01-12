@@ -20,3 +20,15 @@ func NewDefaultGRPCConn(endpoint string) (*grpc.ClientConn, error) {
 		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(opts...)),
 		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
 }
+
+// NewGRPCConnWithoutTLS creates a default grpc connection, without tls
+func NewGRPCConnWithoutTLS(endpoint string) (*grpc.ClientConn, error) {
+	opts := []grpc_retry.CallOption{
+		grpc_retry.WithBackoff(grpc_retry.BackoffLinear(100 * time.Second)),
+		grpc_retry.WithMax(3),
+	}
+	return grpc.Dial(endpoint,
+		grpc.WithStreamInterceptor(grpc_retry.StreamClientInterceptor(opts...)),
+		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(opts...)),
+		grpc.WithInsecure())
+}
