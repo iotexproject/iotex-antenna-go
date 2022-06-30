@@ -47,7 +47,7 @@ func TestTransfer(t *testing.T) {
 	to, err := address.FromString(_to)
 	require.NoError(err)
 	v := big.NewInt(160000000000000000)
-	hash, err := c.Transfer(to, v).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).Call(context.Background())
+	hash, err := c.Transfer(to, v).SetChainID(2).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).Call(context.Background())
 	require.NoError(err)
 	require.NotEmpty(hash)
 }
@@ -64,7 +64,7 @@ func TestStake(t *testing.T) {
 
 	one := big.NewInt(int64(unit.Iotx))
 	hash, err := c.Staking().Create("robotbp00001", one.Lsh(one, 7), 0, false).
-		SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(20000).Call(context.Background())
+		SetChainID(2).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(20000).Call(context.Background())
 	require.Contains(err.Error(), "insufficient funds for gas * price + value")
 	require.NotEmpty(hash)
 }
@@ -81,7 +81,7 @@ func TestClaimReward(t *testing.T) {
 
 	require.NoError(err)
 	v := big.NewInt(1000000000000000000)
-	hash, err := c.ClaimReward(v).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).Call(context.Background())
+	hash, err := c.ClaimReward(v).SetChainID(2).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).Call(context.Background())
 	require.NoError(err)
 	require.NotEmpty(hash)
 }
@@ -101,7 +101,7 @@ func TestDeployContract(t *testing.T) {
 	data, err := hex.DecodeString("608060405234801561001057600080fd5b506040516020806100f2833981016040525160005560bf806100336000396000f30060806040526004361060485763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166360fe47b18114604d5780636d4ce63c146064575b600080fd5b348015605857600080fd5b5060626004356088565b005b348015606f57600080fd5b506076608d565b60408051918252519081900360200190f35b600055565b600054905600a165627a7a723058208d4f6c9737f34d9b28ef070baa8127c0876757fbf6f3945a7ea8d4387ca156590029")
 	require.NoError(err)
 
-	hash, err := c.DeployContract(data).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).SetArgs(abi, big.NewInt(10)).Call(context.Background())
+	hash, err := c.DeployContract(data).SetGasPrice(big.NewInt(int64(unit.Qev))).SetChainID(2).SetGasLimit(1000000).SetArgs(abi, big.NewInt(10)).Call(context.Background())
 	require.NoError(err)
 	require.NotNil(hash)
 }
@@ -120,7 +120,7 @@ func TestExecuteContract(t *testing.T) {
 	contract, err := address.FromString("io17sn486alutrnzlrdz9vv44g7qyc38hygf7s6h0")
 	require.NoError(err)
 
-	hash, err := c.Contract(contract, abi).Execute("set", big.NewInt(8)).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).Call(context.Background())
+	hash, err := c.Contract(contract, abi).Execute("set", big.NewInt(8)).SetChainID(2).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).Call(context.Background())
 	require.NoError(err)
 	require.NotNil(hash)
 }
@@ -211,7 +211,7 @@ func TestExecuteContractWithAddressArgument(t *testing.T) {
 	recipients := [2]address.Address{recipient1, recipient2}
 	// recipients := [2]string{"io18jaldgzc8wlyfnzamgas62yu3kg5nw527czg37", "io1ntprz4p5zw38fvtfrcczjtcv3rkr3nqs6sm3pj"}
 	amounts := [2]*big.Int{big.NewInt(1), big.NewInt(2)}
-	actionHash, err := c.Contract(contract, abi).Execute("multiSend", recipients, amounts, "payload").SetGasPrice(big.NewInt(1000000000000)).SetGasLimit(1000000).Call(context.Background())
+	actionHash, err := c.Contract(contract, abi).Execute("multiSend", recipients, amounts, "payload").SetChainID(2).SetGasPrice(big.NewInt(1000000000000)).SetGasLimit(1000000).Call(context.Background())
 	require.NoError(err)
 	require.NotNil(actionHash)
 }

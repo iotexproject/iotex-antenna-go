@@ -148,6 +148,11 @@ func (c *stakingCaller) SetNonce(n uint64) SendActionCaller {
 	return c
 }
 
+func (c *stakingCaller) SetChainID(id uint32) SendActionCaller {
+	c.sendActionCaller.setChainID(id)
+	return c
+}
+
 func (c *stakingCaller) SetPayload(pl []byte) SendActionCaller {
 	c.sendActionCaller.setPayload(pl)
 	return c

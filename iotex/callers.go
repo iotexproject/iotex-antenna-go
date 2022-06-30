@@ -31,6 +31,7 @@ type sendActionCaller struct {
 	nonce    uint64
 	gasLimit uint64
 	gasPrice *big.Int
+	chainID  uint32
 	payload  []byte
 	core     *iotextypes.ActionCore
 }
@@ -42,6 +43,10 @@ func (c *sendActionCaller) API() iotexapi.APIServiceClient {
 
 func (c *sendActionCaller) setNonce(n uint64) {
 	c.nonce = n
+}
+
+func (c *sendActionCaller) setChainID(id uint32) {
+	c.chainID = id
 }
 
 func (c *sendActionCaller) setGasLimit(g uint64) {
@@ -83,6 +88,7 @@ func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (h
 		c.gasLimit = response.GetGas()
 	}
 	c.core.GasLimit = c.gasLimit
+	c.core.ChainID = c.chainID
 
 	if c.gasPrice == nil {
 		response, err := c.api.SuggestGasPrice(ctx, &iotexapi.SuggestGasPriceRequest{}, opts...)

@@ -22,6 +22,11 @@ go get github.com/iotexproject/iotex-antenna-go/v2
 ```
 
 ### Code It Up
+The below example code shows the 4 easy steps to send a transaction to IoTeX blockchain
+1. connect to the chain's RPC endpoint
+2. create an account by importing a private key
+3. create a client and generate an action sender
+4. send the transaction to the chain
 
 ```
 package main
@@ -38,12 +43,15 @@ import (
 )
 
 const (
-	host = "api.testnet.iotex.one:443"
+	mainnetRPC     = "api.iotex.one:443"
+	testnetRPC     = "api.testnet.iotex.one:443"
+	mainnetChainID = 1
+	testnetChainID = 2
 )
 
 func main() {
 	// Create grpc connection
-	conn, err := iotex.NewDefaultGRPCConn(host)
+	conn, err := iotex.NewDefaultGRPCConn(testnetRPC)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,16 +65,17 @@ func main() {
 
 	// create client
 	c := iotex.NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
-
-	// transfer
-	to, err := address.FromString("to...")
+	
+	// send the transfer to chain
+	to, err := address.FromString("io1zq5g9c5c3hqw9559ks4anptkpumxgsjfn2e4ke")
 	if err != nil {
 		log.Fatal(err)
 	}
-	hash, err := c.Transfer(to, big.NewInt(10)).Call(context.Background())
+	hash, err := c.Transfer(to, big.NewInt(10)).SetChainID(testnetChainID).SetGasPrice(big.NewInt(100000000000)).SetGasLimit(20000).Call(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("transaction hash = %x\n", hash)
 }
 ```
 
