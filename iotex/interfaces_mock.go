@@ -132,6 +132,20 @@ func (mr *MockSendActionCallerMockRecorder) Call(ctx interface{}, opts ...interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Call", reflect.TypeOf((*MockSendActionCaller)(nil).Call), varargs...)
 }
 
+// SetChainID mocks base method.
+func (m *MockSendActionCaller) SetChainID(arg0 uint32) SendActionCaller {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetChainID", arg0)
+	ret0, _ := ret[0].(SendActionCaller)
+	return ret0
+}
+
+// SetChainID indicates an expected call of SetChainID.
+func (mr *MockSendActionCallerMockRecorder) SetChainID(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetChainID", reflect.TypeOf((*MockSendActionCaller)(nil).SetChainID), arg0)
+}
+
 // SetGasLimit mocks base method.
 func (m *MockSendActionCaller) SetGasLimit(arg0 uint64) SendActionCaller {
 	m.ctrl.T.Helper()
@@ -243,6 +257,20 @@ func (mr *MockClaimRewardCallerMockRecorder) Call(ctx interface{}, opts ...inter
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Call", reflect.TypeOf((*MockClaimRewardCaller)(nil).Call), varargs...)
+}
+
+// SetChainID mocks base method.
+func (m *MockClaimRewardCaller) SetChainID(arg0 uint32) ClaimRewardCaller {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetChainID", arg0)
+	ret0, _ := ret[0].(ClaimRewardCaller)
+	return ret0
+}
+
+// SetChainID indicates an expected call of SetChainID.
+func (mr *MockClaimRewardCallerMockRecorder) SetChainID(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetChainID", reflect.TypeOf((*MockClaimRewardCaller)(nil).SetChainID), arg0)
 }
 
 // SetData mocks base method.
@@ -757,6 +785,20 @@ func (mr *MockExecuteContractCallerMockRecorder) SetAmount(arg0 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAmount", reflect.TypeOf((*MockExecuteContractCaller)(nil).SetAmount), arg0)
 }
 
+// SetChainID mocks base method.
+func (m *MockExecuteContractCaller) SetChainID(arg0 uint32) ExecuteContractCaller {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetChainID", arg0)
+	ret0, _ := ret[0].(ExecuteContractCaller)
+	return ret0
+}
+
+// SetChainID indicates an expected call of SetChainID.
+func (mr *MockExecuteContractCallerMockRecorder) SetChainID(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetChainID", reflect.TypeOf((*MockExecuteContractCaller)(nil).SetChainID), arg0)
+}
+
 // SetGasLimit mocks base method.
 func (m *MockExecuteContractCaller) SetGasLimit(arg0 uint64) ExecuteContractCaller {
 	m.ctrl.T.Helper()
@@ -873,6 +915,20 @@ func (mr *MockDeployContractCallerMockRecorder) SetArgs(abi interface{}, args ..
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{abi}, args...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetArgs", reflect.TypeOf((*MockDeployContractCaller)(nil).SetArgs), varargs...)
+}
+
+// SetChainID mocks base method.
+func (m *MockDeployContractCaller) SetChainID(arg0 uint32) DeployContractCaller {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetChainID", arg0)
+	ret0, _ := ret[0].(DeployContractCaller)
+	return ret0
+}
+
+// SetChainID indicates an expected call of SetChainID.
+func (mr *MockDeployContractCallerMockRecorder) SetChainID(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetChainID", reflect.TypeOf((*MockDeployContractCaller)(nil).SetChainID), arg0)
 }
 
 // SetGasLimit mocks base method.

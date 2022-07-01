@@ -39,6 +39,11 @@ func (c *transferCaller) SetGasPrice(g *big.Int) SendActionCaller {
 	return c
 }
 
+func (c *transferCaller) SetChainID(id uint32) SendActionCaller {
+	c.sendActionCaller.setChainID(id)
+	return c
+}
+
 func (c *transferCaller) SetNonce(n uint64) SendActionCaller {
 	c.sendActionCaller.setNonce(n)
 	return c

@@ -31,6 +31,7 @@ type sendActionCaller struct {
 	nonce    uint64
 	gasLimit uint64
 	gasPrice *big.Int
+	chainID  uint32
 	payload  []byte
 	core     *iotextypes.ActionCore
 }
@@ -42,6 +43,10 @@ func (c *sendActionCaller) API() iotexapi.APIServiceClient {
 
 func (c *sendActionCaller) setNonce(n uint64) {
 	c.nonce = n
+}
+
+func (c *sendActionCaller) setChainID(id uint32) {
+	c.chainID = id
 }
 
 func (c *sendActionCaller) setGasLimit(g uint64) {
@@ -61,6 +66,11 @@ func (c *sendActionCaller) setPayload(pl []byte) {
 }
 
 func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
+	if c.chainID == 0 {
+		return hash.ZeroHash256, errcodes.New("0 is not a valid chain ID (use 1 for mainnet, 2 for testnet)", errcodes.InvalidParam)
+	}
+	c.core.ChainID = c.chainID
+
 	if c.nonce == 0 {
 		res, err := c.api.GetAccount(ctx, &iotexapi.GetAccountRequest{Address: c.account.Address().String()}, opts...)
 		if err != nil {
