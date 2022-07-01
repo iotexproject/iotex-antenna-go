@@ -25,22 +25,22 @@ type transferCaller struct {
 }
 
 func (c *transferCaller) SetPayload(pl []byte) SendActionCaller {
-	c.sendActionCaller.SetPayload(pl)
+	c.sendActionCaller.setPayload(pl)
 	return c
 }
 
 func (c *transferCaller) SetGasLimit(g uint64) SendActionCaller {
-	c.sendActionCaller.SetGasLimit(g)
+	c.sendActionCaller.setGasLimit(g)
 	return c
 }
 
 func (c *transferCaller) SetGasPrice(g *big.Int) SendActionCaller {
-	c.sendActionCaller.SetGasPrice(g)
+	c.sendActionCaller.setGasPrice(g)
 	return c
 }
 
 func (c *transferCaller) SetNonce(n uint64) SendActionCaller {
-	c.sendActionCaller.SetNonce(n)
+	c.sendActionCaller.setNonce(n)
 	return c
 }
 

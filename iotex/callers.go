@@ -40,19 +40,19 @@ func (c *sendActionCaller) API() iotexapi.APIServiceClient {
 	return c.api
 }
 
-func (c *sendActionCaller) SetNonce(n uint64) {
+func (c *sendActionCaller) setNonce(n uint64) {
 	c.nonce = n
 }
 
-func (c *sendActionCaller) SetGasLimit(g uint64) {
+func (c *sendActionCaller) setGasLimit(g uint64) {
 	c.gasLimit = g
 }
 
-func (c *sendActionCaller) SetGasPrice(g *big.Int) {
+func (c *sendActionCaller) setGasPrice(g *big.Int) {
 	c.gasPrice = g
 }
 
-func (c *sendActionCaller) SetPayload(pl []byte) {
+func (c *sendActionCaller) setPayload(pl []byte) {
 	if pl == nil {
 		return
 	}

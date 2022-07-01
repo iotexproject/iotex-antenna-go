@@ -23,22 +23,22 @@ type claimRewardCaller struct {
 }
 
 func (c *claimRewardCaller) SetData(data []byte) ClaimRewardCaller {
-	c.sendActionCaller.SetPayload(data)
+	c.sendActionCaller.setPayload(data)
 	return c
 }
 
 func (c *claimRewardCaller) SetGasLimit(g uint64) ClaimRewardCaller {
-	c.sendActionCaller.SetGasLimit(g)
+	c.sendActionCaller.setGasLimit(g)
 	return c
 }
 
 func (c *claimRewardCaller) SetGasPrice(g *big.Int) ClaimRewardCaller {
-	c.sendActionCaller.SetGasPrice(g)
+	c.sendActionCaller.setGasPrice(g)
 	return c
 }
 
 func (c *claimRewardCaller) SetNonce(n uint64) ClaimRewardCaller {
-	c.sendActionCaller.SetNonce(n)
+	c.sendActionCaller.setNonce(n)
 	return c
 }
 

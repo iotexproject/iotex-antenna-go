@@ -133,27 +133,23 @@ func (c *stakingCaller) Update(name string, operatorAddr, rewardAddr address.Add
 	return c
 }
 
-//SetGasLimit set basic data
 func (c *stakingCaller) SetGasLimit(g uint64) SendActionCaller {
-	c.sendActionCaller.SetGasLimit(g)
+	c.sendActionCaller.setGasLimit(g)
 	return c
 }
 
-//SetGasPrice set basic data
 func (c *stakingCaller) SetGasPrice(g *big.Int) SendActionCaller {
-	c.sendActionCaller.SetGasPrice(g)
+	c.sendActionCaller.setGasPrice(g)
 	return c
 }
 
-//SetNonce set basic data
 func (c *stakingCaller) SetNonce(n uint64) SendActionCaller {
-	c.sendActionCaller.SetNonce(n)
+	c.sendActionCaller.setNonce(n)
 	return c
 }
 
-//SetPayload set basic data
 func (c *stakingCaller) SetPayload(pl []byte) SendActionCaller {
-	c.sendActionCaller.SetPayload(pl)
+	c.sendActionCaller.setPayload(pl)
 	return c
 }
 

@@ -36,17 +36,17 @@ func (c *deployContractCaller) SetArgs(abi abi.ABI, args ...interface{}) DeployC
 }
 
 func (c *deployContractCaller) SetGasLimit(g uint64) DeployContractCaller {
-	c.sendActionCaller.SetGasLimit(g)
+	c.sendActionCaller.setGasLimit(g)
 	return c
 }
 
 func (c *deployContractCaller) SetGasPrice(g *big.Int) DeployContractCaller {
-	c.sendActionCaller.SetGasPrice(g)
+	c.sendActionCaller.setGasPrice(g)
 	return c
 }
 
 func (c *deployContractCaller) SetNonce(n uint64) DeployContractCaller {
-	c.sendActionCaller.SetNonce(n)
+	c.sendActionCaller.setNonce(n)
 	return c
 }
 
@@ -97,17 +97,17 @@ func (c *executeContractCaller) SetAmount(a *big.Int) ExecuteContractCaller {
 }
 
 func (c *executeContractCaller) SetGasLimit(g uint64) ExecuteContractCaller {
-	c.sendActionCaller.SetGasLimit(g)
+	c.sendActionCaller.setGasLimit(g)
 	return c
 }
 
 func (c *executeContractCaller) SetGasPrice(g *big.Int) ExecuteContractCaller {
-	c.sendActionCaller.SetGasPrice(g)
+	c.sendActionCaller.setGasPrice(g)
 	return c
 }
 
 func (c *executeContractCaller) SetNonce(n uint64) ExecuteContractCaller {
-	c.sendActionCaller.SetNonce(n)
+	c.sendActionCaller.setNonce(n)
 	return c
 }
 
