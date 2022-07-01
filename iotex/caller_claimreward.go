@@ -11,7 +11,6 @@ import (
 	"math/big"
 
 	"github.com/iotexproject/go-pkgs/hash"
-	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 	"github.com/iotexproject/iotex-proto/golang/iotextypes"
 	"google.golang.org/grpc"
 
@@ -19,48 +18,42 @@ import (
 )
 
 type claimRewardCaller struct {
-	sendActionCaller
+	*sendActionCaller
 	amount *big.Int
 }
 
 func (c *claimRewardCaller) SetData(data []byte) ClaimRewardCaller {
-	if data == nil {
-		return c
-	}
-	c.payload = make([]byte, len(data))
-	copy(c.payload, data)
+	c.sendActionCaller.setPayload(data)
 	return c
 }
 
 func (c *claimRewardCaller) SetGasLimit(g uint64) ClaimRewardCaller {
-	c.gasLimit = g
+	c.sendActionCaller.setGasLimit(g)
 	return c
 }
 
 func (c *claimRewardCaller) SetGasPrice(g *big.Int) ClaimRewardCaller {
-	c.gasPrice = g
+	c.sendActionCaller.setGasPrice(g)
 	return c
 }
 
 func (c *claimRewardCaller) SetNonce(n uint64) ClaimRewardCaller {
-	c.nonce = n
+	c.sendActionCaller.setNonce(n)
 	return c
 }
-
-func (c *claimRewardCaller) API() iotexapi.APIServiceClient { return c.api }
 
 func (c *claimRewardCaller) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
 	if c.amount == nil {
 		return hash.ZeroHash256, errcodes.New("claim amount cannot be nil", errcodes.InvalidParam)
 	}
 
-	tx := &iotextypes.ClaimFromRewardingFund{
+	tx := iotextypes.ClaimFromRewardingFund{
 		Amount: c.amount.String(),
 		Data:   c.payload,
 	}
 	c.core = &iotextypes.ActionCore{
 		Version: ProtocolVersion,
-		Action:  &iotextypes.ActionCore_ClaimFromRewardingFund{ClaimFromRewardingFund: tx},
+		Action:  &iotextypes.ActionCore_ClaimFromRewardingFund{ClaimFromRewardingFund: &tx},
 	}
 	return c.sendActionCaller.Call(ctx, opts...)
 }

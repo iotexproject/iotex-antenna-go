@@ -13,7 +13,6 @@ import (
 
 type authedClient struct {
 	client
-
 	account account.Account
 }
 
@@ -29,16 +28,18 @@ func NewAuthedClient(api iotexapi.APIServiceClient, a account.Account) AuthedCli
 
 func (c *authedClient) Contract(co address.Address, abi abi.ABI) Contract {
 	return &contract{
+		sendActionCaller: &sendActionCaller{
+			account: c.account,
+			api:     c.api,
+		},
 		address: co,
 		abi:     &abi,
-		api:     c.api,
-		account: c.account,
 	}
 }
 
-func (c *authedClient) Transfer(to address.Address, value *big.Int) TransferCaller {
+func (c *authedClient) Transfer(to address.Address, value *big.Int) SendActionCaller {
 	return &transferCaller{
-		sendActionCaller: sendActionCaller{
+		sendActionCaller: &sendActionCaller{
 			account: c.account,
 			api:     c.api,
 		},
@@ -49,7 +50,7 @@ func (c *authedClient) Transfer(to address.Address, value *big.Int) TransferCall
 
 func (c *authedClient) ClaimReward(value *big.Int) ClaimRewardCaller {
 	return &claimRewardCaller{
-		sendActionCaller: sendActionCaller{
+		sendActionCaller: &sendActionCaller{
 			account: c.account,
 			api:     c.api,
 		},
@@ -59,7 +60,7 @@ func (c *authedClient) ClaimReward(value *big.Int) ClaimRewardCaller {
 
 func (c *authedClient) DeployContract(data []byte) DeployContractCaller {
 	return &deployContractCaller{
-		sendActionCaller: sendActionCaller{
+		sendActionCaller: &sendActionCaller{
 			account: c.account,
 			api:     c.api,
 			payload: data,
@@ -70,7 +71,7 @@ func (c *authedClient) DeployContract(data []byte) DeployContractCaller {
 //Staking interface
 func (c *authedClient) Staking() StakingCaller {
 	return &stakingCaller{
-		sendActionCaller: sendActionCaller{
+		sendActionCaller: &sendActionCaller{
 			account: c.account,
 			api:     c.api,
 		}}
@@ -79,7 +80,7 @@ func (c *authedClient) Staking() StakingCaller {
 //Candidate interface
 func (c *authedClient) Candidate() CandidateCaller {
 	return &stakingCaller{
-		sendActionCaller: sendActionCaller{
+		sendActionCaller: &sendActionCaller{
 			account: c.account,
 			api:     c.api,
 		}}

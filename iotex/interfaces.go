@@ -12,25 +12,24 @@ import (
 	"google.golang.org/grpc"
 )
 
-// SendActionCaller is used to perform a send action call.
-type SendActionCaller interface {
+// Caller is used to perform a send action call.
+type Caller interface {
 	API() iotexapi.APIServiceClient
 	Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error)
 }
 
-// TransferCaller is used to perform a transfer call.
-type TransferCaller interface {
-	SendActionCaller
-
-	SetGasPrice(*big.Int) TransferCaller
-	SetGasLimit(uint64) TransferCaller
-	SetPayload([]byte) TransferCaller
-	SetNonce(uint64) TransferCaller
+// SendActionCaller is used to set nonce/gas etc. on top of Caller
+type SendActionCaller interface {
+	Caller
+	SetNonce(uint64) SendActionCaller
+	SetGasLimit(uint64) SendActionCaller
+	SetGasPrice(*big.Int) SendActionCaller
+	SetPayload([]byte) SendActionCaller
 }
 
 // ClaimRewardCaller is used to perform a claim reward call.
 type ClaimRewardCaller interface {
-	SendActionCaller
+	Caller
 
 	SetGasPrice(*big.Int) ClaimRewardCaller
 	SetGasLimit(uint64) ClaimRewardCaller
@@ -53,7 +52,7 @@ type AuthedClient interface {
 	ReadOnlyClient
 
 	Contract(contract address.Address, abi abi.ABI) Contract
-	Transfer(to address.Address, value *big.Int) TransferCaller
+	Transfer(to address.Address, value *big.Int) SendActionCaller
 	ClaimReward(value *big.Int) ClaimRewardCaller
 	DeployContract(data []byte) DeployContractCaller
 	// staking related
@@ -77,7 +76,7 @@ type ReadContractCaller interface {
 
 // ExecuteContractCaller is used to perform an execute contract call.
 type ExecuteContractCaller interface {
-	SendActionCaller
+	Caller
 
 	SetGasPrice(*big.Int) ExecuteContractCaller
 	SetGasLimit(uint64) ExecuteContractCaller
@@ -87,7 +86,7 @@ type ExecuteContractCaller interface {
 
 // DeployContractCaller is used to perform a deploy contract call.
 type DeployContractCaller interface {
-	SendActionCaller
+	Caller
 
 	SetArgs(abi abi.ABI, args ...interface{}) DeployContractCaller
 	SetGasPrice(*big.Int) DeployContractCaller
@@ -109,26 +108,17 @@ type ReadOnlyContract interface {
 
 // StakingCaller is used to perform a staking call.
 type StakingCaller interface {
-	Create(candidateName string, amount *big.Int, duration uint32, autoStake bool) StakingAPICaller
-	Unstake(bucketIndex uint64) StakingAPICaller
-	Withdraw(bucketIndex uint64) StakingAPICaller
-	AddDeposit(index uint64, amount *big.Int) StakingAPICaller
-	ChangeCandidate(candName string, bucketIndex uint64) StakingAPICaller
-	StakingTransfer(voterAddress address.Address, bucketIndex uint64) StakingAPICaller
-	Restake(index uint64, duration uint32, autoStake bool) StakingAPICaller
+	Create(candidateName string, amount *big.Int, duration uint32, autoStake bool) SendActionCaller
+	Unstake(bucketIndex uint64) SendActionCaller
+	Withdraw(bucketIndex uint64) SendActionCaller
+	AddDeposit(index uint64, amount *big.Int) SendActionCaller
+	ChangeCandidate(candName string, bucketIndex uint64) SendActionCaller
+	StakingTransfer(voterAddress address.Address, bucketIndex uint64) SendActionCaller
+	Restake(index uint64, duration uint32, autoStake bool) SendActionCaller
 }
 
 // CandidateCaller is used to perform a candidate call.
 type CandidateCaller interface {
-	Register(name string, ownerAddr, operatorAddr, rewardAddr address.Address, amount *big.Int, duration uint32, autoStake bool, payload []byte) StakingAPICaller
-	Update(name string, operatorAddr, rewardAddr address.Address) StakingAPICaller
-}
-
-// StakingAPICaller is used to perform extra info call.
-type StakingAPICaller interface {
-	SendActionCaller
-	SetGasPrice(*big.Int) StakingAPICaller
-	SetGasLimit(uint64) StakingAPICaller
-	SetNonce(uint64) StakingAPICaller
-	SetPayload([]byte) StakingAPICaller
+	Register(name string, ownerAddr, operatorAddr, rewardAddr address.Address, amount *big.Int, duration uint32, autoStake bool, payload []byte) SendActionCaller
+	Update(name string, operatorAddr, rewardAddr address.Address) SendActionCaller
 }

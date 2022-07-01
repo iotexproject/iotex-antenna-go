@@ -21,7 +21,7 @@ import (
 
 type (
 	stakingCaller struct {
-		sendActionCaller
+		*sendActionCaller
 		action interface{}
 	}
 
@@ -33,131 +33,123 @@ type (
 )
 
 //Create Staking
-func (c *stakingCaller) Create(candidateName string, amount *big.Int, duration uint32, autoStake bool) StakingAPICaller {
-	tx := &iotextypes.StakeCreate{
+func (c *stakingCaller) Create(candidateName string, amount *big.Int, duration uint32, autoStake bool) SendActionCaller {
+	tx := iotextypes.StakeCreate{
 		CandidateName:  candidateName,
 		StakedDuration: duration,
 		AutoStake:      autoStake,
 		StakedAmount:   amount.String(),
 	}
-	c.action = tx
+	c.action = &tx
 	return c
 }
 
 //Unstake Staking
-func (c *stakingCaller) Unstake(bucketIndex uint64) StakingAPICaller {
-	tx := &iotextypes.StakeReclaim{
+func (c *stakingCaller) Unstake(bucketIndex uint64) SendActionCaller {
+	tx := iotextypes.StakeReclaim{
 		BucketIndex: bucketIndex,
 	}
-	c.action = &reclaim{tx, false}
+	c.action = &reclaim{&tx, false}
 	return c
 }
 
 //Withdraw Staking
-func (c *stakingCaller) Withdraw(bucketIndex uint64) StakingAPICaller {
-	tx := &iotextypes.StakeReclaim{
+func (c *stakingCaller) Withdraw(bucketIndex uint64) SendActionCaller {
+	tx := iotextypes.StakeReclaim{
 		BucketIndex: bucketIndex,
 	}
-	c.action = &reclaim{tx, true}
+	c.action = &reclaim{&tx, true}
 	return c
 }
 
 //AddDeposit Staking
-func (c *stakingCaller) AddDeposit(index uint64, amount *big.Int) StakingAPICaller {
-	tx := &iotextypes.StakeAddDeposit{
+func (c *stakingCaller) AddDeposit(index uint64, amount *big.Int) SendActionCaller {
+	tx := iotextypes.StakeAddDeposit{
 		BucketIndex: index,
 		Amount:      amount.String(),
 	}
-	c.action = tx
+	c.action = &tx
 	return c
 }
 
 //ChangeCandidate Staking
-func (c *stakingCaller) ChangeCandidate(candName string, bucketIndex uint64) StakingAPICaller {
-	tx := &iotextypes.StakeChangeCandidate{
+func (c *stakingCaller) ChangeCandidate(candName string, bucketIndex uint64) SendActionCaller {
+	tx := iotextypes.StakeChangeCandidate{
 		CandidateName: candName,
 		BucketIndex:   bucketIndex,
 	}
-	c.action = tx
+	c.action = &tx
 	return c
 }
 
 //StakingTransfer Staking
-func (c *stakingCaller) StakingTransfer(voterAddress address.Address, bucketIndex uint64) StakingAPICaller {
-	tx := &iotextypes.StakeTransferOwnership{
+func (c *stakingCaller) StakingTransfer(voterAddress address.Address, bucketIndex uint64) SendActionCaller {
+	tx := iotextypes.StakeTransferOwnership{
 		VoterAddress: voterAddress.String(),
 		BucketIndex:  bucketIndex,
 	}
-	c.action = tx
+	c.action = &tx
 	return c
 }
 
 //Restake Staking
-func (c *stakingCaller) Restake(index uint64, duration uint32, autoStake bool) StakingAPICaller {
-	tx := &iotextypes.StakeRestake{
+func (c *stakingCaller) Restake(index uint64, duration uint32, autoStake bool) SendActionCaller {
+	tx := iotextypes.StakeRestake{
 		BucketIndex:    index,
 		StakedDuration: duration,
 		AutoStake:      autoStake,
 	}
-	c.action = tx
+	c.action = &tx
 	return c
 }
 
 //Register Staking
-func (c *stakingCaller) Register(name string, ownerAddr, operatorAddr, rewardAddr address.Address, amount *big.Int, duration uint32, autoStake bool, payload []byte) StakingAPICaller {
-	basic := &iotextypes.CandidateBasicInfo{
+func (c *stakingCaller) Register(name string, ownerAddr, operatorAddr, rewardAddr address.Address, amount *big.Int, duration uint32, autoStake bool, payload []byte) SendActionCaller {
+	basic := iotextypes.CandidateBasicInfo{
 		Name:            name,
 		OperatorAddress: operatorAddr.String(),
 		RewardAddress:   rewardAddr.String(),
 	}
-	tx := &iotextypes.CandidateRegister{
-		Candidate:      basic,
+	tx := iotextypes.CandidateRegister{
+		Candidate:      &basic,
 		StakedAmount:   amount.String(),
 		StakedDuration: duration,
 		AutoStake:      autoStake,
 		OwnerAddress:   ownerAddr.String(),
 		Payload:        payload,
 	}
-	c.action = tx
+	c.action = &tx
 	return c
 }
 
 //Update Staking
-func (c *stakingCaller) Update(name string, operatorAddr, rewardAddr address.Address) StakingAPICaller {
-	tx := &iotextypes.CandidateBasicInfo{
+func (c *stakingCaller) Update(name string, operatorAddr, rewardAddr address.Address) SendActionCaller {
+	tx := iotextypes.CandidateBasicInfo{
 		Name:            name,
 		OperatorAddress: operatorAddr.String(),
 		RewardAddress:   rewardAddr.String(),
 	}
-	c.action = tx
+	c.action = &tx
 	return c
 }
 
-//SetGasLimit set basic data
-func (c *stakingCaller) SetGasLimit(g uint64) StakingAPICaller {
-	c.gasLimit = g
+func (c *stakingCaller) SetGasLimit(g uint64) SendActionCaller {
+	c.sendActionCaller.setGasLimit(g)
 	return c
 }
 
-//SetGasPrice set basic data
-func (c *stakingCaller) SetGasPrice(g *big.Int) StakingAPICaller {
-	c.gasPrice = g
+func (c *stakingCaller) SetGasPrice(g *big.Int) SendActionCaller {
+	c.sendActionCaller.setGasPrice(g)
 	return c
 }
 
-//SetNonce set basic data
-func (c *stakingCaller) SetNonce(n uint64) StakingAPICaller {
-	c.nonce = n
+func (c *stakingCaller) SetNonce(n uint64) SendActionCaller {
+	c.sendActionCaller.setNonce(n)
 	return c
 }
 
-//SetPayload set basic data
-func (c *stakingCaller) SetPayload(pl []byte) StakingAPICaller {
-	if pl == nil {
-		return c
-	}
-	c.payload = make([]byte, len(pl))
-	copy(c.payload, pl)
+func (c *stakingCaller) SetPayload(pl []byte) SendActionCaller {
+	c.sendActionCaller.setPayload(pl)
 	return c
 }
 

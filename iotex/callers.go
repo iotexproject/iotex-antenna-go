@@ -40,6 +40,26 @@ func (c *sendActionCaller) API() iotexapi.APIServiceClient {
 	return c.api
 }
 
+func (c *sendActionCaller) setNonce(n uint64) {
+	c.nonce = n
+}
+
+func (c *sendActionCaller) setGasLimit(g uint64) {
+	c.gasLimit = g
+}
+
+func (c *sendActionCaller) setGasPrice(g *big.Int) {
+	c.gasPrice = g
+}
+
+func (c *sendActionCaller) setPayload(pl []byte) {
+	if pl == nil {
+		return
+	}
+	c.payload = make([]byte, len(pl))
+	copy(c.payload, pl)
+}
+
 func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
 	if c.nonce == 0 {
 		res, err := c.api.GetAccount(ctx, &iotexapi.GetAccountRequest{Address: c.account.Address().String()}, opts...)

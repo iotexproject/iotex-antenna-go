@@ -67,6 +67,10 @@ test: lint fmt
 lint:
 	go list ./... | grep -v /vendor/ | xargs $(GOLINT)
 
+.PHONY: mockgen
+mockgen:
+	mockgen -destination=./iotex/interfaces_mock.go -source=./iotex/interfaces.go -package=iotex
+
 .PHONY: examples
 examples:
 	$(GOBUILD) -o ./examples/chaininfo/chaininfo ./examples/chaininfo

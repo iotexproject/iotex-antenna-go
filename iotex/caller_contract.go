@@ -24,7 +24,7 @@ import (
 )
 
 type deployContractCaller struct {
-	sendActionCaller
+	*sendActionCaller
 	abi  *abi.ABI
 	args []interface{}
 }
@@ -36,21 +36,19 @@ func (c *deployContractCaller) SetArgs(abi abi.ABI, args ...interface{}) DeployC
 }
 
 func (c *deployContractCaller) SetGasLimit(g uint64) DeployContractCaller {
-	c.gasLimit = g
+	c.sendActionCaller.setGasLimit(g)
 	return c
 }
 
 func (c *deployContractCaller) SetGasPrice(g *big.Int) DeployContractCaller {
-	c.gasPrice = g
+	c.sendActionCaller.setGasPrice(g)
 	return c
 }
 
 func (c *deployContractCaller) SetNonce(n uint64) DeployContractCaller {
-	c.nonce = n
+	c.sendActionCaller.setNonce(n)
 	return c
 }
-
-func (c *deployContractCaller) API() iotexapi.APIServiceClient { return c.api }
 
 func (c *deployContractCaller) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
 	if len(c.payload) == 0 {
@@ -88,7 +86,7 @@ type contractArgs struct {
 }
 
 type executeContractCaller struct {
-	sendActionCaller
+	*sendActionCaller
 	contractArgs
 	amount *big.Int
 }
@@ -99,21 +97,19 @@ func (c *executeContractCaller) SetAmount(a *big.Int) ExecuteContractCaller {
 }
 
 func (c *executeContractCaller) SetGasLimit(g uint64) ExecuteContractCaller {
-	c.gasLimit = g
+	c.sendActionCaller.setGasLimit(g)
 	return c
 }
 
 func (c *executeContractCaller) SetGasPrice(g *big.Int) ExecuteContractCaller {
-	c.gasPrice = g
+	c.sendActionCaller.setGasPrice(g)
 	return c
 }
 
 func (c *executeContractCaller) SetNonce(n uint64) ExecuteContractCaller {
-	c.nonce = n
+	c.sendActionCaller.setNonce(n)
 	return c
 }
-
-func (c *executeContractCaller) API() iotexapi.APIServiceClient { return c.api }
 
 func (c *executeContractCaller) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
 	if c.method == "" {

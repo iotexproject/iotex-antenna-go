@@ -141,7 +141,7 @@ func TestCandidateCaller_Register(t *testing.T) {
 
 	testTimes := len(candidateRegisterTests)
 
-	stakingAPICaller := NewMockStakingAPICaller(ctrl)
+	stakingAPICaller := NewMockSendActionCaller(ctrl)
 	stakingAPICaller.EXPECT().SetGasPrice(gomock.Any()).Return(stakingAPICaller).Times(testTimes)
 	stakingAPICaller.EXPECT().SetGasLimit(gomock.Any()).Return(stakingAPICaller).Times(testTimes)
 	stakingAPICaller.EXPECT().SetPayload(gomock.Any()).Return(stakingAPICaller).Times(testTimes)
@@ -174,7 +174,7 @@ func TestStakingCaller_Create(t *testing.T) {
 
 	testTimes := len(stakeTests)
 
-	stakingAPICaller := NewMockStakingAPICaller(ctrl)
+	stakingAPICaller := NewMockSendActionCaller(ctrl)
 	stakingAPICaller.EXPECT().SetGasPrice(gomock.Any()).Return(stakingAPICaller).Times(testTimes)
 	stakingAPICaller.EXPECT().SetGasLimit(gomock.Any()).Return(stakingAPICaller).Times(testTimes)
 	stakingAPICaller.EXPECT().SetPayload(gomock.Any()).Return(stakingAPICaller).Times(testTimes)
@@ -204,7 +204,7 @@ func TestStakingCaller_Unstake(t *testing.T) {
 
 	testTimes := len(unstakeTests)
 
-	stakingAPICaller := NewMockStakingAPICaller(ctrl)
+	stakingAPICaller := NewMockSendActionCaller(ctrl)
 	stakingAPICaller.EXPECT().SetGasPrice(gomock.Any()).Return(stakingAPICaller).Times(testTimes)
 	stakingAPICaller.EXPECT().SetGasLimit(gomock.Any()).Return(stakingAPICaller).Times(testTimes)
 	stakingAPICaller.EXPECT().SetPayload(gomock.Any()).Return(stakingAPICaller).Times(testTimes)
