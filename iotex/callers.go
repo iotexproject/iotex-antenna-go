@@ -66,6 +66,11 @@ func (c *sendActionCaller) setPayload(pl []byte) {
 }
 
 func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
+	if c.chainID == 0 {
+		return hash.ZeroHash256, errcodes.New("0 is not a valid chain ID (use 1 for mainnet, 2 for testnet)", errcodes.InvalidParam)
+	}
+	c.core.ChainID = c.chainID
+
 	if c.nonce == 0 {
 		res, err := c.api.GetAccount(ctx, &iotexapi.GetAccountRequest{Address: c.account.Address().String()}, opts...)
 		if err != nil {
@@ -88,7 +93,6 @@ func (c *sendActionCaller) Call(ctx context.Context, opts ...grpc.CallOption) (h
 		c.gasLimit = response.GetGas()
 	}
 	c.core.GasLimit = c.gasLimit
-	c.core.ChainID = c.chainID
 
 	if c.gasPrice == nil {
 		response, err := c.api.SuggestGasPrice(ctx, &iotexapi.SuggestGasPriceRequest{}, opts...)

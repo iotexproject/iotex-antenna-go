@@ -47,9 +47,23 @@ func TestTransfer(t *testing.T) {
 	to, err := address.FromString(_to)
 	require.NoError(err)
 	v := big.NewInt(160000000000000000)
-	hash, err := c.Transfer(to, v).SetChainID(2).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).Call(context.Background())
-	require.NoError(err)
-	require.NotEmpty(hash)
+	caller := c.Transfer(to, v)
+	for _, test := range []struct {
+		chainID uint32
+		err     string
+	}{
+		{0, "0 is not a valid chain ID (use 1 for mainnet, 2 for testnet)"},
+		{1, "ChainID does not match, expecting 2, got 1"},
+		{2, ""},
+	} {
+		hash, err := caller.SetChainID(test.chainID).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).Call(context.Background())
+		if len(test.err) > 0 {
+			require.Contains(err.Error(), test.err)
+		} else {
+			require.NoError(err)
+			require.NotEmpty(hash)
+		}
+	}
 }
 
 func TestStake(t *testing.T) {
