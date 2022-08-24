@@ -24,7 +24,6 @@ type SendActionCaller interface {
 	SetNonce(uint64) SendActionCaller
 	SetGasLimit(uint64) SendActionCaller
 	SetGasPrice(*big.Int) SendActionCaller
-	SetChainID(uint32) SendActionCaller
 	SetPayload([]byte) SendActionCaller
 }
 
@@ -34,7 +33,6 @@ type ClaimRewardCaller interface {
 
 	SetGasPrice(*big.Int) ClaimRewardCaller
 	SetGasLimit(uint64) ClaimRewardCaller
-	SetChainID(uint32) ClaimRewardCaller
 	SetData([]byte) ClaimRewardCaller
 	SetNonce(uint64) ClaimRewardCaller
 }
@@ -61,6 +59,7 @@ type AuthedClient interface {
 	Staking() StakingCaller
 	Candidate() CandidateCaller
 	Account() account.Account
+	ChainID() uint32
 }
 
 // ReadOnlyClient is an iotex client which can perform read actions.
@@ -82,7 +81,6 @@ type ExecuteContractCaller interface {
 
 	SetGasPrice(*big.Int) ExecuteContractCaller
 	SetGasLimit(uint64) ExecuteContractCaller
-	SetChainID(uint32) ExecuteContractCaller
 	SetAmount(*big.Int) ExecuteContractCaller
 	SetNonce(uint64) ExecuteContractCaller
 }
@@ -94,7 +92,6 @@ type DeployContractCaller interface {
 	SetArgs(abi abi.ABI, args ...interface{}) DeployContractCaller
 	SetGasPrice(*big.Int) DeployContractCaller
 	SetGasLimit(uint64) DeployContractCaller
-	SetChainID(uint32) DeployContractCaller
 	SetNonce(uint64) DeployContractCaller
 }
 

@@ -64,14 +64,14 @@ func main() {
 	}
 
 	// create client
-	c := iotex.NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
+	c := iotex.NewAuthedClient(iotexapi.NewAPIServiceClient(conn), testnetChainID, acc)
 	
 	// send the transfer to chain
 	to, err := address.FromString("io1zq5g9c5c3hqw9559ks4anptkpumxgsjfn2e4ke")
 	if err != nil {
 		log.Fatal(err)
 	}
-	hash, err := c.Transfer(to, big.NewInt(10)).SetChainID(testnetChainID).SetGasPrice(big.NewInt(100000000000)).SetGasLimit(20000).Call(context.Background())
+	hash, err := c.Transfer(to, big.NewInt(10)).SetGasPrice(big.NewInt(100000000000)).SetGasLimit(20000).Call(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}

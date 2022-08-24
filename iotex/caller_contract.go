@@ -45,11 +45,6 @@ func (c *deployContractCaller) SetGasPrice(g *big.Int) DeployContractCaller {
 	return c
 }
 
-func (c *deployContractCaller) SetChainID(id uint32) DeployContractCaller {
-	c.sendActionCaller.setChainID(id)
-	return c
-}
-
 func (c *deployContractCaller) SetNonce(n uint64) DeployContractCaller {
 	c.sendActionCaller.setNonce(n)
 	return c
@@ -108,11 +103,6 @@ func (c *executeContractCaller) SetGasLimit(g uint64) ExecuteContractCaller {
 
 func (c *executeContractCaller) SetGasPrice(g *big.Int) ExecuteContractCaller {
 	c.sendActionCaller.setGasPrice(g)
-	return c
-}
-
-func (c *executeContractCaller) SetChainID(id uint32) ExecuteContractCaller {
-	c.sendActionCaller.setChainID(id)
 	return c
 }
 
