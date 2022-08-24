@@ -13,15 +13,17 @@ import (
 
 type authedClient struct {
 	client
+	chainID uint32
 	account account.Account
 }
 
 // NewAuthedClient creates an AuthedClient using given account's credentials.
-func NewAuthedClient(api iotexapi.APIServiceClient, a account.Account) AuthedClient {
+func NewAuthedClient(api iotexapi.APIServiceClient, chainID uint32, a account.Account) AuthedClient {
 	return &authedClient{
 		client: client{
 			api: api,
 		},
+		chainID: chainID,
 		account: a,
 	}
 }
@@ -29,6 +31,7 @@ func NewAuthedClient(api iotexapi.APIServiceClient, a account.Account) AuthedCli
 func (c *authedClient) Contract(co address.Address, abi abi.ABI) Contract {
 	return &contract{
 		sendActionCaller: &sendActionCaller{
+			chainID: c.chainID,
 			account: c.account,
 			api:     c.api,
 		},
@@ -40,6 +43,7 @@ func (c *authedClient) Contract(co address.Address, abi abi.ABI) Contract {
 func (c *authedClient) Transfer(to address.Address, value *big.Int) SendActionCaller {
 	return &transferCaller{
 		sendActionCaller: &sendActionCaller{
+			chainID: c.chainID,
 			account: c.account,
 			api:     c.api,
 		},
@@ -51,6 +55,7 @@ func (c *authedClient) Transfer(to address.Address, value *big.Int) SendActionCa
 func (c *authedClient) ClaimReward(value *big.Int) ClaimRewardCaller {
 	return &claimRewardCaller{
 		sendActionCaller: &sendActionCaller{
+			chainID: c.chainID,
 			account: c.account,
 			api:     c.api,
 		},
@@ -61,6 +66,7 @@ func (c *authedClient) ClaimReward(value *big.Int) ClaimRewardCaller {
 func (c *authedClient) DeployContract(data []byte) DeployContractCaller {
 	return &deployContractCaller{
 		sendActionCaller: &sendActionCaller{
+			chainID: c.chainID,
 			account: c.account,
 			api:     c.api,
 			payload: data,
@@ -72,6 +78,7 @@ func (c *authedClient) DeployContract(data []byte) DeployContractCaller {
 func (c *authedClient) Staking() StakingCaller {
 	return &stakingCaller{
 		sendActionCaller: &sendActionCaller{
+			chainID: c.chainID,
 			account: c.account,
 			api:     c.api,
 		}}
@@ -81,12 +88,15 @@ func (c *authedClient) Staking() StakingCaller {
 func (c *authedClient) Candidate() CandidateCaller {
 	return &stakingCaller{
 		sendActionCaller: &sendActionCaller{
+			chainID: c.chainID,
 			account: c.account,
 			api:     c.api,
 		}}
 }
 
 func (c *authedClient) Account() account.Account { return c.account }
+
+func (c *authedClient) ChainID() uint32 { return c.chainID }
 
 // NewReadOnlyClient creates a ReadOnlyClient.
 func NewReadOnlyClient(c iotexapi.APIServiceClient) ReadOnlyClient {

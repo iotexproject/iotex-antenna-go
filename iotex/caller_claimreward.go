@@ -37,11 +37,6 @@ func (c *claimRewardCaller) SetGasPrice(g *big.Int) ClaimRewardCaller {
 	return c
 }
 
-func (c *claimRewardCaller) SetChainID(id uint32) ClaimRewardCaller {
-	c.sendActionCaller.setChainID(id)
-	return c
-}
-
 func (c *claimRewardCaller) SetNonce(n uint64) ClaimRewardCaller {
 	c.sendActionCaller.setNonce(n)
 	return c

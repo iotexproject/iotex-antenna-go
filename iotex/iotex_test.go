@@ -42,12 +42,10 @@ func TestTransfer(t *testing.T) {
 
 	acc, err := account.HexStringToAccount(_accountPrivateKey)
 	require.NoError(err)
-	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
 
 	to, err := address.FromString(_to)
 	require.NoError(err)
 	v := big.NewInt(160000000000000000)
-	caller := c.Transfer(to, v)
 	for _, test := range []struct {
 		chainID uint32
 		err     string
@@ -56,7 +54,9 @@ func TestTransfer(t *testing.T) {
 		{1, "ChainID does not match, expecting 2, got 1"},
 		{2, ""},
 	} {
-		hash, err := caller.SetChainID(test.chainID).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).Call(context.Background())
+		c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), test.chainID, acc)
+		caller := c.Transfer(to, v)
+		hash, err := caller.SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).Call(context.Background())
 		if len(test.err) > 0 {
 			require.Contains(err.Error(), test.err)
 		} else {
@@ -74,11 +74,11 @@ func TestStake(t *testing.T) {
 
 	acc, err := account.HexStringToAccount("afeefca74d9a325cf1d6b6911d61a65c32afa8e02bd5e78e2e4ac2910bab45f5")
 	require.NoError(err)
-	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
+	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), 2, acc)
 
 	one := big.NewInt(int64(unit.Iotx))
 	hash, err := c.Staking().Create("robotbp00001", one.Lsh(one, 7), 0, false).
-		SetChainID(2).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(20000).Call(context.Background())
+		SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(20000).Call(context.Background())
 	require.Contains(err.Error(), "insufficient funds for gas * price + value")
 	require.NotEmpty(hash)
 }
@@ -91,11 +91,11 @@ func TestClaimReward(t *testing.T) {
 
 	acc, err := account.HexStringToAccount(_accountPrivateKey)
 	require.NoError(err)
-	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
+	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), 2, acc)
 
 	require.NoError(err)
 	v := big.NewInt(1000000000000000000)
-	hash, err := c.ClaimReward(v).SetChainID(2).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).Call(context.Background())
+	hash, err := c.ClaimReward(v).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).Call(context.Background())
 	require.NoError(err)
 	require.NotEmpty(hash)
 }
@@ -108,14 +108,14 @@ func TestDeployContract(t *testing.T) {
 
 	acc, err := account.HexStringToAccount(_accountPrivateKey)
 	require.NoError(err)
-	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
+	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), 2, acc)
 
 	abi, err := abi.JSON(strings.NewReader(`[{"constant":false,"inputs":[{"name":"x","type":"uint256"}],"name":"set","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"get","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_x","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]`))
 	require.NoError(err)
 	data, err := hex.DecodeString("608060405234801561001057600080fd5b506040516020806100f2833981016040525160005560bf806100336000396000f30060806040526004361060485763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166360fe47b18114604d5780636d4ce63c146064575b600080fd5b348015605857600080fd5b5060626004356088565b005b348015606f57600080fd5b506076608d565b60408051918252519081900360200190f35b600055565b600054905600a165627a7a723058208d4f6c9737f34d9b28ef070baa8127c0876757fbf6f3945a7ea8d4387ca156590029")
 	require.NoError(err)
 
-	hash, err := c.DeployContract(data).SetGasPrice(big.NewInt(int64(unit.Qev))).SetChainID(2).SetGasLimit(1000000).SetArgs(abi, big.NewInt(10)).Call(context.Background())
+	hash, err := c.DeployContract(data).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).SetArgs(abi, big.NewInt(10)).Call(context.Background())
 	require.NoError(err)
 	require.NotNil(hash)
 }
@@ -128,13 +128,13 @@ func TestExecuteContract(t *testing.T) {
 
 	acc, err := account.HexStringToAccount(_accountPrivateKey)
 	require.NoError(err)
-	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
+	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), 2, acc)
 	abi, err := abi.JSON(strings.NewReader(`[{"constant":false,"inputs":[{"name":"x","type":"uint256"}],"name":"set","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"get","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_x","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]`))
 	require.NoError(err)
 	contract, err := address.FromString("io17sn486alutrnzlrdz9vv44g7qyc38hygf7s6h0")
 	require.NoError(err)
 
-	hash, err := c.Contract(contract, abi).Execute("set", big.NewInt(8)).SetChainID(2).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).Call(context.Background())
+	hash, err := c.Contract(contract, abi).Execute("set", big.NewInt(8)).SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(1000000).Call(context.Background())
 	require.NoError(err)
 	require.NotNil(hash)
 }
@@ -147,7 +147,7 @@ func TestExecuteContractWithAddressArgument(t *testing.T) {
 
 	acc, err := account.HexStringToAccount(_accountPrivateKey)
 	require.NoError(err)
-	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
+	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), 2, acc)
 	abi, err := abi.JSON(strings.NewReader(`[
 	{
 		"constant": false,
@@ -225,7 +225,7 @@ func TestExecuteContractWithAddressArgument(t *testing.T) {
 	recipients := [2]address.Address{recipient1, recipient2}
 	// recipients := [2]string{"io18jaldgzc8wlyfnzamgas62yu3kg5nw527czg37", "io1ntprz4p5zw38fvtfrcczjtcv3rkr3nqs6sm3pj"}
 	amounts := [2]*big.Int{big.NewInt(1), big.NewInt(2)}
-	actionHash, err := c.Contract(contract, abi).Execute("multiSend", recipients, amounts, "payload").SetChainID(2).SetGasPrice(big.NewInt(1000000000000)).SetGasLimit(1000000).Call(context.Background())
+	actionHash, err := c.Contract(contract, abi).Execute("multiSend", recipients, amounts, "payload").SetGasPrice(big.NewInt(1000000000000)).SetGasLimit(1000000).Call(context.Background())
 	require.NoError(err)
 	require.NotNil(actionHash)
 }

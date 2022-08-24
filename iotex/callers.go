@@ -45,10 +45,6 @@ func (c *sendActionCaller) setNonce(n uint64) {
 	c.nonce = n
 }
 
-func (c *sendActionCaller) setChainID(id uint32) {
-	c.chainID = id
-}
-
 func (c *sendActionCaller) setGasLimit(g uint64) {
 	c.gasLimit = g
 }
