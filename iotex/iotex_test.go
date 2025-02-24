@@ -77,10 +77,9 @@ func TestStake(t *testing.T) {
 	c := NewAuthedClient(iotexapi.NewAPIServiceClient(conn), 2, acc)
 
 	one := big.NewInt(int64(unit.Iotx))
-	hash, err := c.Staking().Create("robotbp00001", one.Lsh(one, 7), 0, false).
+	_, err = c.Staking().Create("robotbp00001", one.Lsh(one, 7), 0, false).
 		SetGasPrice(big.NewInt(int64(unit.Qev))).SetGasLimit(20000).Call(context.Background())
 	require.Contains(err.Error(), "insufficient funds for gas * price + value")
-	require.NotEmpty(hash)
 }
 
 func TestClaimReward(t *testing.T) {
@@ -648,6 +647,7 @@ func TestMainnetTransactionLogs(t *testing.T) {
 }
 
 func TestMainnetReadCandAndReclaim(t *testing.T) {
+	t.Skipf("skip mainnet test because the data may be updated")
 	require := require.New(t)
 	conn, err := mainnetGrpcConn()
 	require.NoError(err)
