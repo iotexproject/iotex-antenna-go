@@ -10,6 +10,7 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/iotexproject/iotex-address/address"
 	"github.com/iotexproject/iotex-proto/golang/iotextypes"
@@ -41,6 +42,26 @@ func (c *transferCaller) SetGasPrice(g *big.Int) SendActionCaller {
 
 func (c *transferCaller) SetNonce(n uint64) SendActionCaller {
 	c.sendActionCaller.setNonce(n)
+	return c
+}
+
+func (c *transferCaller) SetTxType(t uint32) SendActionCaller {
+	c.sendActionCaller.setTxType(t)
+	return c
+}
+
+func (c *transferCaller) SetGasTipCap(v *big.Int) SendActionCaller {
+	c.sendActionCaller.setGasTipCap(v)
+	return c
+}
+
+func (c *transferCaller) SetGasFeeCap(v *big.Int) SendActionCaller {
+	c.sendActionCaller.setGasFeeCap(v)
+	return c
+}
+
+func (c *transferCaller) SetAccessList(l types.AccessList) SendActionCaller {
+	c.sendActionCaller.setAccessList(l)
 	return c
 }
 

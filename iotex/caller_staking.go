@@ -10,6 +10,7 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/core/types"
 	"google.golang.org/grpc"
 
 	"github.com/iotexproject/go-pkgs/hash"
@@ -150,6 +151,26 @@ func (c *stakingCaller) SetNonce(n uint64) SendActionCaller {
 
 func (c *stakingCaller) SetPayload(pl []byte) SendActionCaller {
 	c.sendActionCaller.setPayload(pl)
+	return c
+}
+
+func (c *stakingCaller) SetTxType(t uint32) SendActionCaller {
+	c.sendActionCaller.setTxType(t)
+	return c
+}
+
+func (c *stakingCaller) SetGasTipCap(v *big.Int) SendActionCaller {
+	c.sendActionCaller.setGasTipCap(v)
+	return c
+}
+
+func (c *stakingCaller) SetGasFeeCap(v *big.Int) SendActionCaller {
+	c.sendActionCaller.setGasFeeCap(v)
+	return c
+}
+
+func (c *stakingCaller) SetAccessList(l types.AccessList) SendActionCaller {
+	c.sendActionCaller.setAccessList(l)
 	return c
 }
 

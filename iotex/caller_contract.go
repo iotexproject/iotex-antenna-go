@@ -14,6 +14,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/iotexproject/iotex-address/address"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
@@ -47,6 +48,26 @@ func (c *deployContractCaller) SetGasPrice(g *big.Int) DeployContractCaller {
 
 func (c *deployContractCaller) SetNonce(n uint64) DeployContractCaller {
 	c.sendActionCaller.setNonce(n)
+	return c
+}
+
+func (c *deployContractCaller) SetTxType(t uint32) DeployContractCaller {
+	c.sendActionCaller.setTxType(t)
+	return c
+}
+
+func (c *deployContractCaller) SetGasTipCap(v *big.Int) DeployContractCaller {
+	c.sendActionCaller.setGasTipCap(v)
+	return c
+}
+
+func (c *deployContractCaller) SetGasFeeCap(v *big.Int) DeployContractCaller {
+	c.sendActionCaller.setGasFeeCap(v)
+	return c
+}
+
+func (c *deployContractCaller) SetAccessList(l types.AccessList) DeployContractCaller {
+	c.sendActionCaller.setAccessList(l)
 	return c
 }
 
@@ -108,6 +129,36 @@ func (c *executeContractCaller) SetGasPrice(g *big.Int) ExecuteContractCaller {
 
 func (c *executeContractCaller) SetNonce(n uint64) ExecuteContractCaller {
 	c.sendActionCaller.setNonce(n)
+	return c
+}
+
+func (c *executeContractCaller) SetTxType(t uint32) ExecuteContractCaller {
+	c.sendActionCaller.setTxType(t)
+	return c
+}
+
+func (c *executeContractCaller) SetGasTipCap(v *big.Int) ExecuteContractCaller {
+	c.sendActionCaller.setGasTipCap(v)
+	return c
+}
+
+func (c *executeContractCaller) SetGasFeeCap(v *big.Int) ExecuteContractCaller {
+	c.sendActionCaller.setGasFeeCap(v)
+	return c
+}
+
+func (c *executeContractCaller) SetAccessList(l types.AccessList) ExecuteContractCaller {
+	c.sendActionCaller.setAccessList(l)
+	return c
+}
+
+func (c *executeContractCaller) SetBlobTxData(b *BlobData) ExecuteContractCaller {
+	c.sendActionCaller.setBlobTxData(b.toProto())
+	return c
+}
+
+func (c *executeContractCaller) SetSetCodeAuthList(a []types.SetCodeAuthorization) ExecuteContractCaller {
+	c.sendActionCaller.setSetCodeAuthList(a)
 	return c
 }
 
