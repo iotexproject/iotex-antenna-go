@@ -20,9 +20,12 @@ func accountFromHex(key string) (account.Account, error) {
 }
 
 const (
-	_rlpTestKey     = "73c7b4a62bf165dccf8ebdea8278db811efd5b8638e2ed9683d2d94889450426"
-	_rlpTestTo      = "io1emxf8zzqckhgjde6dqd97ts0y3q496gm3fdrl6"
-	_rlpTestChainID = uint32(4690)
+	_rlpTestKey = "73c7b4a62bf165dccf8ebdea8278db811efd5b8638e2ed9683d2d94889450426"
+	_rlpTestTo  = "io1emxf8zzqckhgjde6dqd97ts0y3q496gm3fdrl6"
+	// _rlpTestChainID is the IoTeX chain ID carried in ActionCore;
+	// _rlpTestEVMChainID is the EVM chain ID actionToRLP embeds in the tx.
+	_rlpTestChainID    = uint32(2)
+	_rlpTestEVMChainID = uint32(4690)
 )
 
 // fixedSig is a syntactically valid 65-byte secp256k1 signature; the test
@@ -47,7 +50,7 @@ func toEthAddr(t *testing.T, ioAddr string) common.Address {
 
 func signAndHash(t *testing.T, tx *types.Transaction) []byte {
 	t.Helper()
-	h, err := rlpSignedHash(tx, _rlpTestChainID, fixedSig)
+	h, err := rlpSignedHash(tx, _rlpTestEVMChainID, fixedSig)
 	require.NoError(t, err)
 	return h[:]
 }
@@ -101,7 +104,7 @@ func TestActionToRLP_AccessList(t *testing.T) {
 	require.Equal(t, uint8(types.AccessListTxType), gotTx.Type())
 
 	wantTx := types.NewTx(&types.AccessListTx{
-		ChainID:  big.NewInt(int64(_rlpTestChainID)),
+		ChainID:  big.NewInt(int64(_rlpTestEVMChainID)),
 		Nonce:    9,
 		GasPrice: big.NewInt(2000000000000),
 		Gas:      50000,
@@ -140,7 +143,7 @@ func TestActionToRLP_DynamicFee(t *testing.T) {
 	require.Equal(t, uint8(types.DynamicFeeTxType), gotTx.Type())
 
 	wantTx := types.NewTx(&types.DynamicFeeTx{
-		ChainID:   big.NewInt(int64(_rlpTestChainID)),
+		ChainID:   big.NewInt(int64(_rlpTestEVMChainID)),
 		Nonce:     11,
 		GasTipCap: big.NewInt(1500000000),
 		GasFeeCap: big.NewInt(3000000000),
@@ -178,7 +181,7 @@ func TestActionToRLP_Blob(t *testing.T) {
 	require.Equal(t, uint8(types.BlobTxType), gotTx.Type())
 
 	wantTx := types.NewTx(&types.BlobTx{
-		ChainID:    uint256.NewInt(uint64(_rlpTestChainID)),
+		ChainID:    uint256.NewInt(uint64(_rlpTestEVMChainID)),
 		Nonce:      13,
 		GasTipCap:  uint256.NewInt(1000000000),
 		GasFeeCap:  uint256.NewInt(2000000000),
@@ -223,7 +226,7 @@ func TestActionToRLP_SetCode(t *testing.T) {
 	require.Equal(t, uint8(types.SetCodeTxType), gotTx.Type())
 
 	wantTx := types.NewTx(&types.SetCodeTx{
-		ChainID:   uint256.NewInt(uint64(_rlpTestChainID)),
+		ChainID:   uint256.NewInt(uint64(_rlpTestEVMChainID)),
 		Nonce:     17,
 		GasTipCap: uint256.NewInt(1000000000),
 		GasFeeCap: uint256.NewInt(2000000000),
@@ -336,7 +339,7 @@ func TestSignContainer_SignatureRecoversSigner(t *testing.T) {
 
 	decoded := new(types.Transaction)
 	require.NoError(t, decoded.UnmarshalBinary(sealed.GetCore().GetTxContainer().GetRaw()))
-	signer := types.LatestSignerForChainID(big.NewInt(int64(_rlpTestChainID)))
+	signer := types.LatestSignerForChainID(big.NewInt(int64(_rlpTestEVMChainID)))
 	pub, err := crypto.RecoverPubkey(signer.Hash(decoded).Bytes(), sealed.Signature)
 	require.NoError(t, err)
 	require.Equal(t, acc.PublicKey().Bytes(), pub.Bytes())
@@ -360,7 +363,7 @@ func signContainerRoundTrip(t *testing.T, acc account.Account, core *iotextypes.
 	require.NoError(t, decoded.UnmarshalBinary(raw))
 	require.Equal(t, wantType, decoded.Type())
 
-	signer := types.LatestSignerForChainID(big.NewInt(int64(core.GetChainID())))
+	signer := types.LatestSignerForChainID(big.NewInt(evmChainIDOffset + int64(core.GetChainID())))
 	pub, err := crypto.RecoverPubkey(signer.Hash(decoded).Bytes(), sealed.Signature)
 	require.NoError(t, err)
 	require.Equal(t, acc.PublicKey().Bytes(), pub.Bytes())

@@ -2,7 +2,6 @@ package iotex
 
 import (
 	"fmt"
-	"math/big"
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/golang/protobuf/proto"
@@ -38,7 +37,13 @@ func signContainer(a account.Account, act *iotextypes.ActionCore) (*iotextypes.A
 	if err != nil {
 		return nil, err
 	}
-	signer := types.LatestSignerForChainID(big.NewInt(int64(act.GetChainID())))
+	// The signer must use the EVM chain ID that actionToRLP embedded in tx;
+	// for typed txs a mismatch makes WithSignature return ErrInvalidChainId.
+	evmChainID, err := toEVMChainID(act.GetChainID())
+	if err != nil {
+		return nil, err
+	}
+	signer := types.LatestSignerForChainID(evmChainID)
 	h := signer.Hash(tx)
 	sig, err := a.PrivateKey().Sign(h[:])
 	if err != nil {

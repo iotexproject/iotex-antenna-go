@@ -74,7 +74,7 @@ func (c *authedClient) DeployContract(data []byte) DeployContractCaller {
 	}
 }
 
-//Staking interface
+// Staking interface
 func (c *authedClient) Staking() StakingCaller {
 	return &stakingCaller{
 		sendActionCaller: &sendActionCaller{
@@ -84,7 +84,7 @@ func (c *authedClient) Staking() StakingCaller {
 		}}
 }
 
-//Candidate interface
+// Candidate interface
 func (c *authedClient) Candidate() CandidateCaller {
 	return &stakingCaller{
 		sendActionCaller: &sendActionCaller{

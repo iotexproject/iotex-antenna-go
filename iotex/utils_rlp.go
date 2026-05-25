@@ -21,6 +21,23 @@ const (
 	setCodeTxType    = 4
 )
 
+// evmChainIDOffset converts an IoTeX chain ID into its EVM chain ID. IoTeX
+// numbers its chains 1 (mainnet), 2 (testnet) and 3 in ActionCore, but signs
+// EIP-155 and EIP-2718 typed transactions against the chain ID it exposes over
+// the Ethereum JSON-RPC: 4689/4690/4691.
+const evmChainIDOffset = 4688
+
+// toEVMChainID maps an IoTeX chain ID (1/2/3) to the EVM chain ID embedded in
+// an RLP-encoded transaction and used to derive the signer that signs it.
+func toEVMChainID(iotexChainID uint32) (*big.Int, error) {
+	switch iotexChainID {
+	case 1, 2, 3:
+		return big.NewInt(evmChainIDOffset + int64(iotexChainID)), nil
+	default:
+		return nil, fmt.Errorf("invalid chain id %d", iotexChainID)
+	}
+}
+
 func actionToRLP(core *iotextypes.ActionCore) (*types.Transaction, error) {
 	to, value, payload, err := extractBody(core)
 	if err != nil {
@@ -37,8 +54,12 @@ func actionToRLP(core *iotextypes.ActionCore) (*types.Transaction, error) {
 		}
 		return types.NewTransaction(core.GetNonce(), *to, value, core.GetGasLimit(), gasPrice, payload), nil
 	case accessListTxType:
+		evmChainID, err := toEVMChainID(core.GetChainID())
+		if err != nil {
+			return nil, err
+		}
 		return types.NewTx(&types.AccessListTx{
-			ChainID:    big.NewInt(int64(core.GetChainID())),
+			ChainID:    evmChainID,
 			Nonce:      core.GetNonce(),
 			GasPrice:   gasPrice,
 			Gas:        core.GetGasLimit(),
@@ -48,12 +69,16 @@ func actionToRLP(core *iotextypes.ActionCore) (*types.Transaction, error) {
 			AccessList: accessListFromProto(core.GetAccessList()),
 		}), nil
 	case dynamicFeeTxType:
+		evmChainID, err := toEVMChainID(core.GetChainID())
+		if err != nil {
+			return nil, err
+		}
 		tipCap, feeCap, err := parseFeeCaps(core)
 		if err != nil {
 			return nil, err
 		}
 		return types.NewTx(&types.DynamicFeeTx{
-			ChainID:    big.NewInt(int64(core.GetChainID())),
+			ChainID:    evmChainID,
 			Nonce:      core.GetNonce(),
 			GasTipCap:  tipCap,
 			GasFeeCap:  feeCap,
@@ -66,6 +91,10 @@ func actionToRLP(core *iotextypes.ActionCore) (*types.Transaction, error) {
 	case blobTxType:
 		if to == nil {
 			return nil, fmt.Errorf("blob tx requires non-empty recipient")
+		}
+		evmChainID, err := toEVMChainID(core.GetChainID())
+		if err != nil {
+			return nil, err
 		}
 		tipCap, feeCap, err := parseFeeCaps(core)
 		if err != nil {
@@ -88,7 +117,7 @@ func actionToRLP(core *iotextypes.ActionCore) (*types.Transaction, error) {
 			return nil, fmt.Errorf("blob tx gas fee cap overflows uint256")
 		}
 		return types.NewTx(&types.BlobTx{
-			ChainID:    uint256.NewInt(uint64(core.GetChainID())),
+			ChainID:    uint256.MustFromBig(evmChainID),
 			Nonce:      core.GetNonce(),
 			GasTipCap:  tipCapU,
 			GasFeeCap:  feeCapU,
@@ -104,6 +133,10 @@ func actionToRLP(core *iotextypes.ActionCore) (*types.Transaction, error) {
 	case setCodeTxType:
 		if to == nil {
 			return nil, fmt.Errorf("setcode tx cannot create contract")
+		}
+		evmChainID, err := toEVMChainID(core.GetChainID())
+		if err != nil {
+			return nil, err
 		}
 		tipCap, feeCap, err := parseFeeCaps(core)
 		if err != nil {
@@ -126,7 +159,7 @@ func actionToRLP(core *iotextypes.ActionCore) (*types.Transaction, error) {
 			return nil, fmt.Errorf("setcode tx gas fee cap overflows uint256")
 		}
 		return types.NewTx(&types.SetCodeTx{
-			ChainID:    uint256.NewInt(uint64(core.GetChainID())),
+			ChainID:    uint256.MustFromBig(evmChainID),
 			Nonce:      core.GetNonce(),
 			GasTipCap:  tipCapU,
 			GasFeeCap:  feeCapU,
@@ -278,6 +311,8 @@ func authListFromProto(list []*iotextypes.SetCodeAuthorization) ([]types.SetCode
 	return out, nil
 }
 
+// rlpSignedHash reconstructs the hash of a signed RLP/typed transaction.
+// chainID is the EVM chain ID (e.g. 4689/4690) embedded in the transaction.
 func rlpSignedHash(tx *types.Transaction, chainID uint32, sig []byte) (hash.Hash256, error) {
 	if len(sig) != 65 {
 		return hash.ZeroHash256, fmt.Errorf("invalid signature length = %d, expecting 65", len(sig))
