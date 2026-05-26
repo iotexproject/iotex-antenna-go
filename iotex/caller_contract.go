@@ -157,7 +157,7 @@ func (c *executeContractCaller) SetBlobTxData(b *BlobData) ExecuteContractCaller
 	return c
 }
 
-func (c *executeContractCaller) SetSetCodeAuthList(a []types.SetCodeAuthorization) ExecuteContractCaller {
+func (c *executeContractCaller) SetSetCodeAuthList(a []SetCodeAuthorization) ExecuteContractCaller {
 	c.sendActionCaller.setSetCodeAuthList(a)
 	return c
 }

@@ -99,7 +99,7 @@ type ExecuteContractCaller interface {
 	SetGasFeeCap(*big.Int) ExecuteContractCaller
 	SetAccessList(types.AccessList) ExecuteContractCaller
 	SetBlobTxData(*BlobData) ExecuteContractCaller
-	SetSetCodeAuthList([]types.SetCodeAuthorization) ExecuteContractCaller
+	SetSetCodeAuthList([]SetCodeAuthorization) ExecuteContractCaller
 }
 
 // DeployContractCaller is used to perform a deploy contract call.

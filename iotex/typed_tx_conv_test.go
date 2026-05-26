@@ -10,8 +10,6 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/holiman/uint256"
 	"github.com/stretchr/testify/require"
 )
 
@@ -35,13 +33,13 @@ func TestBlobData_toProto_NilSafe(t *testing.T) {
 
 func TestAuthListToProto(t *testing.T) {
 	addr := common.HexToAddress("0xababababababababababababababababababab01")
-	auths := []types.SetCodeAuthorization{{
-		ChainID: *uint256.NewInt(4690),
+	auths := []SetCodeAuthorization{{
+		ChainID: 2, // IoTeX testnet → maps to EVM 4690
 		Address: addr,
 		Nonce:   7,
 		V:       1,
-		R:       *new(uint256.Int).SetBytes([]byte{0xaa, 0xbb}),
-		S:       *new(uint256.Int).SetBytes([]byte{0xcc, 0xdd}),
+		R:       new(big.Int).SetBytes([]byte{0xaa, 0xbb}),
+		S:       new(big.Int).SetBytes([]byte{0xcc, 0xdd}),
 	}}
 	pb, err := authListToProto(auths)
 	require.NoError(t, err)
@@ -58,19 +56,17 @@ func TestAuthListToProto_Empty(t *testing.T) {
 	pb, err := authListToProto(nil)
 	require.NoError(t, err)
 	require.Nil(t, pb)
-	pb, err = authListToProto([]types.SetCodeAuthorization{})
+	pb, err = authListToProto([]SetCodeAuthorization{})
 	require.NoError(t, err)
 	require.Nil(t, pb)
 }
 
-func TestAuthListToProto_ChainIDOverflow(t *testing.T) {
-	// a chainID that does not fit in uint32 must be rejected, not truncated
-	big33bit := new(uint256.Int).Lsh(uint256.NewInt(1), 33)
-	auths := []types.SetCodeAuthorization{{
-		ChainID: *big33bit,
+func TestAuthListToProto_InvalidChainID(t *testing.T) {
+	auths := []SetCodeAuthorization{{
+		ChainID: 4, // invalid IoTeX chain ID (must be 1, 2, or 3)
 		Address: common.HexToAddress("0x01"),
 	}}
 	_, err := authListToProto(auths)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "overflows uint32")
+	require.Contains(t, err.Error(), "invalid chain id")
 }

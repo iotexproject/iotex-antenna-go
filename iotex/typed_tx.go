@@ -7,7 +7,6 @@ package iotex
 
 import (
 	"fmt"
-	"math"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -65,25 +64,43 @@ func sidecarToProto(sc *types.BlobTxSidecar) *iotextypes.BlobTxSidecar {
 	return out
 }
 
-// authListToProto converts go-ethereum SetCodeAuthorization tuples to the
-// proto form. The proto ChainID field is uint32, so an authorization whose
-// ChainID does not fit is rejected rather than silently truncated.
-func authListToProto(list []types.SetCodeAuthorization) ([]*iotextypes.SetCodeAuthorization, error) {
+// SetCodeAuthorization is an IoTeX-chain-ID-aware EIP-7702 authorization tuple.
+// ChainID uses IoTeX chain IDs (1=mainnet, 2=testnet, 3=nightly), which are
+// mapped to EVM network IDs (4689/4690/4691) before submission.
+type SetCodeAuthorization struct {
+	ChainID uint32 // IoTeX chain ID: 1=mainnet, 2=testnet, 3=nightly
+	Address common.Address
+	Nonce   uint64
+	V       uint8
+	R, S    *big.Int
+}
+
+// authListToProto converts IoTeX SetCodeAuthorization tuples to proto form,
+// mapping IoTeX chain IDs to EVM network IDs in the process.
+func authListToProto(list []SetCodeAuthorization) ([]*iotextypes.SetCodeAuthorization, error) {
 	if len(list) == 0 {
 		return nil, nil
 	}
 	out := make([]*iotextypes.SetCodeAuthorization, len(list))
 	for i, a := range list {
-		if !a.ChainID.IsUint64() || a.ChainID.Uint64() > math.MaxUint32 {
-			return nil, fmt.Errorf("setcode authorization %d: chainID %s overflows uint32", i, a.ChainID.String())
+		evmID, err := toEVMChainID(a.ChainID)
+		if err != nil {
+			return nil, fmt.Errorf("setcode authorization %d: %w", i, err)
+		}
+		var r, s []byte
+		if a.R != nil {
+			r = a.R.Bytes()
+		}
+		if a.S != nil {
+			s = a.S.Bytes()
 		}
 		out[i] = &iotextypes.SetCodeAuthorization{
-			ChainID: uint32(a.ChainID.Uint64()),
+			ChainID: uint32(evmID.Uint64()),
 			Address: a.Address.Bytes(),
 			Nonce:   a.Nonce,
 			V:       uint64(a.V),
-			R:       a.R.Bytes(),
-			S:       a.S.Bytes(),
+			R:       r,
+			S:       s,
 		}
 	}
 	return out, nil

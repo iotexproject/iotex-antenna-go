@@ -13,7 +13,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/holiman/uint256"
 	"github.com/iotexproject/iotex-address/address"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi/mock_iotexapi"
@@ -37,8 +36,8 @@ func TestExecuteCaller_TypedSettersPropagate(t *testing.T) {
 		BlobFeeCap: big.NewInt(7),
 		BlobHashes: []common.Hash{common.HexToHash("0x01")},
 	}
-	auths := []types.SetCodeAuthorization{{
-		ChainID: *uint256.NewInt(2),
+	auths := []SetCodeAuthorization{{
+		ChainID: 2,
 		Address: common.HexToAddress("0xab"),
 		Nonce:   3,
 	}}
@@ -103,8 +102,8 @@ func TestApplyTypedFields_SetCode(t *testing.T) {
 		txType:    setCodeTxType,
 		gasTipCap: big.NewInt(1),
 		gasFeeCap: big.NewInt(2),
-		setCodeAuthList: []types.SetCodeAuthorization{{
-			ChainID: *uint256.NewInt(4690),
+		setCodeAuthList: []SetCodeAuthorization{{
+			ChainID: 2, // IoTeX testnet → maps to EVM 4690
 			Address: common.HexToAddress("0xab"),
 			Nonce:   1,
 		}},
@@ -127,20 +126,20 @@ func TestApplyTypedFields_SetCodeEmptyList(t *testing.T) {
 	require.Contains(t, err.Error(), "non-empty auth list")
 }
 
-func TestApplyTypedFields_SetCodeChainIDOverflow(t *testing.T) {
+func TestApplyTypedFields_SetCodeInvalidChainID(t *testing.T) {
 	c := &sendActionCaller{
 		core:      execCore(),
 		txType:    setCodeTxType,
 		gasTipCap: big.NewInt(1),
 		gasFeeCap: big.NewInt(2),
-		setCodeAuthList: []types.SetCodeAuthorization{{
-			ChainID: *new(uint256.Int).Lsh(uint256.NewInt(1), 33),
+		setCodeAuthList: []SetCodeAuthorization{{
+			ChainID: 4, // invalid IoTeX chain ID (must be 1, 2, or 3)
 			Address: common.HexToAddress("0xab"),
 		}},
 	}
 	err := c.applyTypedFields()
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "overflows uint32")
+	require.Contains(t, err.Error(), "invalid chain id")
 }
 
 // TestCall_TypedTx_RoutesToContainer drives a full typed-tx Call() against a

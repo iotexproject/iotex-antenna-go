@@ -941,7 +941,7 @@ func (mr *MockExecuteContractCallerMockRecorder) SetNonce(arg0 any) *gomock.Call
 }
 
 // SetSetCodeAuthList mocks base method.
-func (m *MockExecuteContractCaller) SetSetCodeAuthList(arg0 []types.SetCodeAuthorization) ExecuteContractCaller {
+func (m *MockExecuteContractCaller) SetSetCodeAuthList(arg0 []SetCodeAuthorization) ExecuteContractCaller {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetSetCodeAuthList", arg0)
 	ret0, _ := ret[0].(ExecuteContractCaller)

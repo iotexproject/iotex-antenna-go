@@ -44,7 +44,7 @@ type sendActionCaller struct {
 	gasFeeCap       *big.Int
 	accessList      types.AccessList
 	blobTxData      *iotextypes.BlobTxData
-	setCodeAuthList []types.SetCodeAuthorization
+	setCodeAuthList []SetCodeAuthorization
 }
 
 // API returns api
@@ -97,7 +97,7 @@ func (c *sendActionCaller) setAccessList(l types.AccessList) {
 func (c *sendActionCaller) setBlobTxData(b *iotextypes.BlobTxData) {
 	c.blobTxData = b
 }
-func (c *sendActionCaller) setSetCodeAuthList(a []types.SetCodeAuthorization) {
+func (c *sendActionCaller) setSetCodeAuthList(a []SetCodeAuthorization) {
 	c.setCodeAuthList = a
 }
 
