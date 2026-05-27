@@ -10,6 +10,7 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/core/types"
 	"google.golang.org/grpc"
 
 	"github.com/iotexproject/go-pkgs/hash"
@@ -32,7 +33,7 @@ type (
 	}
 )
 
-//Create Staking
+// Create Staking
 func (c *stakingCaller) Create(candidateName string, amount *big.Int, duration uint32, autoStake bool) SendActionCaller {
 	tx := iotextypes.StakeCreate{
 		CandidateName:  candidateName,
@@ -44,7 +45,7 @@ func (c *stakingCaller) Create(candidateName string, amount *big.Int, duration u
 	return c
 }
 
-//Unstake Staking
+// Unstake Staking
 func (c *stakingCaller) Unstake(bucketIndex uint64) SendActionCaller {
 	tx := iotextypes.StakeReclaim{
 		BucketIndex: bucketIndex,
@@ -53,7 +54,7 @@ func (c *stakingCaller) Unstake(bucketIndex uint64) SendActionCaller {
 	return c
 }
 
-//Withdraw Staking
+// Withdraw Staking
 func (c *stakingCaller) Withdraw(bucketIndex uint64) SendActionCaller {
 	tx := iotextypes.StakeReclaim{
 		BucketIndex: bucketIndex,
@@ -62,7 +63,7 @@ func (c *stakingCaller) Withdraw(bucketIndex uint64) SendActionCaller {
 	return c
 }
 
-//AddDeposit Staking
+// AddDeposit Staking
 func (c *stakingCaller) AddDeposit(index uint64, amount *big.Int) SendActionCaller {
 	tx := iotextypes.StakeAddDeposit{
 		BucketIndex: index,
@@ -72,7 +73,7 @@ func (c *stakingCaller) AddDeposit(index uint64, amount *big.Int) SendActionCall
 	return c
 }
 
-//ChangeCandidate Staking
+// ChangeCandidate Staking
 func (c *stakingCaller) ChangeCandidate(candName string, bucketIndex uint64) SendActionCaller {
 	tx := iotextypes.StakeChangeCandidate{
 		CandidateName: candName,
@@ -82,7 +83,7 @@ func (c *stakingCaller) ChangeCandidate(candName string, bucketIndex uint64) Sen
 	return c
 }
 
-//StakingTransfer Staking
+// StakingTransfer Staking
 func (c *stakingCaller) StakingTransfer(voterAddress address.Address, bucketIndex uint64) SendActionCaller {
 	tx := iotextypes.StakeTransferOwnership{
 		VoterAddress: voterAddress.String(),
@@ -92,7 +93,7 @@ func (c *stakingCaller) StakingTransfer(voterAddress address.Address, bucketInde
 	return c
 }
 
-//Restake Staking
+// Restake Staking
 func (c *stakingCaller) Restake(index uint64, duration uint32, autoStake bool) SendActionCaller {
 	tx := iotextypes.StakeRestake{
 		BucketIndex:    index,
@@ -103,7 +104,7 @@ func (c *stakingCaller) Restake(index uint64, duration uint32, autoStake bool) S
 	return c
 }
 
-//Register Staking
+// Register Staking
 func (c *stakingCaller) Register(name string, ownerAddr, operatorAddr, rewardAddr address.Address, amount *big.Int, duration uint32, autoStake bool, payload []byte) SendActionCaller {
 	basic := iotextypes.CandidateBasicInfo{
 		Name:            name,
@@ -122,7 +123,7 @@ func (c *stakingCaller) Register(name string, ownerAddr, operatorAddr, rewardAdd
 	return c
 }
 
-//Update Staking
+// Update Staking
 func (c *stakingCaller) Update(name string, operatorAddr, rewardAddr address.Address) SendActionCaller {
 	tx := iotextypes.CandidateBasicInfo{
 		Name:            name,
@@ -153,7 +154,27 @@ func (c *stakingCaller) SetPayload(pl []byte) SendActionCaller {
 	return c
 }
 
-//Call call sendActionCaller
+func (c *stakingCaller) SetTxType(t uint32) SendActionCaller {
+	c.sendActionCaller.setTxType(t)
+	return c
+}
+
+func (c *stakingCaller) SetGasTipCap(v *big.Int) SendActionCaller {
+	c.sendActionCaller.setGasTipCap(v)
+	return c
+}
+
+func (c *stakingCaller) SetGasFeeCap(v *big.Int) SendActionCaller {
+	c.sendActionCaller.setGasFeeCap(v)
+	return c
+}
+
+func (c *stakingCaller) SetAccessList(l types.AccessList) SendActionCaller {
+	c.sendActionCaller.setAccessList(l)
+	return c
+}
+
+// Call call sendActionCaller
 func (c *stakingCaller) Call(ctx context.Context, opts ...grpc.CallOption) (hash.Hash256, error) {
 	c.core = &iotextypes.ActionCore{
 		Version: ProtocolVersion,

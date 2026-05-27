@@ -5,6 +5,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/iotexproject/go-pkgs/hash"
 	"github.com/iotexproject/iotex-address/address"
 	"github.com/iotexproject/iotex-antenna-go/v2/account"
@@ -25,6 +26,16 @@ type SendActionCaller interface {
 	SetGasLimit(uint64) SendActionCaller
 	SetGasPrice(*big.Int) SendActionCaller
 	SetPayload([]byte) SendActionCaller
+	// Eth-typed transaction setters. Calling SetTxType with a non-zero value
+	// builds an Ethereum typed tx, signs it, and submits it via the
+	// TX_CONTAINER encoding. Values 1 and 2 select AccessList and DynamicFee.
+	// Blob (3) and SetCode (4) are exposed on ExecuteContractCaller only:
+	// iotex-core routes every SetCodeTx through BuildExecution, and blob txs
+	// in practice carry contract calldata.
+	SetTxType(uint32) SendActionCaller
+	SetGasTipCap(*big.Int) SendActionCaller
+	SetGasFeeCap(*big.Int) SendActionCaller
+	SetAccessList(types.AccessList) SendActionCaller
 }
 
 // ClaimRewardCaller is used to perform a claim reward call.
@@ -83,6 +94,12 @@ type ExecuteContractCaller interface {
 	SetGasLimit(uint64) ExecuteContractCaller
 	SetAmount(*big.Int) ExecuteContractCaller
 	SetNonce(uint64) ExecuteContractCaller
+	SetTxType(uint32) ExecuteContractCaller
+	SetGasTipCap(*big.Int) ExecuteContractCaller
+	SetGasFeeCap(*big.Int) ExecuteContractCaller
+	SetAccessList(types.AccessList) ExecuteContractCaller
+	SetBlobTxData(*BlobData) ExecuteContractCaller
+	SetSetCodeAuthList([]SetCodeAuthorization) ExecuteContractCaller
 }
 
 // DeployContractCaller is used to perform a deploy contract call.
@@ -93,6 +110,13 @@ type DeployContractCaller interface {
 	SetGasPrice(*big.Int) DeployContractCaller
 	SetGasLimit(uint64) DeployContractCaller
 	SetNonce(uint64) DeployContractCaller
+	// Eth-typed transaction setters. Blob and SetCode are intentionally
+	// omitted: BlobTx requires non-nil To and SetCodeTx forbids contract
+	// creation, so neither makes sense for contract deployment.
+	SetTxType(uint32) DeployContractCaller
+	SetGasTipCap(*big.Int) DeployContractCaller
+	SetGasFeeCap(*big.Int) DeployContractCaller
+	SetAccessList(types.AccessList) DeployContractCaller
 }
 
 // Contract allows to read or execute on this contract's methods.
