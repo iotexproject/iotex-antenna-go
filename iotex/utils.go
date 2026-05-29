@@ -68,13 +68,11 @@ func signContainer(a account.Account, act *iotextypes.ActionCore) (*iotextypes.A
 	if err != nil {
 		return nil, err
 	}
+	act.Action = &iotextypes.ActionCore_TxContainer{
+		TxContainer: &iotextypes.TxContainer{Raw: raw},
+	}
 	return &iotextypes.Action{
-		Core: &iotextypes.ActionCore{
-			ChainID: act.GetChainID(),
-			Action: &iotextypes.ActionCore_TxContainer{
-				TxContainer: &iotextypes.TxContainer{Raw: raw},
-			},
-		},
+		Core:         act,
 		SenderPubKey: a.PublicKey().Bytes(),
 		Signature:    actionSig,
 		Encoding:     iotextypes.Encoding_TX_CONTAINER,
