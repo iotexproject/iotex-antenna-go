@@ -11,7 +11,7 @@ require (
 	github.com/holiman/uint256 v1.3.2
 	github.com/iotexproject/go-pkgs v0.1.16-0.20250813094138-d89b145b833c
 	github.com/iotexproject/iotex-address v0.2.9-0.20251203033311-6e8aa4fd43ef
-	github.com/iotexproject/iotex-proto v0.6.6-0.20260211020747-f26bd969ed16
+	github.com/iotexproject/iotex-proto v0.6.13
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/mock v0.5.2

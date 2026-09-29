@@ -146,4 +146,14 @@ type StakingCaller interface {
 type CandidateCaller interface {
 	Register(name string, ownerAddr, operatorAddr, rewardAddr address.Address, amount *big.Int, duration uint32, autoStake bool, payload []byte) SendActionCaller
 	Update(name string, operatorAddr, rewardAddr address.Address) SendActionCaller
+	// WithBLS attaches a BLS public key and its proof of possession to the
+	// next Register or Update. The proof must be over the candidate's owner
+	// address; Zanzibar's EnforceBLSPoP rejects it otherwise.
+	WithBLS(pubKey, pop []byte) CandidateCaller
+	// SetVoterRewardOptIn opts the sending delegate into IIP-59 on-chain
+	// voter reward distribution. One-way: there is no opt-out action.
+	SetVoterRewardOptIn() SendActionCaller
+	// SetVoterRewardDestination redirects the sender's own voter rewards.
+	// Passing the sender's own address clears the override.
+	SetVoterRewardDestination(recipient address.Address) SendActionCaller
 }

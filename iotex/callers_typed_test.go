@@ -185,6 +185,43 @@ func TestCall_TypedTx_RoutesToContainer(t *testing.T) {
 	require.Equal(t, uint64(50000), decoded.Gas())
 }
 
+// TestCall_TypedTx_ActionCoreFieldsPreserved confirms that signContainer does
+// not strip non-ChainID fields from ActionCore (Bug 2 regression guard).
+func TestCall_TypedTx_ActionCoreFieldsPreserved(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	acc, err := account.HexStringToAccount(_rlpTestKey)
+	require.NoError(t, err)
+	to, err := address.FromString(_rlpTestTo)
+	require.NoError(t, err)
+
+	api := mock_iotexapi.NewMockAPIServiceClient(ctrl)
+	var captured *iotextypes.Action
+	api.EXPECT().
+		SendAction(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(_ context.Context, req *iotexapi.SendActionRequest, _ ...grpc.CallOption) (*iotexapi.SendActionResponse, error) {
+			captured = req.GetAction()
+			return &iotexapi.SendActionResponse{ActionHash: strings.Repeat("0", 64)}, nil
+		})
+
+	c := NewAuthedClient(api, _rlpTestChainID, acc)
+	_, err = c.Transfer(to, big.NewInt(1)).
+		SetNonce(7).
+		SetTxType(dynamicFeeTxType).
+		SetGasTipCap(big.NewInt(500000000)).
+		SetGasFeeCap(big.NewInt(1500000000)).
+		SetGasLimit(42000).
+		Call(context.Background())
+	require.NoError(t, err)
+
+	core := captured.GetCore()
+	require.Equal(t, uint64(7), core.GetNonce())
+	require.Equal(t, uint64(42000), core.GetGasLimit())
+	require.Equal(t, "500000000", core.GetGasTipCap())
+	require.Equal(t, "1500000000", core.GetGasFeeCap())
+	require.Equal(t, _rlpTestChainID, core.GetChainID())
+}
+
 // TestSetAccessList_DefensiveCopy confirms mutating the caller's slice after
 // the setter does not change what the SDK will send.
 func TestSetAccessList_DefensiveCopy(t *testing.T) {

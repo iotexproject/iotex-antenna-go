@@ -1408,6 +1408,34 @@ func (mr *MockCandidateCallerMockRecorder) Register(name, ownerAddr, operatorAdd
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockCandidateCaller)(nil).Register), name, ownerAddr, operatorAddr, rewardAddr, amount, duration, autoStake, payload)
 }
 
+// SetVoterRewardDestination mocks base method.
+func (m *MockCandidateCaller) SetVoterRewardDestination(recipient address.Address) SendActionCaller {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetVoterRewardDestination", recipient)
+	ret0, _ := ret[0].(SendActionCaller)
+	return ret0
+}
+
+// SetVoterRewardDestination indicates an expected call of SetVoterRewardDestination.
+func (mr *MockCandidateCallerMockRecorder) SetVoterRewardDestination(recipient any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetVoterRewardDestination", reflect.TypeOf((*MockCandidateCaller)(nil).SetVoterRewardDestination), recipient)
+}
+
+// SetVoterRewardOptIn mocks base method.
+func (m *MockCandidateCaller) SetVoterRewardOptIn() SendActionCaller {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetVoterRewardOptIn")
+	ret0, _ := ret[0].(SendActionCaller)
+	return ret0
+}
+
+// SetVoterRewardOptIn indicates an expected call of SetVoterRewardOptIn.
+func (mr *MockCandidateCallerMockRecorder) SetVoterRewardOptIn() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetVoterRewardOptIn", reflect.TypeOf((*MockCandidateCaller)(nil).SetVoterRewardOptIn))
+}
+
 // Update mocks base method.
 func (m *MockCandidateCaller) Update(name string, operatorAddr, rewardAddr address.Address) SendActionCaller {
 	m.ctrl.T.Helper()
@@ -1420,4 +1448,18 @@ func (m *MockCandidateCaller) Update(name string, operatorAddr, rewardAddr addre
 func (mr *MockCandidateCallerMockRecorder) Update(name, operatorAddr, rewardAddr any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockCandidateCaller)(nil).Update), name, operatorAddr, rewardAddr)
+}
+
+// WithBLS mocks base method.
+func (m *MockCandidateCaller) WithBLS(pubKey, pop []byte) CandidateCaller {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithBLS", pubKey, pop)
+	ret0, _ := ret[0].(CandidateCaller)
+	return ret0
+}
+
+// WithBLS indicates an expected call of WithBLS.
+func (mr *MockCandidateCallerMockRecorder) WithBLS(pubKey, pop any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithBLS", reflect.TypeOf((*MockCandidateCaller)(nil).WithBLS), pubKey, pop)
 }
